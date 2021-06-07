@@ -28,13 +28,13 @@ reg_named <- function(x, pattern) {
 
 try_type <- function(..., type) {
     if (missing(type)) {
-        stop_("Argument 'type' must be given")
+        stop_("Argument `type` must be given")
     }
     dots <- list(...)
     arg_name <- names(dots)[1L]
     out <- try(do.call(paste0("as.", type), list(dots[[1L]])), silent = TRUE)
     if ("try-error" %in% class(out)) {
-        stop_("Unable to coerce argument '", arg_name, "' to '", type, "'")
+        stop_("Unable to coerce argument `", arg_name, "` to `", type, "`")
     }
     names(out) <- names(dots[[1L]])
     out

@@ -57,7 +57,7 @@ CounterfactualVariable <- function(var, obs = integer(0), int = integer(0)) {
     names(var) <- names(obs) <- NULL
     if (length(int)) {
         if (is.null(names(int))) {
-            stop_("Argument 'int' must be named")
+            stop_("Argument `int` must be named")
         }
         int <- try_type(int = int, type = "integer")
         names(int) <- toupper(names(int))

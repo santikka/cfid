@@ -109,7 +109,7 @@ test_that("dagitty mag not supported", {
 
 test_that("causaleffect / igraph supported", {
     if (!requireNamespace("igraph", quietly = TRUE)) {
-        skip("Package 'igraph' is not available")
+        skip("Package `igraph` is not available")
     } else {
         ig <- igraph::graph.formula(X -+ Z -+ Y, Y -+ X, X -+ Y)
         ig <- igraph::set.edge.attribute(ig, "description", c(2, 4), "U")
@@ -119,7 +119,7 @@ test_that("causaleffect / igraph supported", {
 
 test_that("generic igraph not supported", {
     if (!requireNamespace("igraph", quietly = TRUE)) {
-        skip("Package 'igraph' is not available")
+        skip("Package `igraph` is not available")
     } else {
         ig <- igraph::graph.formula(X -- Y)
         expect_error(import_graph(ig))

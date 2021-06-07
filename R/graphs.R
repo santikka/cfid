@@ -59,6 +59,9 @@ dag <- function(x) {
     x <- try_type(x = x, type = "character")
     x <- toupper(x)
     x <- gsub("[;\\,]", " ", x)
+    if (!nchar(gsub("[ \\r\\n\\t]", "", x))) {
+        stop_("Argument `x` contains only whitespace or special characters")
+    }
     e_within <- grepl("\\{.+ [<>\\-]+ .+\\}", x)
     if (e_within) {
         stop_("Edges are not allowed within groups defined by {...}")
@@ -80,7 +83,7 @@ dag <- function(x) {
     if (n_e) {
         for (i in e_lst) {
             if (i == 1 || i == length(g_lst)) {
-                stop_("Invalid edge construct in argument 'x'")
+                stop_("Invalid edge construct in argument `x`")
             }
             pairs <- expand.grid(g_lst[[i - 1]], g_lst[[i + 1]],
                                  stringsAsFactors = FALSE)
@@ -105,7 +108,7 @@ dag <- function(x) {
         }
     }
     if (detect_cycles(A_obs)) {
-        stop_("The graph specified by argument 'x' is not acyclic")
+        stop_("The graph specified by argument `x` is not acyclic")
     }
     n_u <- sum(A_bi[lower.tri(A_bi)])
     n_vu <- n_v + n_u
@@ -399,9 +402,9 @@ import_graph <- function(x) {
         x <- gsub("\n|\r", " ", x)
         x_def <- reg_named(x, "dag \\{(.+)\\}.*")
         if (length(x_def)) {
-            out <- try(dag(x_def[2,1]))
+            out <- dag(x_def[2,1])
         } else {
-            stop_("Unable to parse argument 'x' into an object of class 'DAG'")
+            stop_("Unable to parse argument `x` into an object of class `DAG`")
         }
     } else if (inherits(x, "igraph")) {
         if (requireNamespace("igraph", quietly = TRUE)) {
@@ -422,17 +425,14 @@ import_graph <- function(x) {
                 g_unobs <- paste(v[unobs_ind[,1]], "<->",
                                  v[unobs_ind[,2]], collapse = " ")
             }
-            out <- try(dag(paste0(c(g_obs, g_unobs), collapse = " ")))
+            out <- dag(paste0(c(g_obs, g_unobs), collapse = " "))
         } else {
-            stop_("Attempting to use 'igraph' input, but the required package is not available")
+            stop_("Attempting to use `igraph` input, but the required package is not available")
         }
     } else if (is.character(x)) {
-        out <- try(dag(x))
-    }
-    if ("try-error" %in% class(out)) {
-        stop_("Unable to parse argument 'x' into an object of class 'DAG'")
+        out <- dag(x)
     } else if (is.null(out)) {
-        stop_("Argument 'x' has an unrecognized format")
+        stop_("Argument `x` has an unrecognized format")
     }
     out
 }
@@ -454,14 +454,13 @@ export_graph <- function(
     ...
 ) {
     if (!is_DAG(g)) {
-        stop_("Argument 'x' must be an object of class 'DAG'")
+        stop_("Argument `x` must be an object of class 'DAG'")
     }
     type <- match.arg(type)
     if (identical(type, "dagitty")) {
         lab <- attr(g, "labels")
         if (any(is.CounterfactualVariable(lab))) {
-            stop_("Counterfactual variables are not suppored
-                  as labels for 'dagitty' graphs")
+            stop_("Counterfactual variables are not suppored as labels for `dagitty` graphs")
         }
         lab_form <- sapply(lab, format, type = "dagitty")
         lat <- attr(g, "latent")

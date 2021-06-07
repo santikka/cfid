@@ -68,24 +68,24 @@
 #' @export
 identifiable <- function(g, gamma, delta = NULL) {
     if (missing(g)) {
-        stop_("Argument 'g' is missing")
+        stop_("Argument `g` is missing")
     } else if (!is_dag(g)) {
-        stop_("Argument 'g' must be an object of class 'DAG'")
+        stop_("Argument `g` must be an object of class `DAG`")
     }
     if (missing(gamma)) {
-        stop_("Argument 'gamma' is missing")
+        stop_("Argument `gamma` is missing")
     } else if (!is.CounterfactualConjunction(gamma)) {
         if (is.CounterfactualVariable(gamma)) {
             gamma <- CounterfactualConjunction(gamma)
         } else {
-            stop_("Argument 'gamma' must be an object of class 'CounterfactualConjunction'")
+            stop_("Argument `gamma` must be an object of class `CounterfactualConjunction`")
         }
     }
     if (is.null(delta)) {
         out <- id_star(g, gamma)
     } else {
         if (!is.CounterfactualConjunction(delta)) {
-            stop_("Argument 'delta' must be an object of class 'CounterfactualConjunction")
+            stop_("Argument `delta` must be an object of class `CounterfactualConjunction`")
         }
         out <- idc_star(g, gamma, delta)
     }

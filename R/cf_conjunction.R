@@ -45,7 +45,7 @@ CounterfactualConjunction <- function(...) {
         check_conflicts(dots)
         structure(unique(dots), class = "CounterfactualConjunction")
     } else {
-        stop_("All arguments must be of class 'CounterfactualVariable'")
+        stop_("All arguments must be of class `CounterfactualVariable`")
     }
 }
 
@@ -57,8 +57,8 @@ as.CounterfactualConjunction <- function(x) {
         if (is.list(x)) {
             out <- do.call(CounterfactualConjunction, x)
         } else {
-            stop("Cannot coerce type'", typeof(x),
-                 "' to an object of class 'CounterfactualConjunction'")
+            stop_("Cannot coerce type`", typeof(x),
+                  "` to an object of class `CounterfactualConjunction`")
         }
     }
     out
@@ -98,8 +98,8 @@ print.CounterfactualConjunction <- function(x, ...) {
             }
             out <- structure(y, class = "CounterfactualConjunction")
         } else {
-            stop_("Unable to add object of class '", class(e2),
-                  "' to a counterfactual conjunction")
+            stop_("Unable to add object of class `", class(e2),
+                  "` to a counterfactual conjunction")
         }
     } else if (is.CounterfactualVariable(e1)) {
         if (is.CounterfactualConjunction(e2)) {
@@ -107,11 +107,11 @@ print.CounterfactualConjunction <- function(x, ...) {
         } else if (is.CounterfactualVariable(e2)) {
             out <- CounterfactualConjunction(e1, e2)
         } else {
-            stop_("Unable to add object of class '", class(e2),
-                  "' to a counterfactual variable")
+            stop_("Unable to add object of class `", class(e2),
+                  "` to a counterfactual variable")
         }
     } else {
-        stop_("Unsupported input for method '+.CounterfactualConjunction'")
+        stop_("Unsupported input for method `+.CounterfactualConjunction`")
     }
     out
 }
