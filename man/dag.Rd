@@ -18,7 +18,6 @@ with the following attributes:
 \item \code{labels} A character vector (or a list) of vertex labels.
 \item \code{latent} A logical vector indicating latent variables.
 \item \code{order} An integer vector giving a topological order for the vertices.
-\item \code{def} A character string of the original definition (parsed form of \code{x}).
 .
 }
 }

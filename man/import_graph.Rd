@@ -10,7 +10,7 @@ import_graph(x)
 \item{x}{A graph object in a valid external format, see details.}
 }
 \value{
-A \code{dag} object if successful.
+A \code{DAG} object if successful.
 }
 \description{
 Import and construct a valid DAG from an external format.

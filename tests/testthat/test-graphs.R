@@ -1,0 +1,127 @@
+# Tests for DAGs
+
+test_that("no self-loops or cycles", {
+    expect_error(dag("X -> X"))
+    expect_error(dag("X -> Z -> X"))
+    expect_error(dag("X -> Z -> Y -> X"))
+})
+
+test_that("extra delimiter invariance", {
+    expect_identical(dag("X -> Y -> Z"), dag("X -> Y; Y -> Z"))
+    expect_identical(dag("X -> Y -> Z"), dag("X -> Y\n Y -> Z"))
+    expect_identical(dag("{X, Y, Z}"), dag("X Y Z"))
+})
+
+test_that("zero edges is allowed", {
+    expect_length(attr(dag("X Y Z"), "labels"), 3)
+    expect_length(attr(dag("{X Y Z}"), "labels"), 3)
+})
+
+test_that("duplicate edge invariance", {
+    expect_identical(dag("X -> Y <- X"), dag("X -> Y"))
+    expect_identical(dag("X <-> Y <-> X"), dag("X <-> Y"))
+})
+
+test_that("singleton bidirected", {
+    expect_error(dag("X <-> X"))
+})
+
+test_that("no edges within groups", {
+    expect_error(dag("{X -> Y}"))
+    expect_error(dag("{X <-> Y} -> {Z -> W}"))
+})
+
+test_that("missing endpoint", {
+    expect_error(dag("X ->"))
+    expect_error(dag("<- X"))
+    expect_error(dag("<-> X"))
+    expect_error(dag("X <->"))
+})
+
+# Tests for Parallel Worlds Graphs
+
+g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")
+v1 <- cf("Y", 0, c(X = 0))
+v2 <- cf("X", 1)
+v3 <- cf("Z", 0, c(D = 0))
+v4 <- cf("D", 0)
+gamma1 <- conj(v4, v1, v2, v3)
+p1 <- cfid:::pwg(g1, gamma1)
+
+test_that("generated worlds", {
+    expect_identical(sum(p1$latent), 4L)
+    expect_identical(p1$n_obs, 15L)
+    expect_identical(p1$n_unobs, 4L)
+    expect_identical(p1$n_worlds, 3L)
+})
+
+# Tests for Counterfactual Graphs
+
+c1 <- cfid:::cg(p1, gamma1)
+
+# Tests for graph operations
+
+A <- matrix(
+    c(0, 1, 0, 1, 0,
+      0, 0, 1, 0, 0,
+      0, 0, 0, 0, 1,
+      0, 0, 1, 0, 0,
+      0, 0, 0, 0, 0),
+    5, 5, byrow = TRUE)
+
+test_that("vertex ordering", {
+    expect_identical(cfid:::topological_order(A), c(1L, 2L, 4L, 3L, 5L))
+})
+
+test_that("children", {
+    expect_setequal(cfid:::children(1, A), c(2, 4))
+    expect_setequal(cfid:::children(c(2, 4), A), 3)
+})
+
+test_that("parents", {
+    expect_setequal(cfid:::parents(c(2, 4), A), 1)
+    expect_setequal(cfid:::parents(5, A), 3)
+})
+
+test_that("d-separation", {
+    expect_true(dsep(A, 1, 5, c(2, 4)))
+    expect_true(dsep(A, 1, 5, 3))
+    expect_true(dsep(A, 2, 4, 1))
+    expect_false(dsep(A, 1, 5))
+    expect_false(dsep(A, 2, 4, 5))
+    expect_false(dsep(A, 2, 4))
+})
+
+# Tests for imports
+
+test_that("dagitty dag supported", {
+    dgty <- "dag {\nx\ny\nx -> y\n}\n"
+    class(dgty) <- "dagitty"
+    expect_identical(import_graph(dgty), dag("x -> y"))
+})
+
+test_that("dagitty mag not supported", {
+    dgty <- "mag {\nx\ny\nx -- y\n}\n"
+    class(dgty) <- "dagitty"
+    expect_error(import_graph(dgty))
+})
+
+
+test_that("causaleffect / igraph supported", {
+    if (!requireNamespace("igraph", quietly = TRUE)) {
+        skip("Package 'igraph' is not available")
+    } else {
+        ig <- igraph::graph.formula(X -+ Z -+ Y, Y -+ X, X -+ Y)
+        ig <- igraph::set.edge.attribute(ig, "description", c(2, 4), "U")
+        expect_identical(import_graph(ig), dag("X -> Z -> Y X <-> Y"))
+    }
+})
+
+test_that("generic igraph not supported", {
+    if (!requireNamespace("igraph", quietly = TRUE)) {
+        skip("Package 'igraph' is not available")
+    } else {
+        ig <- igraph::graph.formula(X -- Y)
+        expect_error(import_graph(ig))
+    }
+})

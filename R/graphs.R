@@ -132,7 +132,7 @@ dag <- function(x) {
               labels = labels,
               latent = latent,
               order = topological_order(A, latent),
-              class = "dag")
+              class = "DAG")
 }
 
 # Parallel Worlds Graph
@@ -197,10 +197,15 @@ pwg <- function(g, gamma) {
             }
         })
     }
-    order_pw[1:n_err] <- ix_err
-    order_pw[(n_err + 1):(n_unobs_pw)] <- ix_unobs
     latent_pw <- logical(n_obs_pw)
-    latent_pw[c(ix_err, ix_unobs)] <- TRUE
+    if (n_err) {
+        order_pw[1:n_err] <- ix_err
+        latent_pw[ix_err] <- TRUE
+    }
+    if (n_unobs_pw) {
+        order_pw[(n_err + 1):(n_unobs_pw)] <- ix_unobs
+        latent_pw[ix_unobs] <- TRUE
+    }
     list(adjacency = A_pw,
          labels = labels_pw,
          latent = latent_pw,
@@ -306,47 +311,32 @@ cg <- function(p, gamma) {
                         labels = p$labels,
                         latent = p$latent,
                         order = p$order,
-                        class = "dag")
+                        class = "DAG")
     cg_dag <- subgraph(keep, cg_dag)
     n_cf <- length(gamma)
     gamma_ix <- 1:n_cf
     labels_cg <- attr(cg_dag, "labels")
     label_ix <- seq_along(labels_cg)
-    gamma_replace <- TRUE
-    label_replace <- TRUE
     for (i in seq_along(merged)) {
-        if (gamma_replace) {
-            for (g in gamma_ix) {
-                g_temp <- gamma[[g]]
-                g_obs <- g_temp$obs
-                if (!length(merged[[i]]$original$obs)) {
-                    g_temp$obs <- integer(0)
-                }
-                if (identical(g_temp, merged[[i]]$original)) {
-                    gamma[[g]] <- merged[[i]]$replacement
-                    gamma[[g]]$obs <- g_obs
-                    gamma_ix <- setdiff(gamma_ix, g)
-                    if (!length(gamma_ix)) {
-                        gamma_replace <- FALSE
-                    }
-                    break
-                }
+        for (g in gamma_ix) {
+            g_temp <- gamma[[g]]
+            g_obs <- g_temp$obs
+            if (!length(merged[[i]]$original$obs)) {
+                g_temp$obs <- integer(0)
+            }
+            if (identical(g_temp, merged[[i]]$original)) {
+                gamma[[g]] <- merged[[i]]$replacement
+                gamma[[g]]$obs <- g_obs
+                gamma_ix <- setdiff(gamma_ix, g)
+                break
             }
         }
-        if (label_replace) {
-            for (l in label_ix) {
-                if (identical(labels_cg[[l]], merged[[i]]$original)) {
-                    labels_cg[[l]] <- merged[[i]]$replacement
-                    label_ix <- setdiff(label_ix, l)
-                    if (!length(label_ix)) {
-                        label_replace <- FALSE
-                    }
-                    break
-                }
+        for (l in label_ix) {
+            if (identical(labels_cg[[l]], merged[[i]]$original)) {
+                labels_cg[[l]] <- merged[[i]]$replacement
+                label_ix <- setdiff(label_ix, l)
+                break
             }
-        }
-        if (!gamma_replace && !label_replace) {
-            break
         }
     }
     attr(cg_dag, "labels") <- labels_cg
@@ -401,26 +391,57 @@ cg <- function(p, gamma) {
 #' in the [causaleffect] package syntax and character strings
 #' in the [dosearch] package syntax.
 #'
-#' @return A `dag` object if successful.
+#' @return A `DAG` object if successful.
 #' @export
 import_graph <- function(x) {
+    out <- NULL
     if (inherits(x, "dagitty")) {
-
+        x <- gsub("\n|\r", " ", x)
+        x_def <- reg_named(x, "dag \\{(.+)\\}.*")
+        if (length(x_def)) {
+            out <- try(dag(x_def[2,1]))
+        } else {
+            stop_("Unable to parse argument 'x' into an object of class 'DAG'")
+        }
+    } else if (inherits(x, "igraph")) {
+        if (requireNamespace("igraph", quietly = TRUE)) {
+            e <- igraph::E(x)
+            v <- igraph::vertex_attr(x, "name")
+            g_obs <- ""
+            g_unobs <- ""
+            description <- NULL
+            obs_edges <- e[(is.na(description) | description != "U")]
+            unobs_edges <- e[description == "U" & !is.na(description)]
+            if (length(obs_edges)) {
+                obs_ind <- igraph::get.edges(x, obs_edges)
+                g_obs <- paste(v[obs_ind[,1]], "->", v[obs_ind[,2]], collapse = " ")
+            }
+            if (length(unobs_edges)) {
+                unobs_ind <- igraph::get.edges(x, unobs_edges)
+                unobs_ind <- unobs_ind[unobs_ind[,1] < unobs_ind[,2],,drop=FALSE]
+                g_unobs <- paste(v[unobs_ind[,1]], "<->",
+                                 v[unobs_ind[,2]], collapse = " ")
+            }
+            out <- try(dag(paste0(c(g_obs, g_unobs), collapse = " ")))
+        } else {
+            stop_("Attempting to use 'igraph' input, but the required package is not available")
+        }
+    } else if (is.character(x)) {
+        out <- try(dag(x))
     }
-    if (inherits(x, "igraph")) {
-
+    if ("try-error" %in% class(out)) {
+        stop_("Unable to parse argument 'x' into an object of class 'DAG'")
+    } else if (is.null(out)) {
+        stop_("Argument 'x' has an unrecognized format")
     }
-    if (is.character(x)) {
-
-    }
-    stop_("Argument 'x' has an unrecognized format")
+    out
 }
 
 #' Export Graph
 #'
 #' Convert a valid graph object to a supported external format.
 #'
-#' @param g An object of class `dag`.
+#' @param g An object of class `DAG`.
 #' @param type A character string matching one of the following:
 #'     "dagitty", "causaleffect" or "dosearch".
 #' @param ... Additional arguments passed to `format`
@@ -432,8 +453,8 @@ export_graph <- function(
     use_bidirected = TRUE,
     ...
 ) {
-    if (!is.DAG(g)) {
-        stop_("Argument 'x' must be an object of class 'dag'")
+    if (!is_DAG(g)) {
+        stop_("Argument 'x' must be an object of class 'DAG'")
     }
     type <- match.arg(type)
     if (identical(type, "dagitty")) {
@@ -469,7 +490,7 @@ export_graph <- function(
 }
 
 # Verify that argument is a valid DAG
-is.DAG <- function(x) {
+is_dag <- function(x) {
     inherits(x, "DAG")
 }
 
@@ -477,45 +498,3 @@ is.DAG <- function(x) {
 make_cg <- function(g, gamma) {
     cg(pwg(g, gamma), gamma)
 }
-
-
-
-# g <- dag("X -> W -> Y <- Z <- D X <-> Y")
-
- #v1 <- cf("Y", 0, c(X = 0))
- #v2 <- cf("X", 1)
- #v3 <- cf("Z", 0, c(D = 0))
- #v4 <- cf("D", 0)
- #v5 <- cf("Y", 0, c(X = 0, Z = 0))
-
-#c1 <- conj(v4, v1, v2, v3)
-
- #c2 <- conj(v1)
- #c3 <- conj(v2, v3, v4)
-# c4 <- conj(v2)
-
-# p <- cfid:::pwg(g, c1)
-# p2 <- cfid:::pwg(g, c2)
-
-# coug <- cfid:::cg(p, c1)
-# coug2 <- cfid:::cg(p2, c2)
-
- # v1 <- cf("Y", 0, c(X = 0))
- # v2 <- cf("Y", 1, c(X = 0))
- # cc <- conj(v1, v2)
- # identifiable(cc, g = g)
-
-#prob <- cfid:::id_star(g, c1)$prob
-# prob2 <- cfid:::id_star(g, c4)$prob
-
-#prob3 <- cfid:::idc_star(g, c2, c3)
-
-# cfid:::c_components(g)
-# cfid:::c_components(coug$g)
-
-# dgty <- cfid::export_graph(g, "dagitty")
-
-# gtbl <- ggdag::dagify(w1 ~ x1, y1 ~ w1, y1 ~ z1, z1 ~ d1, x2 ~~~y1)
-
-# ggdag::ggdag(dgty) + ggdag::theme_dag_blank()
-# ggdag::ggdag(gtbl) + ggdag::theme_dag_blank()

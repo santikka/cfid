@@ -93,7 +93,7 @@ print.CounterfactualConjunction <- function(x, ...) {
             if (x %in% e1) {
                 y <- e1
             } else {
-                check_conflict(e2, e1)
+                check_conflicts(e2, e1)
                 y <- c(e1, x)
             }
             out <- structure(y, class = "CounterfactualConjunction")

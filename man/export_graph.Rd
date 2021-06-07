@@ -12,7 +12,7 @@ export_graph(
 )
 }
 \arguments{
-\item{g}{An object of class \code{dag}.}
+\item{g}{An object of class \code{DAG}.}
 
 \item{type}{A character string matching one of the following:
 "dagitty", "causaleffect" or "dosearch".}

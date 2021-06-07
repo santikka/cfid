@@ -1,7 +1,7 @@
 # Construct a vertex subgraph
 #
 # @param x An integer vector giving the vertex indices.
-# @param g A `dag` object
+# @param g A `DAG` object
 subgraph <- function(x, g) {
     h <- g[x, x, drop = FALSE]
     ord <- attr(g, "order")
@@ -11,13 +11,13 @@ subgraph <- function(x, g) {
         x <- which(x)
     }
     attr(h, "order") <- rank(ord[ord %in% x])
-    class(h) <- "dag"
+    class(h) <- "DAG"
     h
 }
 
 # Check for cycles in a directed graph.
 #
-# @param A An adjacency matrix or a `dag` object
+# @param A An adjacency matrix or a `DAG` object
 detect_cycles <- function(A) {
     X <- A
     n <- ncol(X)
@@ -60,15 +60,12 @@ components <- function(A) {
 
 # Compute the confounded components of DAG
 #
-# @param g A `dag` object
+# @param g A `DAG` object
 # @return A list where each element gives the labels of vertices belonging to that component
 c_components <- function(g) {
     fixed <- sapply(attr(g, "labels"), function(x) {
-        if (is.CounterfactualVariable(x)) {
-            length(x$obs)
-        } else {
-            0L
-        }})
+        length(x$obs)
+    })
     g <- subgraph(!fixed, g)
     latent <- attr(g, "latent")
     if (any(latent)) {
@@ -92,16 +89,16 @@ c_components <- function(g) {
 # Check whether a DAG is connected based on its adjacency matrix
 #
 # @param A An adjacency matrix or a `dag` object
-is_connected <- function(A) {
-    A_sym <- A + t(A)
-    n <- ncol(A_sym)
-    diag(A_sym) <- 1L
-    length(components(A_sym)) == 1L
-}
+# is_connected <- function(A) {
+#     A_sym <- A + t(A)
+#     n <- ncol(A_sym)
+#     diag(A_sym) <- 1L
+#     length(components(A_sym)) == 1L
+# }
 
 # Computes a topological ordering for the vertices of a DAG.
 #
-# @param A An adjancecy matrix or a `dag` object
+# @param A An adjancecy matrix or a `DAG` object
 # @param latent An optional logical vector with
 #     `TRUE` indicating latent variables
 topological_order <- function(A, latent) {
@@ -133,43 +130,48 @@ topological_order <- function(A, latent) {
 # Ancestors of a vertex set
 #
 # @param x An integer vector giving the vertex indices.
-# @param A An adjancecy matrix or a `dag` object.
+# @param A An adjancecy matrix or a `DAG` object.
 ancestors <- function(x, A) {
-    an <- parents(x, A)
-    if (length(an)) {
-        an <- union(an, ancestors(an, A))
+    B <- t(A)
+    diag(B) <- 1L
+    X <- B
+    n <- ncol(X)
+    for (i in 1:(n - 1)) {
+        X <- X %*% B
     }
-    an
+    setdiff(children(x, X), x)
 }
 
 # Children of a vertex set
 #
 # @param x An integer vector giving the vertex indices.
-# @param A An adjancecy matrix or a `dag` object.
+# @param A An adjancecy matrix or a `DAG` object.
 children <- function(x, A) {
     if (length(x) == 1L) which(A[x,] > 0L)
-    else which(A[x,] > 0L, arr.ind = TRUE)[,2]
+    else unique(which(A[x,] > 0L, arr.ind = TRUE)[,2])
 }
 
 # Descendants of a vertex set
 #
 # @param x An integer vector giving the vertex indices.
-# @param A An adjancecy matrix or a `dag` object.
+# @param A An adjancecy matrix or a `DAG` object.
 descendants <- function(x, A) {
-    de <- children(x, A)
-    if (length(de)) {
-        de <- union(de, descendants(de, A))
+    diag(A) <- 1L
+    X <- A
+    n <- ncol(X)
+    for (i in 1:(n - 1)) {
+        X <- X %*% A
     }
-    de
+    setdiff(children(x, X), x)
 }
 
 # Parents of a vertex set
 #
 # @param x An integer vector giving the vertex indices.
-# @param A An adjancecy matrix or a `dag` object.
+# @param A An adjancecy matrix or a `DAG` object.
 parents <- function(x, A) {
     if (length(x) == 1L) which(A[,x] > 0L)
-    else which(A[,x] > 0L, arr.ind = TRUE)[,1]
+    else unique(which(A[,x] > 0L, arr.ind = TRUE)[,1])
 }
 
 # Test for d-separation, adapted from the causaleffect package
@@ -183,7 +185,7 @@ parents <- function(x, A) {
 # Note that the roles of Y and Z have been reversed from the paper, meaning that
 # we are testing whether X is separated from Y given Z in G.
 #
-# @param g A `dag` object.
+# @param g A `DAG` object.
 # @param x An integer vector of vertex indices.
 # @param y An integer vector of vertex indices.
 # @param z An integer vector of vertex indices (optional).
@@ -194,105 +196,48 @@ dsep <- function(g, x, y, z = integer(0)) {
     } else {
         an_z <- integer(0)
     }
+    n <- ncol(g)
     xyz <- union(union(x, y), z)
     an_xyz <- union(ancestors(xyz, g), xyz)
-    stack_top <- length(x)
-    stack_size <- max(stack_top, 64)
-    stack <- rep(FALSE, stack_size)
-    stack[1:stack_top] <- TRUE
-    names(stack)[1:stack_top] <- x
-    visited_top <- 0
-    visited_size <- 64
-    visited <- rep(FALSE, visited_size)
-    names(visited) <- rep(NA, visited_size)
-    is_visited <- FALSE
-    while (stack_top > 0) {
-        is_visited <- FALSE
-        el <- stack[stack_top]
-        el_name <- names(el)
-        el_var <- as.integer(el_name)
-        stack_top <- stack_top - 1
-        if (visited_top > 0) {
-            for (i in 1:visited_top) {
-                if (el == visited[i] && identical(el_name, names(visited[i]))) {
-                    is_visited <- TRUE
-                    break
-                }
-            }
-        }
-        if (!is_visited) {
-            if (el_var %in% y) {
+    # indices from 1:n = 1st direction ("up"), map to TRUE
+    # the rest = 2nd direction ("down"), map to FALSE
+    L <- logical(2L * n)
+    V <- logical(2L * n)
+    L[x] <- TRUE
+    while (any(L)) {
+        el <- which(L)[1]
+        L[el] <- FALSE
+        d <- el <= n
+        v <- el - (n * !d)
+        if (!V[el]) {
+            if (v %in% y) {
                 return(FALSE)
             }
-            visited_top <- visited_top + 1
-            if (visited_top > visited_size) {
-                visited_old <- visited
-                visited_size_old <- visited_size
-                visited_size <- visited_size * 2
-                visited <- rep(FALSE, visited_size)
-                visited[1:visited_size_old] <- visited_old
-                names(visited[1:visited_size_old]) <- names(visited_old)
-            }
-            visited[visited_top] <- el
-            names(visited)[visited_top] <- el_name
-            if (el && !(el_var %in% z)) {
-                visitable_parents <- intersect(parents(el_var, g), an_xyz)
-                visitable_children <- intersect(children(el_var, g), an_xyz)
-                n_vis_pa <- length(visitable_parents)
-                n_vis_ch <- length(visitable_children)
-                if (n_vis_pa + n_vis_ch > 0) {
-                    while (n_vis_pa + n_vis_ch + stack_top > stack_size) {
-                        stack_old <- stack
-                        stack_size_old <- stack_size
-                        stack_size <- stack_size * 2
-                        stack <- rep(FALSE, stack_size)
-                        stack[1:stack_size_old] <- stack_old
-                        names(stack[1:stack_size_old]) <- names(stack_old)
-                    }
-                    stack_add <- stack_top + n_vis_pa + n_vis_ch
-                    stack[(stack_top + 1):(stack_add)] <- c(rep(TRUE, n_vis_pa), rep(FALSE, n_vis_ch))
-                    names(stack)[(stack_top + 1):(stack_add)] <- c(visitable_parents, visitable_children)
-                    stack_top <- stack_add
+            V[el] <- TRUE
+            if (d && !(v %in% z)) {
+                vis_pa <- intersect(parents(v, g), an_xyz)
+                vis_ch <- intersect(children(v, g), an_xyz)
+                if (length(vis_pa)) {
+                    L[vis_pa] <- TRUE
                 }
-            } else if (!el) {
-                if (!(el_var %in% z)) {
-                    visitable_children <- intersect(children(el_var, g), an_xyz)
-                    n_vis_ch <- length(visitable_children)
-                    if (n_vis_ch > 0) {
-                        while (n_vis_ch + stack_top > stack_size) {
-                            stack_old <- stack
-                            stack_size_old <- stack_size
-                            stack_size <- stack_size * 2
-                            stack <- rep(FALSE, stack_size)
-                            stack[1:stack_size_old] <- stack_old
-                            names(stack[1:stack_size_old]) <- names(stack_old)
-                        }
-                        stack_add <- stack_top + n_vis_ch
-                        stack[(stack_top + 1):(stack_add)] <- rep(FALSE, n_vis_ch)
-                        names(stack)[(stack_top + 1):(stack_add)] <- visitable_children
-                        stack_top <- stack_add
+                if (length(vis_ch)) {
+                    L[vis_ch + n] <- TRUE
+                }
+            } else if (!d) {
+                if (!(v %in% z)) {
+                    vis_ch <- intersect(children(v, g), an_xyz)
+                    if (length(vis_ch)) {
+                        L[vis_ch + n] <- TRUE
                     }
                 }
-                if (el_var %in% an_z) {
-                    visitable_parents <- intersect(parents(el_var, g), an_xyz)
-                    n_vis_pa <- length(visitable_parents)
-                    if (n_vis_pa > 0) {
-                        while (n_vis_pa + stack_top > stack_size) {
-                            stack_old <- stack
-                            stack_size_old <- stack_size
-                            stack_size <- stack_size * 2
-                            stack <- rep(FALSE, stack_size)
-                            stack[1:stack_size_old] <- stack_old
-                            names(stack[1:stack_size_old] <- stack_old)
-                        }
-                        stack_add <- stack_top + n_vis_pa
-                        stack[(stack_top + 1):(stack_add)] <- rep(TRUE, n_vis_pa)
-                        names(stack)[(stack_top + 1):(stack_add)] <- visitable_parents
-                        stack_top <- stack_add
+                if (v %in% an_z) {
+                    vis_pa <- intersect(parents(v, g), an_xyz)
+                    if (length(vis_pa)) {
+                        L[vis_pa] <- TRUE
                     }
                 }
             }
         }
     }
-    return(TRUE)
+    TRUE
 }

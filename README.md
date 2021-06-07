@@ -15,5 +15,5 @@ models via the ID* and IDC* algorithms by Shpitser, I. and Pearl, J. (2008)
 Install the latest development version by using the devtools package:
 ```R
 # install.packages("devtools")
-devtools::install_github("santikka/causaleffect")
+devtools::install_github("santikka/cfid")
 ```

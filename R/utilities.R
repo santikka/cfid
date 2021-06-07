@@ -33,7 +33,7 @@ try_type <- function(..., type) {
     dots <- list(...)
     arg_name <- names(dots)[1L]
     out <- try(do.call(paste0("as.", type), list(dots[[1L]])), silent = TRUE)
-    if (identical(class(out), "try-error")) {
+    if ("try-error" %in% class(out)) {
         stop_("Unable to coerce argument '", arg_name, "' to '", type, "'")
     }
     names(out) <- names(dots[[1L]])
@@ -70,6 +70,6 @@ any_conflict <- function(x) {
 
 check_conflicts <- function(x, y) {
     if (missing(y)) out <- trivial_conflicts(x)
-    else out <- trivil_conflict(x, y)
+    else out <- trivial_conflict(x, y)
     any_conflict(out)
 }

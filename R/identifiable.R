@@ -2,12 +2,12 @@
 #'
 #' Determine the identifiability of a (conditional) counterfactual conjunction.
 #'
+#' @param g A `DAG` object describing the causal graph
+#'     (or an object that can be coerced, see [cfid::import_graph()].
 #' @param gamma An object of class `CounterfactualConjunction`
 #'     representing the counterfactual causal query.
 #' @param delta An object of class `CounterfactualConjunction`
 #'     representing the conditioning conjunction (optional).
-#' @param g A `dag` object describing the causal graph
-#'     (or an object that can be coerced, see [cfid::import_graph()].
 #'
 #' @seealso [cfid::dag()], [cfid::CounterfactualVariable()],
 #'     [cfid::CounterfactualConjunction()]
@@ -43,7 +43,8 @@
 #'
 #' @return A list containing one or more of the following:
 #' * `id` A logical value that is `TRUE` if the query is identifiable and
-#'     `FALSE` otherwise.
+#'     `FALSE` otherwise. Note that in cases where `gamma` is itself
+#'     inconsistent, the query will be identifiable, but with probability 0.
 #' * `prob` An object of class `Probability` giving the
 #'     formula of the query in latex syntax, if identifiable. This expression
 #'     is given in terms of \eqn{P*},
@@ -63,13 +64,30 @@
 #' v4 <- cf("D", 0)
 #' c1 <- conj(v1)
 #' c2 <- conj(v2, v3, v4)
-#' identifiable(c1, c2, g)
+#' identifiable(g, c1, c2)
 #' @export
-identifiable <- function(gamma, delta = NULL, g) {
+identifiable <- function(g, gamma, delta = NULL) {
+    if (missing(g)) {
+        stop_("Argument 'g' is missing")
+    } else if (!is_dag(g)) {
+        stop_("Argument 'g' must be an object of class 'DAG'")
+    }
+    if (missing(gamma)) {
+        stop_("Argument 'gamma' is missing")
+    } else if (!is.CounterfactualConjunction(gamma)) {
+        if (is.CounterfactualVariable(gamma)) {
+            gamma <- CounterfactualConjunction(gamma)
+        } else {
+            stop_("Argument 'gamma' must be an object of class 'CounterfactualConjunction'")
+        }
+    }
     if (is.null(delta)) {
         out <- id_star(g, gamma)
     } else {
+        if (!is.CounterfactualConjunction(delta)) {
+            stop_("Argument 'delta' must be an object of class 'CounterfactualConjunction")
+        }
         out <- idc_star(g, gamma, delta)
     }
-    return(out)
+    out
 }

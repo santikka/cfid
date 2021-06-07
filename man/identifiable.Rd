@@ -4,39 +4,43 @@
 \alias{identifiable}
 \title{Identify a Counterfactual Query}
 \usage{
-identifiable(gamma, delta = NULL, g)
+identifiable(g, gamma, delta = NULL)
 }
 \arguments{
+\item{g}{A \code{DAG} object describing the causal graph
+(or an object that can be coerced, see \code{\link[=import_graph]{import_graph()}}.}
+
 \item{gamma}{An object of class \code{CounterfactualConjunction}
 representing the counterfactual causal query.}
 
 \item{delta}{An object of class \code{CounterfactualConjunction}
 representing the conditioning conjunction (optional).}
-
-\item{g}{A \code{dag} object describing the causal graph
-(or an object that can be coerced, see \code{\link[=import_graph]{import_graph()}}).}
 }
 \value{
 A list containing one or more of the following:
 \itemize{
-\item \code{id} A logical value that is \code{TRUE} is the query is identifiable.
+\item \code{id} A logical value that is \code{TRUE} if the query is identifiable and
+\code{FALSE} otherwise. Note that in cases where \code{gamma} is itself
+inconsistent, the query will be identifiable, but with probability 0.
 \item \code{prob} An object of class \code{Probability} giving the
 formula of the query in latex syntax, if identifiable. This expression
 is given in terms of \eqn{P*},
-the set of all interventional distributions over \code{g}.
+the set of all interventional distributions over \code{g}. For tautological
+statements, the resulting probability is 1, and for inconsistent
+statements, the resulting probability is 0.
 \item \code{undefined} A logical value that is \code{TRUE} if
 a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
-for example when \eqn{p(\delta) = 0}.
+for example when \eqn{p(\delta) = 0}, and \code{FALSE} otherwise.
 }
 }
 \description{
 Determine the identifiability of a (conditional) counterfactual conjunction.
 }
 \details{
-To identify a non-conditional conjunction \eqn{P(\gamma)}, the argument
+To identify a non-conditional conjunction \eqn{p(\gamma)}, the argument
 \code{delta} should be \code{NULL}.
 
-To identify a conditional conjunction \eqn{P(\gamma|\delta)}, both \code{gamma}
+To identify a conditional conjunction \eqn{p(\gamma|\delta)}, both \code{gamma}
 and \code{delta} should be specified.
 
 First, a parallel worlds graph is constructed based on the query. In a
@@ -61,7 +65,7 @@ v3 <- cf("Z", 0, c(D = 0))
 v4 <- cf("D", 0)
 c1 <- conj(v1)
 c2 <- conj(v2, v3, v4)
-identifiable(c1, c2, g)
+identifiable(g, c1, c2)
 }
 \references{
 Shpister, I. and Pearl, J. (2006). Identification of joint interventional

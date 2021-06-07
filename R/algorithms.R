@@ -100,9 +100,11 @@ id_star <- function(g, gamma) {
             if (n_vals > 1) {
                 val_pairs <- which(lower.tri(matrix(0L, n_vals, n_vals)),
                                    arr.ind = TRUE)
+                intv_i <- S_intv[[S_val_names[[i]]]]
+                vals_i <- S_vals[[S_val_names[[i]]]]
                 for (j in 1:nrow(val_pairs)) {
-                    if (val_pairs[,1] %in% S_intv[[S_val_names[[i]]]] ||
-                            val_pairs[,2] %in% S_intv[[S_val_names[[i]]]]) {
+                    if (vals_i[val_pairs[,1]] %in% intv_i ||
+                            vals_i[val_pairs[,2]] %in% intv_i) {
                         return(list(id = FALSE))
                     }
                 }
