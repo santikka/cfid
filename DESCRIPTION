@@ -1,0 +1,17 @@
+Package: cfid
+Type: Package
+Title: Identification of Counterfactual Queries in Causal Models
+Version: 0.1.0
+Author: Santtu Tikka
+Maintainer: Santtu Tikka <santtuth@gmail.com>
+Description: Facilitates the identification of counterfactual queries in 
+    structural causal models via the ID* and IDC* algorithms 
+    by Shpitser, I. and Pearl, J. (2008) 
+    <http://jmlr.org/papers/v9/shpitser08a.html>.
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
