@@ -1,11 +1,9 @@
-# cfid
+# cfid: An R Package for Identification of Counterfactual Queries in Causal Models
 
 <!-- Badges -->
 [![codecov](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg?token=13KFY7ULZ4)](https://codecov.io/gh/santikka/cfid)
   
 ## Overview
-
-cfid:  An R Package for Identification of Counterfactual Queries in Causal Models
 
 Facilitates the identification of counterfactual queries in structural causal 
 models via the ID* and IDC* algorithms by Shpitser, I. and Pearl, J. (2008) 
