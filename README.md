@@ -1,7 +1,7 @@
 # cfid
 
 <!-- Badges -->
-[![Codecov test coverage](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg)](https://codecov.io/gh/santikka/cfid?branch=main)
+[![codecov](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg?token=13KFY7ULZ4)](https://codecov.io/gh/santikka/cfid)
   
 ## Overview
 
