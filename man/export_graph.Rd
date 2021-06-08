@@ -17,8 +17,13 @@ export_graph(
 \item{type}{A character string matching one of the following:
 "dagitty", "causaleffect" or "dosearch".}
 
-\item{...}{Additional arguments passed to \code{format}
-for formatting vertex labels.}
+\item{use_bidirected}{A logical value indicating if bidirected edges
+should be used. If \code{TRUE}, the result will have explicit \verb{X <-> Y} type
+edges. If \code{FALSE}, an explicit latent variable \code{X <- U[X,Y] -> Y} will
+be used instead.}
+
+\item{...}{Additional arguments passed to \code{format} for formatting
+vertex labels.}
 }
 \description{
 Convert a valid graph object to a supported external format.

@@ -35,6 +35,9 @@ defines the set of variable to be marginalized over.}
 \item{summand}{An object of class \code{Probability}. If \code{sumset}
 is not \code{NULL}, this defines the probability being marginalized.}
 
+\item{terms}{A list of \code{Probability} objects if the object in question
+is meant to represent a product of terms.}
+
 \item{numerator}{An object of class \code{Probability}. If the probability
 depicts a conditional probability that cannot be expressed simply
 in terms of the set of inputs \eqn{P*}, this is the numerator

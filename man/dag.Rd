@@ -25,7 +25,7 @@ with the following attributes:
 Define a directed acyclic graph (DAG).
 }
 \details{
-The syntax for \code{x} follows closely that of \link{dagitty} for compatibility.
+The syntax for \code{x} follows closely that of \code{\link[dagitty:dagitty]{dagitty::dagitty()}} for compatibility.
 The resulting adjacency matrix of the definition is checked for cycles.
 
 Directed edges are defined as \code{X -> Y} meaning that there is an edge from

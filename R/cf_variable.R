@@ -73,7 +73,7 @@ is.CounterfactualVariable <- function(x) {
 }
 
 #' @export
-format.CounterfactualVariable <- function(x, use_primes = TRUE) {
+format.CounterfactualVariable <- function(x, use_primes = TRUE, ...) {
     super_var <- character(0L)
     super_int <- character(0L)
     form <- list(var = x$var, int = character(0L))

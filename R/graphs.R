@@ -7,7 +7,7 @@
 #'     See details for more advanced constructs.
 #'
 #' @details
-#' The syntax for `x` follows closely that of [dagitty] for compatibility.
+#' The syntax for `x` follows closely that of [dagitty::dagitty()] for compatibility.
 #' The resulting adjacency matrix of the definition is checked for cycles.
 #'
 #' Directed edges are defined as `X -> Y` meaning that there is an edge from
@@ -390,9 +390,9 @@ cg <- function(p, gamma) {
 #' @param x A graph object in a valid external format, see details.
 #'
 #' @details
-#' Argument `x` accepts [dagitty] graphs, [igraph] graphs
-#' in the [causaleffect] package syntax and character strings
-#' in the [dosearch] package syntax.
+#' Argument `x` accepts [dagitty::dagitty()] graphs, igraph-graphs
+#' in the [causaleffect::causaleffect()] package syntax and character strings
+#' in the [dosearch::dosearch()] package syntax.
 #'
 #' @return A `DAG` object if successful.
 #' @export
@@ -446,8 +446,12 @@ import_graph <- function(x) {
 #' @param g An object of class `DAG`.
 #' @param type A character string matching one of the following:
 #'     "dagitty", "causaleffect" or "dosearch".
-#' @param ... Additional arguments passed to `format`
-#'     for formatting vertex labels.
+#' @param use_bidirected A logical value indicating if bidirected edges
+#'     should be used. If `TRUE`, the result will have explicit `X <-> Y` type
+#'     edges. If `FALSE`, an explicit latent variable `X <- U[X,Y] -> Y` will
+#'     be used instead.
+#' @param ... Additional arguments passed to `format` for formatting
+#'     vertex labels.
 #' @export
 export_graph <- function(
     g,

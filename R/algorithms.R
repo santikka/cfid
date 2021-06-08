@@ -2,6 +2,7 @@
 #
 # @param g An object of class `dag`.
 # @param gamma An object of class `CounterfactualConjunction`
+#' @importFrom stats setNames
 id_star <- function(g, gamma) {
     n_cf <- length(gamma)
     if (!n_cf) {
@@ -48,7 +49,7 @@ id_star <- function(g, gamma) {
                     s_intv <- setdiff(s_intv, intv_vars)
                 }
                 comp[[i]][[j]]$int <- c(comp[[i]][[j]]$int,
-                                        setNames(integer(length(s_intv)), s_intv))
+                                        stats::setNames(integer(length(s_intv)), s_intv))
             }
             s_conj <- do.call(CounterfactualConjunction, comp[[i]])
             c_factors[[i]] <- id_star(g, s_conj)
@@ -133,6 +134,7 @@ id_star <- function(g, gamma) {
 # @param g An object of class `dag`.
 # @param gamma An object of class `CounterfactualConjunction`
 # @param delta An object of class `CounterfactualConjunction`
+#' @importFrom stats setNames
 idc_star <- function(g, gamma, delta) {
     delta_out <- id_star(g, delta)
     if (!delta_out$id) {
@@ -166,7 +168,7 @@ idc_star <- function(g, gamma, delta) {
             d <- delta_prime[[i]]
             for (j in seq_along(de)) {
                 gamma_prime[[j]]$int <- c(gamma_prime[[j]]$int,
-                                          setNames(d$obs, d$var))
+                                          stats::setNames(d$obs, d$var))
             }
             return(idc_star(g, gamma_prime, delta_prime[-i]))
         }

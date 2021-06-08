@@ -16,6 +16,8 @@
 #'     defines the set of variable to be marginalized over.
 #' @param summand An object of class `Probability`. If `sumset`
 #'     is not `NULL`, this defines the probability being marginalized.
+#' @param terms A list of `Probability` objects if the object in question
+#'     is meant to represent a product of terms.
 #' @param numerator An object of class `Probability`. If the probability
 #'     depicts a conditional probability that cannot be expressed simply
 #'     in terms of the set of inputs \eqn{P*}, this is the numerator
@@ -80,13 +82,12 @@ Probability <- function(val = NULL, var = NULL, do = NULL,
     )
 }
 
-#' @export
 is.Probability <- function(x) {
     inherits(x, "Probability")
 }
 
 #' @export
-format.Probability <- function(x, use_primes = TRUE, use_do = FALSE) {
+format.Probability <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
     out <- ""
     if (length(x$val)) {
         out <- as.character(x$val)

@@ -16,7 +16,7 @@ A \code{DAG} object if successful.
 Import and construct a valid DAG from an external format.
 }
 \details{
-Argument \code{x} accepts \link{dagitty} graphs, \link{igraph} graphs
-in the \link{causaleffect} package syntax and character strings
-in the \link{dosearch} package syntax.
+Argument \code{x} accepts \code{\link[dagitty:dagitty]{dagitty::dagitty()}} graphs, igraph-graphs
+in the \code{\link[causaleffect:causaleffect-package]{causaleffect::causaleffect()}} package syntax and character strings
+in the \code{\link[dosearch:dosearch]{dosearch::dosearch()}} package syntax.
 }

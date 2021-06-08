@@ -49,17 +49,14 @@ CounterfactualConjunction <- function(...) {
     }
 }
 
-#' @export
 as.CounterfactualConjunction <- function(x) {
     UseMethod("as.CounterfactualConjunction")
 }
 
-#' @export
 as.CounterfactualConjunction.list <- function(x) {
     do.call(CounterfactualConjunction, x)
 }
 
-#' @export
 as.CounterfactualConjunction.default <- function(x) {
     if (is.CounterfactualConjunction(x)) {
         x
@@ -69,7 +66,6 @@ as.CounterfactualConjunction.default <- function(x) {
 
 }
 
-#' @export
 is.CounterfactualConjunction <- function(x) {
     inherits(x, "CounterfactualConjunction")
 }
