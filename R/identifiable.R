@@ -67,14 +67,14 @@
 #' c2 <- conj(v2, v3, v4)
 #' c3 <- conj(v1, v2, v3, v4)
 #'
+#' # Identifiable conditional conjunction
 #' identifiable(g1, c1, c2)
-#' # Formula: \frac{\sum_{w} p_{x}(w)p_{w,z}(y,x')}{p(x')}
 #'
+#' # Identifiable conjunction
 #' identifiable(g1, c3)
-#' # Formula: \sum_{w} p_{x}(w)p_{w,z}(y,x')p_{d}(z)p(d)
 #'
+#' # Non-identifiable conjunction
 #' identifiable(g2, c3)
-#' # Not identifiable
 #' @export
 identifiable <- function(g, gamma, delta = NULL) {
     if (missing(g)) {

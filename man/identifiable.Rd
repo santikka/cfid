@@ -56,6 +56,27 @@ of the query. Similar to the ID and IDC algorithms for causal effects,
 these algorithms exploit the so called c-component factorization to split
 the query into smaller subproblems, which are then solved recursively.
 }
+\examples{
+# Examples that appears in Shpitser and Pearl (2008)
+g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")
+g2 <- dag("X -> W -> Y <- Z <- D X <-> Y X -> Y")
+v1 <- cf("Y", 0, c(X = 0))
+v2 <- cf("X", 1)
+v3 <- cf("Z", 0, c(D = 0))
+v4 <- cf("D", 0)
+c1 <- conj(v1)
+c2 <- conj(v2, v3, v4)
+c3 <- conj(v1, v2, v3, v4)
+
+# Identifiable conditional conjunction
+identifiable(g1, c1, c2)
+
+# Identifiable conjunction
+identifiable(g1, c3)
+
+# Non-identifiable conjunction
+identifiable(g2, c3)
+}
 \references{
 Shpister, I. and Pearl, J. (2006). Identification of joint interventional
 distributions in semi-Markovian causal models.
