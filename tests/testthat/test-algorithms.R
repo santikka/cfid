@@ -1,4 +1,4 @@
-# Tests for ID* and IDC*
+# ID* and IDC*
 
 g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")
 g2 <- dag("X -> W -> Y <- Z <- D X <-> Y X -> Y")
@@ -73,4 +73,14 @@ test_that("auto convert singletons", {
     out1 <- identifiable(g1, v1)
     out2 <- identifiable(g1, conj(v1))
     expect_identical(out1, out2)
+})
+
+# Interface
+
+test_that("valid input", {
+    expect_error(identifiable())
+    expect_error(identifiable(c1))
+    expect_error(identifiable(g1))
+    expect_error(identifiable(g1, g1))
+    expect_error(identifiable(g1, c1, g1))
 })

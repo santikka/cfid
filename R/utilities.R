@@ -10,19 +10,8 @@ rep_char <- function(x, n) {
     paste0(rep(x, n), collapse = "")
 }
 
-rm_ws <- function(x) {
-    y <- gsub("[ \t\r\n]", "", x, perl = TRUE)
-    dim(y) <- dim(x)
-    y
-}
-
 reg_match <- function(x, pattern, perl = TRUE) {
-    m <- gregexpr(pattern, x, perl)
-    regmatches(x, m)[[1L]]
-}
-
-reg_named <- function(x, pattern) {
-    m <- gregexec(pattern, x, perl = TRUE)
+    m <- gregexec(pattern, x, perl)
     regmatches(x, m)[[1L]]
 }
 
@@ -57,19 +46,14 @@ stop_ <- function(...) {
     stop(..., call. = FALSE)
 }
 
-warning_ <- function(...) {
-    warning(..., call. = FALSE)
-}
-
-any_conflict <- function(x) {
-    if (length(x)) {
-        conf_form <- comma_sep(sapply(x, format))
+check_conflicts <- function(x, y) {
+    if (missing(y)) {
+        conf <- trivial_conflicts(x)
+    } else {
+        conf <- trivial_conflict(x, y)
+    }
+    if (length(conf)) {
+        conf_form <- comma_sep(sapply(conf, format))
         stop_("Inconsistent definitions given for variables: ", conf_form)
     }
-}
-
-check_conflicts <- function(x, y) {
-    if (missing(y)) out <- trivial_conflicts(x)
-    else out <- trivial_conflict(x, y)
-    any_conflict(out)
 }

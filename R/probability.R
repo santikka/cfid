@@ -39,22 +39,32 @@ Probability <- function(val = NULL, var = NULL, do = NULL,
     }
     if (!is.null(var)) {
         if (!all(sapply(var, is.CounterfactualVariable))) {
-            stop_("All elements of 'var' must be of class 'CounterfactualVariable'")
+            stop_("All elements of ?var` must be of class `CounterfactualVariable`")
         }
     }
     if (!is.null(do)) {
         if (!all(sapply(do, is.CounterfactualVariable))) {
-            stop_("All elements of 'do' must be of class 'CounterfactualVariable'")
+            stop_("All elements of `do` must be of class `CounterfactualVariable`")
         }
     }
     if (!is.null(sumset)) {
         if (!all(sapply(sumset, is.CounterfactualVariable))) {
-            stop_("All elements of 'do' must be of class 'CounterfactualVariable'")
+            stop_("All elements of `sumset` must be of class `CounterfactualVariable`")
         }
     }
     if (!is.null(summand)) {
         if (!is.Probability(summand)) {
-            stop_("Argument 'summand' must be of class 'Probability'")
+            stop_("Argument `summand` must be of class `Probability`")
+        }
+    }
+    if (!is.null(numerator)) {
+        if (!is.Probability(numerator)) {
+            stop_("Argument `numerator` must be of class `Probability`")
+        }
+    }
+    if (!is.null(denominator)) {
+        if (!is.Probability(denominator)) {
+            stop_("Argument `denominator` must be of class `Probability`")
         }
     }
     structure(
@@ -87,8 +97,12 @@ format.Probability <- function(x, use_primes = TRUE, use_do = FALSE) {
     } else if (!is.null(x$terms)) {
         out <- collapse(sapply(x$terms, format, use_primes, use_do))
     } else if (!is.null(x$numerator)) {
-        out <- paste0("\\frac{", format(x$numerator, use_primes, use_do),
-                      "}{", format(x$denominator, use_primes, use_do), "}")
+        if (length(x$denominator$val) && x$denominator$val == 1L) {
+            out <- format(x$numerator, use_primes, use_do)
+        } else {
+            out <- paste0("\\frac{", format(x$numerator, use_primes, use_do),
+                          "}{", format(x$denominator, use_primes, use_do), "}")
+        }
     } else {
         sub <- ""
         cond <- ""

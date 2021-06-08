@@ -51,17 +51,22 @@ CounterfactualConjunction <- function(...) {
 
 #' @export
 as.CounterfactualConjunction <- function(x) {
+    UseMethod("as.CounterfactualConjunction")
+}
+
+#' @export
+as.CounterfactualConjunction.list <- function(x) {
+    do.call(CounterfactualConjunction, x)
+}
+
+#' @export
+as.CounterfactualConjunction.default <- function(x) {
     if (is.CounterfactualConjunction(x)) {
-        out <- x
+        x
     } else {
-        if (is.list(x)) {
-            out <- do.call(CounterfactualConjunction, x)
-        } else {
-            stop_("Cannot coerce type`", typeof(x),
-                  "` to an object of class `CounterfactualConjunction`")
-        }
+        stop_("Cannot object to class `CounterfactualConjunction`", x)
     }
-    out
+
 }
 
 #' @export
@@ -70,9 +75,9 @@ is.CounterfactualConjunction <- function(x) {
 }
 
 #' @export
-format.CounterfactualConjunction <- function(x, ...) {
+format.CounterfactualConjunction <- function(x, varsep = " \u2227 ", ...) {
     cf <- sapply(x, function(y) format.CounterfactualVariable(y, ...))
-    paste0(cf, collapse = " \u2227 ")
+    paste0(cf, collapse = varsep)
 }
 
 #' @export
@@ -103,7 +108,14 @@ print.CounterfactualConjunction <- function(x, ...) {
         }
     } else if (is.CounterfactualVariable(e1)) {
         if (is.CounterfactualConjunction(e2)) {
-            out <- e2 + e1
+            x <- list(e1)
+            if (x %in% e2) {
+                y <- e2
+            } else {
+                check_conflicts(e1, e2)
+                y <- c(x, e2)
+            }
+            out <- structure(y, class = "CounterfactualConjunction")
         } else if (is.CounterfactualVariable(e2)) {
             out <- CounterfactualConjunction(e1, e2)
         } else {

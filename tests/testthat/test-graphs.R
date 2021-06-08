@@ -57,7 +57,7 @@ test_that("generated worlds", {
 
 # Tests for Counterfactual Graphs
 
-c1 <- cfid:::cg(p1, gamma1)
+# c1 <- cfid:::cg(p1, gamma1)
 
 # Tests for graph operations
 
@@ -108,20 +108,48 @@ test_that("dagitty mag not supported", {
 
 
 test_that("causaleffect / igraph supported", {
-    if (!requireNamespace("igraph", quietly = TRUE)) {
-        skip("Package `igraph` is not available")
-    } else {
-        ig <- igraph::graph.formula(X -+ Z -+ Y, Y -+ X, X -+ Y)
-        ig <- igraph::set.edge.attribute(ig, "description", c(2, 4), "U")
-        expect_identical(import_graph(ig), dag("X -> Z -> Y X <-> Y"))
-    }
+    ig <- igraph::graph.formula(X -+ Z -+ Y, Y -+ X, X -+ Y)
+    ig <- igraph::set.edge.attribute(ig, "description", c(2, 4), "U")
+    expect_identical(import_graph(ig), dag("X -> Z -> Y X <-> Y"))
 })
 
 test_that("generic igraph not supported", {
-    if (!requireNamespace("igraph", quietly = TRUE)) {
-        skip("Package `igraph` is not available")
-    } else {
-        ig <- igraph::graph.formula(X -- Y)
-        expect_error(import_graph(ig))
-    }
+    ig <- igraph::graph.formula(X -- Y)
+    expect_error(import_graph(ig))
+})
+
+test_that("fail when no igraph", {
+    ig <- igraph::graph.formula(X -+ Y)
+    mockery::stub(import_graph, "requireNamespace", FALSE)
+    expect_error(import_graph(ig))
+})
+
+test_that("dosearch syntax", {
+    g <- "X -> Y\n X -> Z"
+    expect_identical(import_graph(g), dag(g))
+})
+
+test_that("unsupported format", {
+    g <- data.frame()
+    expect_error(import_graph(g))
+})
+
+# Tests for exports
+
+test_that("dags only", {
+    g <- data.frame()
+    expect_error(export_graph(g))
+})
+
+test_that("dagitty sanity", {
+    # dagitty will always enforce alphabetical order it seems
+    g <- dag("X <-> Y X -> Z -> Y")
+    e <- export_graph(g, "dagitty")
+    expect_identical(import_graph(e), g)
+})
+
+test_that("fail when no dagitty", {
+    g <- dag("X -> Z -> Y <-> X")
+    mockery::stub(export_graph, "requireNamespace", FALSE)
+    expect_error(export_graph(g, "dagitty"))
 })

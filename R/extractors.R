@@ -91,13 +91,13 @@ trivial_conflict <- function(y, gamma) {
     y_cf <- list(cfvar(y))
     x <- cfvars(gamma)
     z <- which(x %in% y_cf)
-    out <- list()
-    if (length(z) > 1) {
-        x_vals <- sapply(gamma[z], "[[", "obs")
-        if (length(unique(x_vals)) > 1) {
-            out <- y_cf
+    if (length(z)) {
+        xy_vals <- c(sapply(gamma[z], "[[", "obs"), y$obs)
+        if (length(unique(xy_vals)) > 1) {
+            return(y_cf)
         }
     }
+    list()
 }
 
 # Determines the value of a counterfactual variable within a conjunction.

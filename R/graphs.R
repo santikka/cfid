@@ -58,19 +58,19 @@
 dag <- function(x) {
     x <- try_type(x = x, type = "character")
     x <- toupper(x)
-    x <- gsub("[;\\,]", " ", x)
-    if (!nchar(gsub("[ \\r\\n\\t]", "", x))) {
+    x <- gsub("[;\\,\r\n\t]", " ", x)
+    if (!nchar(trimws(x))) {
         stop_("Argument `x` contains only whitespace or special characters")
     }
     e_within <- grepl("\\{.+ [<>\\-]+ .+\\}", x)
     if (e_within) {
         stop_("Edges are not allowed within groups defined by {...}")
     }
-    g_str <- reg_named(x, "\\{([^<>\\-]+)\\}|([^<> \r\n\t\\-]+)|(<->|<-|->)")
+    g_str <- reg_match(x, "\\{([^<>\\-]+)\\}|([^<> \\-]+)|(<->|<-|->)")
     g_str[2,] <- trimws(g_str[2,])
     g_type <- apply(g_str[-1,,drop = FALSE], 2, function(x) nchar(x) > 0)
     g_str <- g_str[rbind(FALSE, g_type)]
-    g_lst <- strsplit(g_str, "[ \\r\\n\\t]+", perl = TRUE)
+    g_lst <- strsplit(g_str, "[ ]+", perl = TRUE)
     e_lst <- which(sapply(g_lst, function(e) e[1] %in% c("<->", "<-", "->")))
     v_lst <- Filter(function(v) all(!v %in% c("<->", "<-", "->")), g_lst)
     v_names <- unique(unlist(v_lst))
@@ -399,8 +399,10 @@ cg <- function(p, gamma) {
 import_graph <- function(x) {
     out <- NULL
     if (inherits(x, "dagitty")) {
-        x <- gsub("\n|\r", " ", x)
-        x_def <- reg_named(x, "dag \\{(.+)\\}.*")
+        names(x) <- NULL
+        class(x) <- NULL
+        x <- trimws(gsub("[;\\,\r\n\t]", " ", x))
+        x_def <- reg_match(x, "dag \\{(.+)\\}")
         if (length(x_def)) {
             out <- dag(x_def[2,1])
         } else {
@@ -427,7 +429,7 @@ import_graph <- function(x) {
             }
             out <- dag(paste0(c(g_obs, g_unobs), collapse = " "))
         } else {
-            stop_("Attempting to use `igraph` input, but the required package is not available")
+            stop_("Attempting to use `igraph` input, but the package is not available")
         }
     } else if (is.character(x)) {
         out <- dag(x)
@@ -453,37 +455,44 @@ export_graph <- function(
     use_bidirected = TRUE,
     ...
 ) {
-    if (!is_DAG(g)) {
-        stop_("Argument `x` must be an object of class 'DAG'")
+    if (!is_dag(g)) {
+        stop_("Argument `x` must be an object of class `DAG`")
     }
     type <- match.arg(type)
     if (identical(type, "dagitty")) {
-        lab <- attr(g, "labels")
-        if (any(is.CounterfactualVariable(lab))) {
-            stop_("Counterfactual variables are not suppored as labels for `dagitty` graphs")
-        }
-        lab_form <- sapply(lab, format, type = "dagitty")
-        lat <- attr(g, "latent")
-        n_v <- ncol(g)
-        n_e <- sum(g)
-        e_str <- character(n_e)
-        e_ix <- 0L
-        for (i in 1:n_v) {
-            if (use_bidirected && lat[i] && sum(g[i,]) == 2L) {
-                e_ix <- e_ix + 1L
-                bi <- which(g[i,] > 0)
-                e_str[e_ix] <- paste0(lab_form[bi[1]], " <-> ", lab_form[bi[2]])
-            } else {
-                for (j in 1:n_v) {
-                    if (g[i,j]) {
-                        e_ix <- e_ix + 1L
-                        e_str[e_ix] <- paste0(lab_form[i], " -> ", lab_form[j])
+        if (requireNamespace("dagitty", quietly = TRUE)) {
+            lab <- attr(g, "labels")
+            lab_form <- sapply(lab, format)
+            lat <- attr(g, "latent")
+            n_v <- ncol(g)
+            n_e <- sum(g)
+            e_bi_str <- character(n_e)
+            e_di_str <- character(n_e)
+            e_bi_ix <- 0L
+            e_di_ix <- 0L
+            for (i in 1:n_v) {
+                if (use_bidirected && lat[i] && sum(g[i,]) == 2L) {
+                    e_bi_ix <- e_bi_ix + 1L
+                    bi <- which(g[i,] > 0)
+                    e_bi_str[e_bi_ix] <- paste0(lab_form[bi[1]], " <-> ", lab_form[bi[2]])
+                } else {
+                    for (j in 1:n_v) {
+                        if (g[i,j]) {
+                            e_di_ix <- e_di_ix + 1L
+                            e_di_str[e_di_ix] <- paste0(lab_form[i], " -> ", lab_form[j])
+                        }
                     }
                 }
             }
+            e_bi_str <- e_bi_str[nchar(e_bi_str) > 0L]
+            e_di_str <- e_di_str[nchar(e_di_str) > 0L]
+            e_str <- collapse(paste0(e_di_str, collapse = " "),
+                              " ",
+                              paste0(e_bi_str, collapse = " "))
+            out <- dagitty::dagitty(collapse("dag {", e_str, "}"))
+        } else {
+            stop_("Package `dagitty` is not available for export")
         }
-        e_str <- e_str[nchar(e_str) > 0L]
-        out <- collapse("dag{", paste0(e_str, collapse = " "), "}")
     }
     out
 }
