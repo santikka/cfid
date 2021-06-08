@@ -45,9 +45,9 @@
 #' * `id` A logical value that is `TRUE` if the query is identifiable and
 #'     `FALSE` otherwise. Note that in cases where `gamma` is itself
 #'     inconsistent, the query will be identifiable, but with probability 0.
-#' * `prob` An object of class `Probability` giving the
-#'     formula of the query in latex syntax, if identifiable. This expression
-#'     is given in terms of \eqn{P*},
+#' * `prob` An object of class `Probability` giving the formula of the query in
+#'     LaTeX syntax via format or print, if identifiable.
+#'     This expression is given in terms of \eqn{P*},
 #'     the set of all interventional distributions over `g`. For tautological
 #'     statements, the resulting probability is 1, and for inconsistent
 #'     statements, the resulting probability is 0.
@@ -56,15 +56,25 @@
 #'     for example when \eqn{p(\delta) = 0}, and `FALSE` otherwise.
 #'
 #' @examples
-#' # The example that appears in Shpitser and Pearl (2008)
-#' g <- dag("X -> W -> Y <- Z <- D X <-> Y")
+#' # Examples that appears in Shpitser and Pearl (2008)
+#' g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")
+#' g2 <- dag("X -> W -> Y <- Z <- D X <-> Y X -> Y")
 #' v1 <- cf("Y", 0, c(X = 0))
 #' v2 <- cf("X", 1)
 #' v3 <- cf("Z", 0, c(D = 0))
 #' v4 <- cf("D", 0)
 #' c1 <- conj(v1)
 #' c2 <- conj(v2, v3, v4)
-#' identifiable(g, c1, c2)
+#' c3 <- conj(v1, v2, v3, v4)
+#'
+#' identifiable(g1, c1, c2)
+#' # Formula: \frac{\sum_{w} p_{x}(w)p_{w,z}(y,x')}{p(x')}
+#'
+#' identifiable(g1, c3)
+#' # Formula: \sum_{w} p_{x}(w)p_{w,z}(y,x')p_{d}(z)p(d)
+#'
+#' identifiable(g2, c3)
+#' # Not identifiable
 #' @export
 identifiable <- function(g, gamma, delta = NULL) {
     if (missing(g)) {
@@ -88,6 +98,9 @@ identifiable <- function(g, gamma, delta = NULL) {
             stop_("Argument `delta` must be an object of class `CounterfactualConjunction`")
         }
         out <- idc_star(g, gamma, delta)
+    }
+    if (is.null(out$undefined)) {
+        out$undefined <- FALSE
     }
     out
 }

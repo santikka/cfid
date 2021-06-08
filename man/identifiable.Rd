@@ -22,9 +22,9 @@ A list containing one or more of the following:
 \item \code{id} A logical value that is \code{TRUE} if the query is identifiable and
 \code{FALSE} otherwise. Note that in cases where \code{gamma} is itself
 inconsistent, the query will be identifiable, but with probability 0.
-\item \code{prob} An object of class \code{Probability} giving the
-formula of the query in latex syntax, if identifiable. This expression
-is given in terms of \eqn{P*},
+\item \code{prob} An object of class \code{Probability} giving the formula of the query in
+LaTeX syntax via format or print, if identifiable.
+This expression is given in terms of \eqn{P*},
 the set of all interventional distributions over \code{g}. For tautological
 statements, the resulting probability is 1, and for inconsistent
 statements, the resulting probability is 0.
@@ -55,17 +55,6 @@ Finally, the ID* (or IDC*) algorithm is applied to determine identifiability
 of the query. Similar to the ID and IDC algorithms for causal effects,
 these algorithms exploit the so called c-component factorization to split
 the query into smaller subproblems, which are then solved recursively.
-}
-\examples{
-# The example that appears in Shpitser and Pearl (2008)
-g <- dag("X -> W -> Y <- Z <- D X <-> Y")
-v1 <- cf("Y", 0, c(X = 0))
-v2 <- cf("X", 1)
-v3 <- cf("Z", 0, c(D = 0))
-v4 <- cf("D", 0)
-c1 <- conj(v1)
-c2 <- conj(v2, v3, v4)
-identifiable(g, c1, c2)
 }
 \references{
 Shpister, I. and Pearl, J. (2006). Identification of joint interventional
