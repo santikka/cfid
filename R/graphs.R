@@ -62,7 +62,7 @@ dag <- function(x) {
     if (!nchar(trimws(x))) {
         stop_("Argument `x` contains only whitespace or special characters")
     }
-    e_within <- grepl("\\{.+ [<>\\-]+ .+\\}", x)
+    e_within <- grepl("\\{[^\\}]+[<>\\-]+[^\\{]+\\}", x)
     if (e_within) {
         stop_("Edges are not allowed within groups defined by {...}")
     }

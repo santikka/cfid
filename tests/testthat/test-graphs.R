@@ -38,6 +38,14 @@ test_that("missing endpoint", {
     expect_error(dag("X <->"))
 })
 
+test_that("allowed structures", {
+    expect_error(dag("x -> {y z} <- w <-> g"), NA)
+    expect_error(dag("{x z} -> {y w}"), NA)
+    expect_error(dag("x -> z -> y; x <-> y"), NA)
+    expect_error(dag("{x, y, z} -> w"), NA)
+    expect_error(dag("z -> w\nx -> y"), NA)
+})
+
 # Tests for Parallel Worlds Graphs
 
 g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")

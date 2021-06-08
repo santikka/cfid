@@ -3,6 +3,8 @@
 S3method("+",CounterfactualConjunction)
 S3method("+",CounterfactualVariable)
 S3method("[",CounterfactualConjunction)
+S3method(as.CounterfactualConjunction,default)
+S3method(as.CounterfactualConjunction,list)
 S3method(format,CounterfactualConjunction)
 S3method(format,CounterfactualVariable)
 S3method(format,Probability)
