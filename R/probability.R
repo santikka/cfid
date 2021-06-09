@@ -31,6 +31,8 @@
 #' `val`, (`var`, `do`), (`sumset`, `summand`), `terms`,
 #' (`numerator`, `denominator`)
 #'
+#' @return An object of class `Probability`.
+#'
 #' @export
 Probability <- function(val = NULL, var = NULL, do = NULL,
     sumset = NULL, summand = NULL, terms = NULL,

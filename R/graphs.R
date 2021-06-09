@@ -449,9 +449,14 @@ import_graph <- function(x) {
 #' @param use_bidirected A logical value indicating if bidirected edges
 #'     should be used. If `TRUE`, the result will have explicit `X <-> Y` type
 #'     edges. If `FALSE`, an explicit latent variable `X <- U[X,Y] -> Y` will
-#'     be used instead.
+#'     be used instead (only for `"dagitty"` and `"dosearch"` values of `type`).
 #' @param ... Additional arguments passed to `format` for formatting
 #'     vertex labels.
+#' @value If `type` is `"dagitty"`, returns a `dagitty` object.
+#'     If `type` is `"causaleffect"`, return an `igraph` graph, with its edge
+#'     attributes set according to the causaleffect package syntax. If `type`
+#'     is `dosearch`, returns a character vector of length one that describes
+#'     `g` in the dosearch package syntax.
 #' @export
 export_graph <- function(
     g,
@@ -462,34 +467,42 @@ export_graph <- function(
     if (!is_dag(g)) {
         stop_("Argument `x` must be an object of class `DAG`")
     }
+    out <- NULL
     type <- match.arg(type)
+    lab <- attr(g, "labels")
+    lab_form <- sapply(lab, format)
+    lat <- attr(g, "latent")
+    lat_ix <- which(lat)
+    e_ix <-  which(g > 0, arr.ind = TRUE)
+    obs_e <- e_ix[!e_ix[,1] %in% lat_ix,,drop = FALSE]
+    unobs_e <- e_ix[e_ix[,1] %in% lat_ix,,drop = FALSE]
+    n_o <- nrow(obs_e)
+    n_u <- nrow(unobs_e)
+    e_str <- character(0)
+    e_di_str <- character(0)
+    e_bi_str <- character(0)
+    if (type %in% c("dagitty", "dosearch")) {
+        if (n_o) {
+            e_di_str <- paste0(lab_form[obs_e[,1]],
+                               " -> ",
+                               lab_form[obs_e[,2]])
+        }
+        if (n_u) {
+            if (use_bidirected) {
+                bi_start <- seq(1, n_o - 1, by = 2)[1:(n_u %/% 2L)]
+                bi_end <- seq(2, n_o, by = 2)[1:(n_u %/% 2L)]
+                e_bi_str <- paste0(lab_form[unobs_e[bi_start,2]],
+                                   " <-> ",
+                                   lab_form[unobs_e[bi_end,2]])
+            } else {
+                e_bi_str <- paste0(lab_form[unobs_e[,1]],
+                                   " -> ",
+                                   lab_form[unobs_e[,2]])
+            }
+        }
+    }
     if (identical(type, "dagitty")) {
         if (requireNamespace("dagitty", quietly = TRUE)) {
-            lab <- attr(g, "labels")
-            lab_form <- sapply(lab, format)
-            lat <- attr(g, "latent")
-            n_v <- ncol(g)
-            n_e <- sum(g)
-            e_bi_str <- character(n_e)
-            e_di_str <- character(n_e)
-            e_bi_ix <- 0L
-            e_di_ix <- 0L
-            for (i in 1:n_v) {
-                if (use_bidirected && lat[i] && sum(g[i,]) == 2L) {
-                    e_bi_ix <- e_bi_ix + 1L
-                    bi <- which(g[i,] > 0)
-                    e_bi_str[e_bi_ix] <- paste0(lab_form[bi[1]], " <-> ", lab_form[bi[2]])
-                } else {
-                    for (j in 1:n_v) {
-                        if (g[i,j]) {
-                            e_di_ix <- e_di_ix + 1L
-                            e_di_str[e_di_ix] <- paste0(lab_form[i], " -> ", lab_form[j])
-                        }
-                    }
-                }
-            }
-            e_bi_str <- e_bi_str[nchar(e_bi_str) > 0L]
-            e_di_str <- e_di_str[nchar(e_di_str) > 0L]
             e_str <- collapse(paste0(e_di_str, collapse = " "),
                               " ",
                               paste0(e_bi_str, collapse = " "))
@@ -497,6 +510,32 @@ export_graph <- function(
         } else {
             stop_("Package `dagitty` is not available for export")
         }
+    } else if (identical(type, "causaleffect")) {
+        if (requireNamespace("igraph", quietly = TRUE)) {
+            ig <- igraph::make_empty_graph(n = sum(!lat))
+            obs_e_ix <- c(t(obs_e))
+            unobs_e_ix <- e_ix[e_ix[,1] %in% lat_ix,2]
+            if (n_o) {
+                ig <- ig %>% igraph::add_edges(obs_e_ix) %>%
+                    igraph::set_edge_attr("description", value = NA)
+            }
+            if (n_u) {
+                ig <- ig %>%
+                    igraph::add_edges(c(unobs_e_ix, rev(unobs_e_ix))) %>%
+                    igraph::set_edge_attr("description",
+                                          index = (n_o + 1):(n_u + n_o),
+                                          value = "U")
+            }
+            ig <- igraph::set_vertex_attr(ig, "name", igraph::V(ig), lab_form[!lat])
+            out <- ig
+        } else {
+            stop_("Package `igraph` is not available for export")
+        }
+    } else if (identical(type, "dosearch")) {
+        e_str <- collapse(paste0(e_di_str, collapse = "\n"),
+                          "\n",
+                          paste0(e_bi_str, collapse = "\n"))
+        out <- e_str
     }
     out
 }

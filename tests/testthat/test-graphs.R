@@ -161,3 +161,21 @@ test_that("fail when no dagitty", {
     mockery::stub(export_graph, "requireNamespace", FALSE)
     expect_error(export_graph(g, "dagitty"))
 })
+
+# test_that("causaleffect sanity", {
+#     g <- dag("X <-> Y X -> Z -> Y")
+#     e <- export_graph(g, "causaleffect")
+#     expect_identical(import_graph(e), g)
+# })
+
+test_that("fail when no igraph", {
+    g <- dag("X -> Z -> Y <-> X")
+    mockery::stub(export_graph, "requireNamespace", FALSE)
+    expect_error(export_graph(g, "causaleffect"))
+})
+
+test_that("dosearch sanity", {
+    g <- dag("X -> Z -> Y <-> X")
+    e <- export_graph(g, "dosearch")
+    expect_identical(import_graph(e), g)
+})
