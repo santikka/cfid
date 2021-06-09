@@ -46,6 +46,9 @@ of the quotient representation.}
 \item{denominator}{An object of class \code{Probability}. The denominator
 of the quotient representation.}
 }
+\value{
+An object of class \code{Probability}.
+}
 \description{
 Defines an interventional or observational probability \eqn{p(y|do(x))}.
 }

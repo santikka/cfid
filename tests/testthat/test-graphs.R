@@ -162,11 +162,11 @@ test_that("fail when no dagitty", {
     expect_error(export_graph(g, "dagitty"))
 })
 
-# test_that("causaleffect sanity", {
-#     g <- dag("X <-> Y X -> Z -> Y")
-#     e <- export_graph(g, "causaleffect")
-#     expect_identical(import_graph(e), g)
-# })
+test_that("causaleffect sanity", {
+    g <- dag("X -> Z -> Y X <-> Y ")
+    e <- export_graph(g, "causaleffect")
+    expect_identical(import_graph(e), g)
+})
 
 test_that("fail when no igraph", {
     g <- dag("X -> Z -> Y <-> X")
@@ -178,4 +178,11 @@ test_that("dosearch sanity", {
     g <- dag("X -> Z -> Y <-> X")
     e <- export_graph(g, "dosearch")
     expect_identical(import_graph(e), g)
+})
+
+
+test_that("dosearch explicit latent variable", {
+    g <- dag("X <-> Y")
+    expect_identical(export_graph(g, "dosearch", use_bidirected = FALSE),
+                     "U[X,Y] -> X\nU[X,Y] -> Y")
 })

@@ -449,13 +449,13 @@ import_graph <- function(x) {
 #' @param use_bidirected A logical value indicating if bidirected edges
 #'     should be used. If `TRUE`, the result will have explicit `X <-> Y` type
 #'     edges. If `FALSE`, an explicit latent variable `X <- U[X,Y] -> Y` will
-#'     be used instead (only for `"dagitty"` and `"dosearch"` values of `type`).
+#'     be used instead (only applicable `type` is `"dosearch"`).
 #' @param ... Additional arguments passed to `format` for formatting
 #'     vertex labels.
-#' @value If `type` is `"dagitty"`, returns a `dagitty` object.
+#' @return If `type` is `"dagitty"`, returns a `dagitty` object.
 #'     If `type` is `"causaleffect"`, return an `igraph` graph, with its edge
 #'     attributes set according to the causaleffect package syntax. If `type`
-#'     is `dosearch`, returns a character vector of length one that describes
+#'     is `"dosearch"`, returns a character vector of length one that describes
 #'     `g` in the dosearch package syntax.
 #' @export
 export_graph <- function(
@@ -488,9 +488,9 @@ export_graph <- function(
                                lab_form[obs_e[,2]])
         }
         if (n_u) {
-            if (use_bidirected) {
-                bi_start <- seq(1, n_o - 1, by = 2)[1:(n_u %/% 2L)]
-                bi_end <- seq(2, n_o, by = 2)[1:(n_u %/% 2L)]
+            if (use_bidirected || identical(type, "dagitty")) {
+                bi_start <- seq(1, n_u - 1, by = 2)[1:(n_u %/% 2L)]
+                bi_end <- seq(2, n_u, by = 2)[1:(n_u %/% 2L)]
                 e_bi_str <- paste0(lab_form[unobs_e[bi_start,2]],
                                    " <-> ",
                                    lab_form[unobs_e[bi_end,2]])
@@ -516,15 +516,13 @@ export_graph <- function(
             obs_e_ix <- c(t(obs_e))
             unobs_e_ix <- e_ix[e_ix[,1] %in% lat_ix,2]
             if (n_o) {
-                ig <- ig %>% igraph::add_edges(obs_e_ix) %>%
-                    igraph::set_edge_attr("description", value = NA)
+                ig <- ig + igraph::edges(obs_e_ix)
             }
             if (n_u) {
-                ig <- ig %>%
-                    igraph::add_edges(c(unobs_e_ix, rev(unobs_e_ix))) %>%
-                    igraph::set_edge_attr("description",
-                                          index = (n_o + 1):(n_u + n_o),
-                                          value = "U")
+                ig <- ig + igraph::edges(c(unobs_e_ix, rev(unobs_e_ix)))
+                ig <- igraph::set_edge_attr(ig, "description",
+                                            index = (n_o + 1):(n_u + n_o),
+                                            value = "U")
             }
             ig <- igraph::set_vertex_attr(ig, "name", igraph::V(ig), lab_form[!lat])
             out <- ig
@@ -535,7 +533,7 @@ export_graph <- function(
         e_str <- collapse(paste0(e_di_str, collapse = "\n"),
                           "\n",
                           paste0(e_bi_str, collapse = "\n"))
-        out <- e_str
+        out <- trimws(e_str)
     }
     out
 }
