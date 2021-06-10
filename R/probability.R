@@ -25,6 +25,7 @@
 #' @param denominator An object of class `Probability`. The denominator
 #'     of the quotient representation.
 #'
+#' @seealso [cfid::CounterfactualVariable]
 #' @details
 #' When formatted via `print` or `format`, the  arguments are
 #' prioritized in the following order if conflicting definitions are given:

@@ -7,7 +7,8 @@
 #'     See details for more advanced constructs.
 #'
 #' @details
-#' The syntax for `x` follows closely that of [dagitty::dagitty()] for compatibility.
+#' The syntax for `x` follows the `dagitty` package closely for compatibility.
+#' However, not all features of `dagitty` graphs are supported.
 #' The resulting adjacency matrix of the definition is checked for cycles.
 #'
 #' Directed edges are defined as `X -> Y` meaning that there is an edge from
@@ -19,7 +20,7 @@
 #' the graph, and the edges `X <- U[X,Y] -> Y`, respectively.
 #'
 #' Groups of vertices can be defined by enclosing the vertices within
-#' curly braces. For example `X -> {Y Z}` defines that the dag has an edge
+#' curly braces. For example `X -> {Y Z}` defines that the graph has an edge
 #' from `X` to both `Y` and `Z`.
 #
 #' Different statements in `x` are automatically distinguished from one
@@ -32,7 +33,7 @@
 #' of counterfactual variables, where capital letter denote variables,
 #' and small letters denote their value assignments.
 #'
-#' @return An object of class `dag`, which is a square adjacency matrix
+#' @return An object of class `DAG`, which is a square adjacency matrix
 #'     with the following attributes:
 #' * `labels` A character vector (or a list) of vertex labels.
 #' * `latent` A logical vector indicating latent variables.
@@ -142,7 +143,7 @@ dag <- function(x) {
 #
 # Construct a parallel worlds graph from a DAG or an ADMG.
 #
-# @param g A `dag` object.
+# @param g A `DAG` object.
 # @param gamma An object of class \code{CounterfactualConjunction}.
 # @return A list representing the parallel worlds graph.
 pwg <- function(g, gamma) {
@@ -223,9 +224,9 @@ pwg <- function(g, gamma) {
 #
 # Construct a counterfactual graph.
 #
-# @param p A list representing a parallel worlds graph from `pwd()`.
+# @param p A list representing a parallel worlds graph from `pwg`.
 # @param gamma A `Counterfactualconjunction` object.
-# @return A `dag` object representing the causal graph.
+# @return A `DAG` object representing the causal graph.
 cg <- function(p, gamma) {
     A <- p$adjacency
     A_cg <- p$adjacency
@@ -390,9 +391,9 @@ cg <- function(p, gamma) {
 #' @param x A graph object in a valid external format, see details.
 #'
 #' @details
-#' Argument `x` accepts [dagitty::dagitty()] graphs, igraph-graphs
-#' in the [causaleffect::causaleffect()] package syntax and character strings
-#' in the [dosearch::dosearch()] package syntax.
+#' Argument `x` accepts `dagitty` graphs, `igraph` graphs
+#' in the `causaleffect` package syntax and character strings
+#' in the `dosearch` package syntax.
 #'
 #' @return A `DAG` object if successful.
 #' @export
@@ -447,16 +448,17 @@ import_graph <- function(x) {
 #' @param type A character string matching one of the following:
 #'     "dagitty", "causaleffect" or "dosearch".
 #' @param use_bidirected A logical value indicating if bidirected edges
-#'     should be used. If `TRUE`, the result will have explicit `X <-> Y` type
+#'     should be used in the resulting object.
+#'     If `TRUE`, the result will have explicit `X <-> Y` type
 #'     edges. If `FALSE`, an explicit latent variable `X <- U[X,Y] -> Y` will
-#'     be used instead (only applicable `type` is `"dosearch"`).
+#'     be used instead (only applicable if `type` is `"dosearch"`).
 #' @param ... Additional arguments passed to `format` for formatting
 #'     vertex labels.
 #' @return If `type` is `"dagitty"`, returns a `dagitty` object.
-#'     If `type` is `"causaleffect"`, return an `igraph` graph, with its edge
-#'     attributes set according to the causaleffect package syntax. If `type`
+#'     If `type` is `"causaleffect"`, returns an `igraph` graph, with its edge
+#'     attributes set according to the `causaleffect` package syntax. If `type`
 #'     is `"dosearch"`, returns a character vector of length one that describes
-#'     `g` in the dosearch package syntax.
+#'     `g` in the `dosearch` package syntax.
 #' @export
 export_graph <- function(
     g,

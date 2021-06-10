@@ -12,7 +12,7 @@ of edges in the form \code{X -> Y}, \code{X <- Y} or \verb{X <-> Y}.
 See details for more advanced constructs.}
 }
 \value{
-An object of class \code{dag}, which is a square adjacency matrix
+An object of class \code{DAG}, which is a square adjacency matrix
 with the following attributes:
 \itemize{
 \item \code{labels} A character vector (or a list) of vertex labels.
@@ -25,7 +25,8 @@ with the following attributes:
 Define a directed acyclic graph (DAG).
 }
 \details{
-The syntax for \code{x} follows closely that of \code{\link[dagitty:dagitty]{dagitty::dagitty()}} for compatibility.
+The syntax for \code{x} follows the \code{dagitty} package closely for compatibility.
+However, not all features of \code{dagitty} graphs are supported.
 The resulting adjacency matrix of the definition is checked for cycles.
 
 Directed edges are defined as \code{X -> Y} meaning that there is an edge from
@@ -37,7 +38,7 @@ Unobserved latent confounders are defined using bidirected edges as
 the graph, and the edges \code{X <- U[X,Y] -> Y}, respectively.
 
 Groups of vertices can be defined by enclosing the vertices within
-curly braces. For example \verb{X -> \{Y Z\}} defines that the dag has an edge
+curly braces. For example \verb{X -> \{Y Z\}} defines that the graph has an edge
 from \code{X} to both \code{Y} and \code{Z}.
 Different statements in \code{x} are automatically distinguished from one
 another without any additional delimiters, but semicolons, commas

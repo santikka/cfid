@@ -1,0 +1,16 @@
+cfid v0.1.3
+===========
+ * Inputs for 'identifiable' are checked more thorougly
+ * Added additional package tests
+ * Further refinement to documentation in general
+ * Added NEWS
+
+cfid v0.1.2
+===========
+ * Added package documentation 'cfid-package.Rd'
+ * Improved documentation of existing functions
+ * Added support for more graph export formats
+
+cfid v0.1.0
+===========
+ * Initial version

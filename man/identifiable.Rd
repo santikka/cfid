@@ -8,7 +8,7 @@ identifiable(g, gamma, delta = NULL)
 }
 \arguments{
 \item{g}{A \code{DAG} object describing the causal graph
-(or an object that can be coerced, see \code{\link[=import_graph]{import_graph()}}.}
+(to obtain a \code{DAG} from another format, see \link{import_graph}.}
 
 \item{gamma}{An object of class \code{CounterfactualConjunction}
 representing the counterfactual causal query.}
@@ -24,7 +24,7 @@ A list containing one or more of the following:
 inconsistent, the query will be identifiable, but with probability 0.
 \item \code{prob} An object of class \code{Probability} giving the formula of the query in
 LaTeX syntax via format or print, if identifiable.
-This expression is given in terms of \eqn{P*},
+This expression is given in terms of \eqn{P^*},
 the set of all interventional distributions over \code{g}. For tautological
 statements, the resulting probability is 1, and for inconsistent
 statements, the resulting probability is 0.
@@ -47,8 +47,10 @@ First, a parallel worlds graph is constructed based on the query. In a
 parallel worlds graph, for each \eqn{do}-action that appears in \eqn{gamma}
 (and \eqn{delta}) a copy of the original graph is created with the new
 observational variables attaining their post-interventional values
-but sharing the latent variables. From this graph, a counterfactual graph
-is derived, where each variable is unique, which might not be the case
+but sharing the latent variables.
+This graph is known as a parallel worlds graph.
+From the parallel worlds graph, a counterfactual graph
+is derived such that each variable is unique, which might not be the case
 in a parallel worlds graph.
 
 Finally, the ID* (or IDC*) algorithm is applied to determine identifiability
@@ -87,6 +89,6 @@ methods for the causal hierarchy. \emph{Journal of Machine Learning Research},
 \strong{9(64)}:1941--1979.
 }
 \seealso{
-\code{\link[=dag]{dag()}}, \code{\link[=CounterfactualVariable]{CounterfactualVariable()}},
-\code{\link[=CounterfactualConjunction]{CounterfactualConjunction()}}
+\link{dag}, \link{CounterfactualVariable},
+\link{CounterfactualConjunction}, \link{Probability}
 }

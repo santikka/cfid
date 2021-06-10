@@ -72,7 +72,10 @@ test_that("remove tautology", {
 test_that("auto convert singletons", {
     out1 <- identifiable(g1, v1)
     out2 <- identifiable(g1, conj(v1))
+    out3 <- identifiable(g1, v1, v2)
+    out4 <- identifiable(g1, v1, conj(v2))
     expect_identical(out1, out2)
+    expect_identical(out3, out4)
 })
 
 # Interface
@@ -83,4 +86,8 @@ test_that("valid input", {
     expect_error(identifiable(g1))
     expect_error(identifiable(g1, g1))
     expect_error(identifiable(g1, c1, g1))
+    expect_error(identifiable(g1, cf("Y")))
+    expect_error(identifiable(g1, conj(cf("Y"))))
+    expect_error(identifiable(g1, cf("Y", 0), cf("X")))
+    expect_error(identifiable(g1, cf("Y", 0), conj(cf("X"))))
 })

@@ -3,7 +3,7 @@
 # @param gamma A counterfactual conjunction.
 # @return A character vector of variable names.
 vars <- function(gamma) {
-    sapply(gamma, function(x) x$var)
+    sapply(gamma, "[[", "var")
 }
 
 # Determines the counterfactual variables present in a counterfactual conjunction.
@@ -28,13 +28,13 @@ vals <- function(gamma) {
     })
 }
 
-# Determines the variables that have been fixed by interventions in
-# a counterfactual conjunction
+# Determines which counterfactual variables within a
+# conjunction have a value assignment
 #
 # @param gamma A counterfactual conjunction.
 # @return A character vector of variable names.
-fixed <- function(gamma) {
-    sapply(gamma, function(x) length(x$obs) > 0)
+assigned <- function(gamma) {
+    sapply(gamma, function(x) length(x$obs))
 }
 
 # Determines the interventions present in a counterfactual conjunction.

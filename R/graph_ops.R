@@ -63,10 +63,9 @@ components <- function(A) {
 # @param g A `DAG` object
 # @return A list where each element gives the labels of vertices belonging to that component
 c_components <- function(g) {
-    fixed <- sapply(attr(g, "labels"), function(x) {
-        length(x$obs)
-    })
-    g <- subgraph(!fixed, g)
+    # In a counterfactual graph, the only assigned
+    # variables (labels) will be those fixed by interventions
+    g <- subgraph(!assigned(attr(g, "labels")), g)
     latent <- attr(g, "latent")
     if (any(latent)) {
         lat <- which(latent)

@@ -22,15 +22,19 @@ Defines a conjunction of counterfactual statements (variables).
 A counterfactual conjunction is a conjunction (or a set in some contexts)
 of counterfactual statements that are assumed to hold simultaneously.
 
-For example, "The value of \eqn{Y} was observed to
+For example, the statement "The value of \eqn{Y} was observed to
 be \eqn{y}, and the value of \eqn{Y} was observed to be \eqn{y'}
 under the intervention \eqn{do(X = x)}" consists of two variables:
 variable \eqn{Y} without intervention, and \eqn{Y} under the intervention
-\eqn{do(X = x)}. Conjunctions can also be constructed via the alias
-\code{conj} or iteratively from \code{CounterfactualVariable} objects (see examples).
+\eqn{do(X = x)} (which is \eqn{Y_x}). This conjunction can be succinctly
+written as \eqn{y \wedge y'_x}.
+
+Conjunctions can also be constructed
+via the alias \code{conj} or iteratively from \code{CounterfactualVariable}
+objects (see examples).
 }
 \examples{
-# The conjunction described in 'details'
+# The conjunction described under 'details'
 v1 <- cf("Y", 0)
 v2 <- cf("Y", 1, c("X" = 0))
 c1 <- conj(v1, v2)
@@ -50,5 +54,5 @@ v5 <- cf("Y", 1, c("X" = 0))
 c3 <- try(conj(v4, v5))
 }
 \seealso{
-\code{\link[=CounterfactualVariable]{CounterfactualVariable()}}
+\link{CounterfactualVariable}
 }

@@ -14,11 +14,11 @@ cf(var, obs = integer(0), int = integer(0))
 the variable (i.e., \eqn{Y}).}
 
 \item{obs}{An integer vector of length one or zero. If given, denotes
-the observed value of \code{var} (i.e., \eqn{Y = 0})}
+the observed value of \code{var} (i.e., \eqn{Y = y})}
 
 \item{int}{A named integer vector where the names correspond to the variables
-intervened on (i.e., \eqn{X}) and values to the value assignments
-(their levels).}
+intervened on (via \eqn{do(X = x)}) and values to the
+value assignments (their levels, e.g., \eqn{x}).}
 }
 \value{
 An object of class \code{CounterfactualVariable}.
@@ -35,9 +35,14 @@ intervention \eqn{do(X = x)} (\code{int}).
 Note that different values of \code{obs} for a two variables with the same \code{var}
 and the same \code{int} do not denote their actual values, but the levels
 (i.e., \code{obs = 0} is different from \code{obs = 1}, but the variables do not
-actually attain values 0 and 1). For more information about the
+actually attain values 0 and 1). In other words, if \code{var} is different for
+two counterfactual variables, but they have the same value \code{obs}, this
+does not mean that these variables have the same value. They will only
+actually have the same value if they share both \code{var} and \code{obs}.
+
+For more information about the
 \eqn{do}-operator, see Pearl (2009). The shortcut alias \code{cf} can also
-be used to construct counterfactual variables variables.
+be used to construct counterfactual variables.
 }
 \examples{
 # Y without an assigned value or any interventions
@@ -62,5 +67,5 @@ Pearl, J. (2009) \emph{Causality: Models, Reasoning, and Inference}. Cambridge
 University Press, 2nd edition.
 }
 \seealso{
-\code{\link[=CounterfactualConjunction]{CounterfactualConjunction()}}
+\link{CounterfactualConjunction}
 }

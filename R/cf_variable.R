@@ -5,10 +5,10 @@
 #' @param var A character vector of length one naming
 #'     the variable (i.e., \eqn{Y}).
 #' @param obs An integer vector of length one or zero. If given, denotes
-#'     the observed value of `var` (i.e., \eqn{Y = 0})
+#'     the observed value of `var` (i.e., \eqn{Y = y})
 #' @param int A named integer vector where the names correspond to the variables
-#'     intervened on (i.e., \eqn{X}) and values to the value assignments
-#'     (their levels).
+#'     intervened on (via \eqn{do(X = x)}) and values to the
+#'     value assignments (their levels, e.g., \eqn{x}).
 #'
 #' @details
 #' Assume that \eqn{Y} is a single variable and \eqn{X} is a vector
@@ -19,9 +19,14 @@
 #' Note that different values of `obs` for a two variables with the same `var`
 #' and the same `int` do not denote their actual values, but the levels
 #' (i.e., `obs = 0` is different from `obs = 1`, but the variables do not
-#' actually attain values 0 and 1). For more information about the
+#' actually attain values 0 and 1). In other words, if `var` is different for
+#' two counterfactual variables, but they have the same value `obs`, this
+#' does not mean that these variables have the same value. They will only
+#' actually have the same value if they share both `var` and `obs`.
+#'
+#' For more information about the
 #' \eqn{do}-operator, see Pearl (2009). The shortcut alias `cf` can also
-#' be used to construct counterfactual variables variables.
+#' be used to construct counterfactual variables.
 #'
 #' @references
 #' Pearl, J. (2009) *Causality: Models, Reasoning, and Inference*. Cambridge
@@ -29,7 +34,7 @@
 #'
 #' @return An object of class `CounterfactualVariable`.
 #'
-#' @seealso [cfid::CounterfactualConjunction()]
+#' @seealso [cfid::CounterfactualConjunction]
 #'
 #' @examples
 #' # Y without an assigned value or any interventions

@@ -58,3 +58,6 @@ prioritized in the following order if conflicting definitions are given:
 \code{val}, (\code{var}, \code{do}), (\code{sumset}, \code{summand}), \code{terms},
 (\code{numerator}, \code{denominator})
 }
+\seealso{
+\link{CounterfactualVariable}
+}

@@ -11,8 +11,8 @@ Identification of Counterfactual Queries in Causal Models
 This package provides tools necessary for identifying counterfactual
 queries in causal models. Causal graphs, counterfactual variables,
 and counterfactual conjunctions are defined via a simple interface.
-\subsection{Counterfactuals:}{
-
+}
+\section{Counterfactuals}{
 In simple terms, counterfactual are statements involving multiple
 conceptual 'worlds' where the observed state of the worlds is different.
 As an example, consider two variables, Y = "headache", and X = "aspirin".
@@ -22,13 +22,12 @@ This statement involves two worlds: the real or actual world, where
 aspirin was not taken, and a hypothetical world, where it was taken.
 In more formal terms, this statement involves a counterfactual variable
 \eqn{Y_x} that attains two different values in two different worlds, forming
-a counterfactual conjunction: \eqn{y_x} AND \eqn{y'_{x'}}, where \eqn{y} and
+a counterfactual conjunction: \eqn{y_x \wedge y'_{x'}}, where \eqn{y} and
 \eqn{y'} are two different values of \eqn{Y}, and \eqn{x} and \eqn{x'} are
 two different values of \eqn{X}.
 }
 
-\subsection{Identifiability}{
-
+\section{Identifiability}{
 Pearl's ladder of causation consists of the associational,
 interventional and counterfactual levels, with counterfactual being
 the highest level. The goal of identification is to find a transformation
@@ -36,11 +35,12 @@ from a higher level query into a lower level one.
 For the interventional case, this transformation is known as causal effect
 identifiability, where interventional distributions are expressed in terms
 of observational quantities. Tools for this type of identification are
-readily available, such as in causaleffect, dagitty, pcalg, and dosearch
+readily available,
+such as in \code{causaleffect}, \code{dagitty}, \code{pcalg}, and \code{dosearch}
 packages. Transformation from the highest counterfactual level, is more
 difficult, both conceptually and computationally, since to reach the
 observational level, we must first find a transformation of our
-counterfactual query into a interventional query, and then transfrom this
+counterfactual query into a interventional query, and then transform this
 yet again to observational. Also, there transformations may not always
 exist, for example in the presence of latent unobserved confounders, meaning
 that the queries are non-identifiable. This package deals with the first
@@ -48,12 +48,12 @@ transformation, i.e., expressing the counterfactual queries in terms of
 interventional queries (and observational, when possible).
 }
 
-\subsection{Algorithms}{
-
-Identification is carried out in terms of \eqn{P*} and \eqn{G}, where
-\eqn{P*} is the set of all observational and interventional distributions,
-and \eqn{G} is a directed acyclic graph (DAG) depicting the causal model
-in question (a causal graph for short). The goal is to transform a
+\section{Algorithms}{
+Identification is carried out in terms of \eqn{G} and \eqn{P^*} and where
+\eqn{G} is a directed acyclic graph (DAG) depicting the causal model
+in question (a causal graph for short), and
+\eqn{P^*} is the set of all interventional distributions
+in causal models inducing \eqn{G}.
 counterfactual probability into an expression which can be represented
 solely in terms of interventional distributions. Identification is carried
 out using the ID* and IDC* algorithms by Shpitser and Pearl (2008). These
@@ -62,17 +62,15 @@ correct, and in the case of a non-identifiable counterfactual, one can
 always construct a counterexample, witnessing non-identifiability.
 }
 
-\subsection{Graphs:}{
-
+\section{Graphs}{
 The causal graph associated with the causal model is given via a simple
-text-based interface, similar to \code{\link[dagitty:dagitty]{dagitty::dagitty()}}. Directed edges
+text-based interface, similar to \code{dagitty} package syntax. Directed edges
 are given as \code{X -> Y}, and bidirected edges as \verb{X <-> Y}, which is a
 shorthand notation for latent confounders. For more details on graph
-construction, see \code{\link[=dag]{dag()}}.
+construction, see \link{dag}.
 }
 
-\subsection{Counterfactual variables and conjunctions}{
-
+\section{Counterfactual variables and conjunctions}{
 Counterfactual variables are defined by their name, value and the conceptual
 world that they belong to. A world is defined by a unique set of actions
 (interventions) via the do-operator (Pearl, 2009). We can define the two
@@ -83,15 +81,15 @@ cf(var = "Y", obs = 1, int = c(X = 1))
 Here, \code{var} defines the name of the variable, \code{obs} gives level the variable
 is assigned to (not the actual value), and \code{int} defines the vector of
 interventions that define the counterfactual world. For more details,
-see \code{\link[=CounterfactualVariable]{CounterfactualVariable()}}. Counterfactual conjunctions on the
+see \link{CounterfactualVariable}. Counterfactual conjunctions on the
 other hand, are simply counterfactual statements (variables) that are
 observed at the same time. For more details, see
-\code{\link[=CounterfactualConjunction]{CounterfactualConjunction()}}.
+\link{CounterfactualConjunction}.
 
 For complete examples of identifiable counterfactual queries, see
-\code{\link[=identifiable]{identifiable()}}, which is the main function of the package.
+\link{identifiable}, which is the main function of the package.
 }
-}
+
 \references{
 Pearl, J. (1995) Causal diagrams for empirical research. \emph{Biometrika},
 \strong{82(4)}:669--688.

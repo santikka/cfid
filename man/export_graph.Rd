@@ -18,19 +18,20 @@ export_graph(
 "dagitty", "causaleffect" or "dosearch".}
 
 \item{use_bidirected}{A logical value indicating if bidirected edges
-should be used. If \code{TRUE}, the result will have explicit \verb{X <-> Y} type
+should be used in the resulting object.
+If \code{TRUE}, the result will have explicit \verb{X <-> Y} type
 edges. If \code{FALSE}, an explicit latent variable \code{X <- U[X,Y] -> Y} will
-be used instead (only applicable \code{type} is \code{"dosearch"}).}
+be used instead (only applicable if \code{type} is \code{"dosearch"}).}
 
 \item{...}{Additional arguments passed to \code{format} for formatting
 vertex labels.}
 }
 \value{
 If \code{type} is \code{"dagitty"}, returns a \code{dagitty} object.
-If \code{type} is \code{"causaleffect"}, return an \code{igraph} graph, with its edge
-attributes set according to the causaleffect package syntax. If \code{type}
+If \code{type} is \code{"causaleffect"}, returns an \code{igraph} graph, with its edge
+attributes set according to the \code{causaleffect} package syntax. If \code{type}
 is \code{"dosearch"}, returns a character vector of length one that describes
-\code{g} in the dosearch package syntax.
+\code{g} in the \code{dosearch} package syntax.
 }
 \description{
 Convert a valid graph object to a supported external format.

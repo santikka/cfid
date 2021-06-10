@@ -3,14 +3,14 @@
 #' Determine the identifiability of a (conditional) counterfactual conjunction.
 #'
 #' @param g A `DAG` object describing the causal graph
-#'     (or an object that can be coerced, see [cfid::import_graph()].
+#'     (to obtain a `DAG` from another format, see [cfid::import_graph].
 #' @param gamma An object of class `CounterfactualConjunction`
 #'     representing the counterfactual causal query.
 #' @param delta An object of class `CounterfactualConjunction`
 #'     representing the conditioning conjunction (optional).
 #'
-#' @seealso [cfid::dag()], [cfid::CounterfactualVariable()],
-#'     [cfid::CounterfactualConjunction()]
+#' @seealso [cfid::dag], [cfid::CounterfactualVariable],
+#'     [cfid::CounterfactualConjunction], [cfid::Probability]
 #'
 #' @details
 #' To identify a non-conditional conjunction \eqn{p(\gamma)}, the argument
@@ -23,8 +23,10 @@
 #' parallel worlds graph, for each \eqn{do}-action that appears in \eqn{gamma}
 #' (and \eqn{delta}) a copy of the original graph is created with the new
 #' observational variables attaining their post-interventional values
-#' but sharing the latent variables. From this graph, a counterfactual graph
-#' is derived, where each variable is unique, which might not be the case
+#' but sharing the latent variables.
+#' This graph is known as a parallel worlds graph.
+#' From the parallel worlds graph, a counterfactual graph
+#' is derived such that each variable is unique, which might not be the case
 #' in a parallel worlds graph.
 #'
 #' Finally, the ID* (or IDC*) algorithm is applied to determine identifiability
@@ -47,7 +49,7 @@
 #'     inconsistent, the query will be identifiable, but with probability 0.
 #' * `prob` An object of class `Probability` giving the formula of the query in
 #'     LaTeX syntax via format or print, if identifiable.
-#'     This expression is given in terms of \eqn{P*},
+#'     This expression is given in terms of \eqn{P^*},
 #'     the set of all interventional distributions over `g`. For tautological
 #'     statements, the resulting probability is 1, and for inconsistent
 #'     statements, the resulting probability is 0.
@@ -86,16 +88,32 @@ identifiable <- function(g, gamma, delta = NULL) {
         stop_("Argument `gamma` is missing")
     } else if (!is.CounterfactualConjunction(gamma)) {
         if (is.CounterfactualVariable(gamma)) {
+            if (!length(gamma$obs)) {
+                stop_("Argument `gamma` contains counterfactual variables without a value assignment")
+            }
             gamma <- CounterfactualConjunction(gamma)
         } else {
             stop_("Argument `gamma` must be an object of class `CounterfactualConjunction`")
         }
     }
+    if (any(!assigned(gamma))) {
+        stop_("Argument `gamma` contains counterfactual variables without a value assignment")
+    }
     if (is.null(delta)) {
         out <- id_star(g, gamma)
     } else {
         if (!is.CounterfactualConjunction(delta)) {
-            stop_("Argument `delta` must be an object of class `CounterfactualConjunction`")
+            if (is.CounterfactualVariable(delta)) {
+                if (!length(delta$obs)) {
+                    stop_("Argument `delta` contains counterfactual variables without a value assignment")
+                }
+                delta <- CounterfactualConjunction(delta)
+            } else {
+                stop_("Argument `delta` must be an object of class `CounterfactualConjunction`")
+            }
+        }
+        if (any(!assigned(delta))) {
+            stop_("Argument `delta` contains counterfactual variables without a value assignment")
         }
         out <- idc_star(g, gamma, delta)
     }

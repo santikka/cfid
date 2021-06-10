@@ -1,6 +1,6 @@
 # The ID* algorithm
 #
-# @param g An object of class `dag`.
+# @param g An object of class `DAG`.
 # @param gamma An object of class `CounterfactualConjunction`
 #' @importFrom stats setNames
 id_star <- function(g, gamma) {
@@ -26,7 +26,7 @@ id_star <- function(g, gamma) {
     }
     g_prime <- tmp$graph
     lab_prime <- attr(g_prime, "labels")
-    v_g <- unique(vars(lab_prime[!attr(g_prime, "latent") & !fixed(lab_prime)]))
+    v_g <- unique(vars(lab_prime[!attr(g_prime, "latent") & !assigned(lab_prime)]))
     gamma_prime <- tmp$conjunction
     gamma_vars <- vars(gamma)
     merged <- tmp$merged
@@ -131,7 +131,7 @@ id_star <- function(g, gamma) {
 
 # The IDC* algorithm
 #
-# @param g An object of class `dag`.
+# @param g An object of class `DAG`.
 # @param gamma An object of class `CounterfactualConjunction`
 # @param delta An object of class `CounterfactualConjunction`
 #' @importFrom stats setNames

@@ -1,7 +1,7 @@
 Package: cfid
 Type: Package
 Title: Identification of Counterfactual Queries in Causal Models
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: c(
     person(given = "Santtu",
            family = "Tikka",
