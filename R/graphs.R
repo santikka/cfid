@@ -183,13 +183,15 @@ pwg <- function(g, gamma) {
         to <- offset + n_obs
         ix <- from:to
         A_pw[ix,ix] <- g[ix_obs,ix_obs]
-        order_pw[n_unobs_pw + ix] <- offset + ord[-(1:n_unobs)]
         if (n_err) {
             ix_err_mat <- cbind(ix_err, setdiff(ix, offset + no_err))
             A_pw[ix_err_mat] <- 1L
         }
         if (n_unobs) {
             A_pw[ix_unobs,ix] <- g[-ix_obs,ix_obs]
+            order_pw[n_unobs_pw + ix] <- offset + ord[-(1:n_unobs)]
+        } else {
+            order_pw[n_unobs_pw + ix] <- offset + ord
         }
         intv_ix <- offset + intv_var[[w]]
         A_pw[,intv_ix] <- 0L
@@ -206,7 +208,7 @@ pwg <- function(g, gamma) {
         order_pw[1:n_err] <- ix_err
         latent_pw[ix_err] <- TRUE
     }
-    if (n_unobs_pw) {
+    if (n_unobs) {
         order_pw[(n_err + 1):(n_unobs_pw)] <- ix_unobs
         latent_pw[ix_unobs] <- TRUE
     }
