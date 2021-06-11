@@ -52,7 +52,8 @@
 #'     This expression is given in terms of \eqn{P^*},
 #'     the set of all interventional distributions over `g`. For tautological
 #'     statements, the resulting probability is 1, and for inconsistent
-#'     statements, the resulting probability is 0.
+#'     statements, the resulting probability is 0. For formatting options,
+#'     see [cfid::format.Probability].
 #' * `undefined` A logical value that is `TRUE` if
 #'     a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
 #'     for example when \eqn{p(\delta) = 0}, and `FALSE` otherwise.

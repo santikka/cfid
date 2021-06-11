@@ -3,6 +3,7 @@
 g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")
 g2 <- dag("X -> W -> Y <- Z <- D X <-> Y X -> Y")
 g3 <- dag("X -> Y <-> A <-> B <-> Z <- X")
+g4 <- dag("C -> A -> Y; C -> Y")
 
 v1 <- cf("Y", 0, c(X = 0))
 v2 <- cf("X", 1)
@@ -76,6 +77,10 @@ test_that("auto convert singletons", {
     out4 <- identifiable(g1, v1, conj(v2))
     expect_identical(out1, out2)
     expect_identical(out3, out4)
+})
+
+test_that("no bidirected allowed", {
+    expect_error(identifiable(g4, cf("Y", 0, c(A = 1)), cf("A", 0)), NA)
 })
 
 # Interface

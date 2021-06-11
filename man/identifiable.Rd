@@ -27,7 +27,8 @@ LaTeX syntax via format or print, if identifiable.
 This expression is given in terms of \eqn{P^*},
 the set of all interventional distributions over \code{g}. For tautological
 statements, the resulting probability is 1, and for inconsistent
-statements, the resulting probability is 0.
+statements, the resulting probability is 0. For formatting options,
+see \link{format.Probability}.
 \item \code{undefined} A logical value that is \code{TRUE} if
 a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
 for example when \eqn{p(\delta) = 0}, and \code{FALSE} otherwise.

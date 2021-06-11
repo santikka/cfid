@@ -26,13 +26,14 @@
 #'     of the quotient representation.
 #'
 #' @seealso [cfid::CounterfactualVariable]
-#' @details
+#' @details For formatting options, see [cfid::format.Probability].
 #' When formatted via `print` or `format`, the  arguments are
 #' prioritized in the following order if conflicting definitions are given:
 #' `val`, (`var`, `do`), (`sumset`, `summand`), `terms`,
 #' (`numerator`, `denominator`)
 #'
-#' @return An object of class `Probability`.
+#' @return An object of class `Probability`, which is a list containing
+#' all of the arguments of the constructor.
 #'
 #' @export
 Probability <- function(val = NULL, var = NULL, do = NULL,
@@ -89,6 +90,44 @@ is.Probability <- function(x) {
     inherits(x, "Probability")
 }
 
+#' Format a `Probability` object representing \eqn{p(y|do(x))}.
+#'
+#' @param x An object of class `Probability`.
+#' @param use_primes A logical value. If `TRUE` (the default), any value
+#'     assignment of a counterfactual variable with `obs` will be formatted with
+#'     as many primes in the superscript as the value of `obs`, e.g.,
+#'     `obs = 0` outputs `"y"`, `obs = 1` outputs `"y'"`,
+#'     `obs = 2` outputs `"y''"` and so forth. The alternative when `FALSE` is
+#'     to simply denote the `obs` value via superscript directly as
+#'     `"y^{(obs)}"`, where obs is evaluated.
+#' @param use_do A logical value. If `TRUE`, the explicit do-operation is used
+#'     to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+#'     If `FALSE` (the default), the subscript notation is used instead
+#'     (e.g., \eqn{p_x(y})).
+#'
+#' @return An character representation of the `Probability` object
+#' in LaTeX syntax.
+#'
+#' @examples
+#' g <- dag("C -> A -> Y; C -> Y")
+#' v1 <- cf("Y", 0, c(A = 1))
+#' v2 <- cf("A", 0)
+#' c1 <- conj(v1)
+#' c2 <- conj(v2)
+#' p <- identifiable(g2, c1, c2)$prob
+#'
+#' # Default, using primes and subscript notation
+#' format(p)
+#'
+#' # Without primes, no do-operator
+#' format(p, use_primes = FALSE)
+#'
+#' # Primes, with do-operator
+#' format(p, use_do = TRUE)
+#'
+#' # Without primes, with do-operator
+#' format(p, use_primes = FALSE, use_do = TRUE)
+#'
 #' @export
 format.Probability <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
     out <- ""

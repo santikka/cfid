@@ -47,12 +47,14 @@ of the quotient representation.}
 of the quotient representation.}
 }
 \value{
-An object of class \code{Probability}.
+An object of class \code{Probability}, which is a list containing
+all of the arguments of the constructor.
 }
 \description{
 Defines an interventional or observational probability \eqn{p(y|do(x))}.
 }
 \details{
+For formatting options, see \link{format.Probability}.
 When formatted via \code{print} or \code{format}, the  arguments are
 prioritized in the following order if conflicting definitions are given:
 \code{val}, (\code{var}, \code{do}), (\code{sumset}, \code{summand}), \code{terms},
