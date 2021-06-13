@@ -108,7 +108,12 @@ is.Probability <- function(x) {
 #' @return An character representation of the `Probability` object
 #' in LaTeX syntax.
 #'
+#' @references Makhlouf, K., Zhioua, S. and Palamidessi, C. (2021).
+#'     Survey on causal-based machine learning fairness notions.
+#'     *arXiv:2010.09553*
+#'
 #' @examples
+#' # Example from Makhlouf, Zhioua and Palamidessi (2021)
 #' g <- dag("C -> A -> Y; C -> Y")
 #' v1 <- cf("Y", 0, c(A = 1))
 #' v2 <- cf("A", 0)

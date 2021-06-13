@@ -42,14 +42,15 @@
 #' interventional queries (and observational, when possible).
 #'
 #' # Algorithms
-#' Identification is carried out in terms of \eqn{G} and \eqn{P^*} and where
+#' Identification is carried out in terms of \eqn{G} and \eqn{P_*} and where
 #' \eqn{G} is a directed acyclic graph (DAG) depicting the causal model
 #' in question (a causal graph for short), and
-#' \eqn{P^*} is the set of all interventional distributions
+#' \eqn{P_*} is the set of all interventional distributions
 #' in causal models inducing \eqn{G}.
 #' counterfactual probability into an expression which can be represented
 #' solely in terms of interventional distributions. Identification is carried
-#' out using the ID* and IDC* algorithms by Shpitser and Pearl (2008). These
+#' out using the ID*
+#' and IDC* algorithms by Shpitser and Pearl (2008). These
 #' algorithms are sound and complete, meaning that their output is always
 #' correct, and in the case of a non-identifiable counterfactual, one can
 #' always construct a counterexample, witnessing non-identifiability.
@@ -89,6 +90,10 @@
 #'
 #' Pearl, J. (2009) *Causality: Models, Reasoning, and Inference*. Cambridge
 #' University Press, 2nd edition.
+#'
+#' Shpitser, I. and Pearl, J. (2007). What counterfactuals can be tested.
+#' In *Proceedings of the 23rd Conference on Uncertainty*
+#' *in Artificial Intelligence*, 352--359.
 #'
 #' Shpitser, I. and Pearl, J. (2008). Complete identification
 #' methods for the causal hierarchy. *Journal of Machine Learning Research*,

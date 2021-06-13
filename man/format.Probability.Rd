@@ -30,6 +30,7 @@ in LaTeX syntax.
 Format a \code{Probability} object representing \eqn{p(y|do(x))}.
 }
 \examples{
+# Example from Makhlouf, Zhioua and Palamidessi (2021)
 g <- dag("C -> A -> Y; C -> Y")
 v1 <- cf("Y", 0, c(A = 1))
 v2 <- cf("A", 0)
@@ -49,4 +50,9 @@ format(p, use_do = TRUE)
 # Without primes, with do-operator
 format(p, use_primes = FALSE, use_do = TRUE)
 
+}
+\references{
+Makhlouf, K., Zhioua, S. and Palamidessi, C. (2021).
+Survey on causal-based machine learning fairness notions.
+\emph{arXiv:2010.09553}
 }

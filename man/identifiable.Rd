@@ -24,7 +24,7 @@ A list containing one or more of the following:
 inconsistent, the query will be identifiable, but with probability 0.
 \item \code{prob} An object of class \code{Probability} giving the formula of the query in
 LaTeX syntax via format or print, if identifiable.
-This expression is given in terms of \eqn{P^*},
+This expression is given in terms of \eqn{P_*},
 the set of all interventional distributions over \code{g}. For tautological
 statements, the resulting probability is 1, and for inconsistent
 statements, the resulting probability is 0. For formatting options,
@@ -81,9 +81,13 @@ identifiable(g1, c3)
 identifiable(g2, c3)
 }
 \references{
-Shpister, I. and Pearl, J. (2006). Identification of joint interventional
+Shpitser, I. and Pearl, J. (2006). Identification of joint interventional
 distributions in semi-Markovian causal models.
-In \emph{21st National Conference on Artificial Intelligence}
+In \emph{21st National Conference on Artificial Intelligence}.
+
+Shpitser, I. and Pearl, J. (2007). What counterfactuals can be tested.
+In \emph{Proceedings of the 23rd Conference on Uncertainty}
+\emph{in Artificial Intelligence}, 352--359.
 
 Shpitser, I. and Pearl, J. (2008). Complete identification
 methods for the causal hierarchy. \emph{Journal of Machine Learning Research},

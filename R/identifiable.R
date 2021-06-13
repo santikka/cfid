@@ -35,9 +35,13 @@
 #' the query into smaller subproblems, which are then solved recursively.
 #'
 #' @references
-#' Shpister, I. and Pearl, J. (2006). Identification of joint interventional
+#' Shpitser, I. and Pearl, J. (2006). Identification of joint interventional
 #' distributions in semi-Markovian causal models.
-#' In *21st National Conference on Artificial Intelligence*
+#' In *21st National Conference on Artificial Intelligence*.
+#'
+#' Shpitser, I. and Pearl, J. (2007). What counterfactuals can be tested.
+#' In *Proceedings of the 23rd Conference on Uncertainty*
+#' *in Artificial Intelligence*, 352--359.
 #'
 #' Shpitser, I. and Pearl, J. (2008). Complete identification
 #' methods for the causal hierarchy. *Journal of Machine Learning Research*,
@@ -49,7 +53,7 @@
 #'     inconsistent, the query will be identifiable, but with probability 0.
 #' * `prob` An object of class `Probability` giving the formula of the query in
 #'     LaTeX syntax via format or print, if identifiable.
-#'     This expression is given in terms of \eqn{P^*},
+#'     This expression is given in terms of \eqn{P_*},
 #'     the set of all interventional distributions over `g`. For tautological
 #'     statements, the resulting probability is 1, and for inconsistent
 #'     statements, the resulting probability is 0. For formatting options,
