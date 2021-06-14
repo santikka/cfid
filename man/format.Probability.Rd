@@ -21,6 +21,8 @@ to simply denote the \code{obs} value via superscript directly as
 to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
 If \code{FALSE} (the default), the subscript notation is used instead
 (e.g., \eqn{p_x(y})).}
+
+\item{...}{Additional arguments passed to \code{format}.}
 }
 \value{
 An character representation of the \code{Probability} object
@@ -31,7 +33,7 @@ Format a \code{Probability} object representing \eqn{p(y|do(x))}.
 }
 \examples{
 # Example from Makhlouf, Zhioua and Palamidessi (2021)
-g <- dag("C -> A -> Y; C -> Y")
+g2 <- dag("C -> A -> Y; C -> Y")
 v1 <- cf("Y", 0, c(A = 1))
 v2 <- cf("A", 0)
 c1 <- conj(v1)

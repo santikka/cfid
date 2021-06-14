@@ -104,6 +104,7 @@ is.Probability <- function(x) {
 #'     to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
 #'     If `FALSE` (the default), the subscript notation is used instead
 #'     (e.g., \eqn{p_x(y})).
+#' @param ... Additional arguments passed to `format`.
 #'
 #' @return An character representation of the `Probability` object
 #' in LaTeX syntax.
@@ -114,7 +115,7 @@ is.Probability <- function(x) {
 #'
 #' @examples
 #' # Example from Makhlouf, Zhioua and Palamidessi (2021)
-#' g <- dag("C -> A -> Y; C -> Y")
+#' g2 <- dag("C -> A -> Y; C -> Y")
 #' v1 <- cf("Y", 0, c(A = 1))
 #' v2 <- cf("A", 0)
 #' c1 <- conj(v1)
