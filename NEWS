@@ -3,11 +3,11 @@ cfid v0.1.3
  * Inputs for 'identifiable' are now checked more thorougly
  * Added additional package tests
  * Further refined documentation in general
- * Fixed an indexing issue when no bidirected edges were present
+ * Fixed an interal indexing issue when no bidirected edges were present in a DAG
  * Added documentation for 'format.Probability' with examples
  * Added citation to Shpitser and Pearl (2007). "What counterfactual can be tested"
+ * The package now correctly lists dependency on R >= 4.1.0
  * Added NEWS
-
 
 cfid v0.1.2
 ===========
