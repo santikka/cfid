@@ -34,7 +34,7 @@ test_that("identifiable conditional conjunction", {
 })
 
 test_that("non-identifiable conditional conjunction", {
-    out <- identifiable(g2, conj(v3), c1)
+    out <- identifiable(g2, conj(v1), conj(v2, v3, v4))
     expect_false(out$id)
 })
 
@@ -81,6 +81,30 @@ test_that("auto convert singletons", {
 
 test_that("no bidirected allowed", {
     expect_error(identifiable(g4, cf("Y", 0, c(A = 1)), cf("A", 0)), NA)
+})
+
+test_that("various counterfactuals", {
+    h <- dag("X -> Z -> Y X <-> Z")
+    w1 <- cf("Y", 1, c(Z = 0))
+    w2 <- cf("Z", 0, c(X = 0))
+    w3 <- cf("X", 0)
+    w1o <- cf("Y", 1)
+    w2o <- cf("Z", 0)
+    w3o <- cf("X", 1)
+    d1 <- conj(w1)
+    d2 <- conj(w1, w2, w3)
+    d2o <- conj(w1o, w2o, w3o)
+    expect_true(identifiable(h, d1)$id) # Identifiable
+    expect_true(identifiable(h, d2)$id) # Identifiable
+    expect_true(identifiable(h, d2, d2o)$prob$val == 0L) # Inconsistent
+    expect_true(identifiable(h, d2, d2o[-3] + cf("X", 0))$prob$val == 1L) # Trivial
+})
+
+test_that("length zero delta via recursion", {
+    h <- dag("X -> Y <- Z")
+    d1 <- conj(cf("Y", 0))
+    d2 <- conj(cf("X", 0), cf("Z", 0))
+    expect_error(identifiable(h, d1, d2), NA)
 })
 
 # Interface

@@ -1,5 +1,7 @@
 cfid v0.1.3
 ===========
+ * An identifiable conditional counterfactual of the form P(gamma)/P(gamma) will have value 1 instead of the formula
+ * Fixed an error when identifying conditional counterfactuals that had common counterfactual variables
  * Inputs for 'identifiable' are now checked more thorougly
  * Added additional package tests
  * Further refined documentation in general

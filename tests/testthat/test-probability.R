@@ -28,11 +28,11 @@ test_that("probability format", {
     expect_identical(format(id1$prob, use_primes = FALSE),
                      "\\sum_{w} p_{x}(w)p_{w,z}(y,x^{(1)})p_{d}(z)p(d)")
     expect_identical(format(id2$prob),
-                     "\\frac{\\sum_{w} p_{x}(w)p_{w,z}(y,x')}{p(x')}")
+                     "\\frac{\\sum_{w,z,d} p_{x}(w)p_{w,z}(y,x')p_{d}(z)p(d)}{p(x')}")
     expect_identical(format(id2$prob, use_do = TRUE),
-                     "\\frac{\\sum_{w} p(w|do(x))p(y,x'|do(w,z))}{p(x')}")
+                     "\\frac{\\sum_{w,z,d} p(w|do(x))p(y,x'|do(w,z))p(z|do(d))p(d)}{p(x')}")
     expect_identical(format(prob3),
-                     "\\sum_{w} p_{x}(w)p_{w,z}(y,x')")
+                     "\\sum_{w,z,d} p_{x}(w)p_{w,z}(y,x')p_{d}(z)p(d)")
     expect_identical(format(Probability(val = 1L)), as.character(1L))
 })
 

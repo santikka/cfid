@@ -136,39 +136,46 @@ id_star <- function(g, gamma) {
 # @param delta An object of class `CounterfactualConjunction`
 #' @importFrom stats setNames
 idc_star <- function(g, gamma, delta) {
-    delta_out <- id_star(g, delta)
-    if (!delta_out$id) {
-        return(delta_out)
+    if (!length(delta)) {
+        return(id_star(g, gamma))
     }
+    delta_out <- id_star(g, delta)
     if (length(delta_out$prob$val) && delta_out$prob$val == 0L) {
         return(list(id = FALSE, undefined = TRUE))
     }
-    n_gamma <- length(gamma)
-    n_delta <- length(delta)
-    tmp <- make_cg(g, gamma + delta)
+    gamma_delta <- try(gamma + delta, silent = TRUE)
+    if ("try-error" %in% class(gamma_delta)) {
+        # Inconsistent directly after merge
+        return(list(id = TRUE, prob = Probability(val = 0L)))
+    }
+    tmp <- make_cg(g, gamma_delta)
     if (!tmp$consistent) {
         return(list(id = TRUE, prob = Probability(val = 0L)))
     }
+    gamma_orig_ix <- which(gamma_delta %in% gamma)
+    delta_orig_ix <- which(gamma_delta %in% delta)
     g_prime <- tmp$graph
     lab <- attr(g, "labels")
     lab_prime <- attr(g_prime, "labels")
     gamma_ix <- which(lab %in% vars(gamma))
-    gamma_prime <- tmp$conjunction[1:n_gamma]
+    gamma_prime <- tmp$conjunction[gamma_orig_ix]
     gamma_prime_ix <- which(lab_prime %in% cfvars(gamma_prime))
-    delta_prime <- tmp$conjunction[(n_gamma + 1):(n_gamma + n_delta)]
+    delta_prime <- tmp$conjunction[delta_orig_ix]
     delta_vars <- vars(delta_prime)
     delta_cfvars <- cfvars(delta_prime)
+    #sub_delta <- subsets(length(delta_prime))
     for (i in seq_along(delta_vars)) {
-        d_ix <- which(lab %in% delta_vars[i])
         d_prime_ix <- which(lab_prime %in% delta_cfvars[i])
         g_temp <- g_prime
-        g_temp[d_ix,] <- 0L
-        if (dsep(g_temp, d_prime_ix, gamma_ix)) {
+        g_temp[d_prime_ix,] <- 0L
+        if (dsep(g_temp, d_prime_ix, gamma_prime_ix)) {
+            d_ix <- which(lab %in% delta_vars[i])
             de <- intersect(descendants(d_ix, g), gamma_ix)
-            d <- delta_prime[[i]]
+            new_intv <- stats::setNames(delta_prime[[i]]$obs, delta_prime[[i]]$var)
             for (j in seq_along(de)) {
-                gamma_prime[[j]]$int <- c(gamma_prime[[j]]$int,
-                                          stats::setNames(d$obs, d$var))
+                if (!new_intv %in% gamma_prime[[j]]$int) {
+                    gamma_prime[[j]]$int <- c(gamma_prime[[j]]$int, new_intv)
+                }
             }
             return(idc_star(g, gamma_prime, delta_prime[-i]))
         }
@@ -176,8 +183,13 @@ idc_star <- function(g, gamma, delta) {
     out <- id_star(g, gamma_prime + delta_prime)
     if (out$id) {
         if (!length(out$prob$val)) {
-            out$prob <- Probability(numerator = out$prob,
-                                    denominator = id_star(g, delta_prime)$prob)
+            num <- out$prob
+            den <- id_star(g, delta_prime)$prob
+            if (identical(num, den)) {
+                out$prob <- Probability(val = 1L)
+            } else {
+                out$prob <- Probability(numerator = num, denominator = den)
+            }
         }
     }
     out
