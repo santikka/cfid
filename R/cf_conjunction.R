@@ -2,7 +2,7 @@
 #'
 #' Defines a conjunction of counterfactual statements (variables).
 #'
-#' @param ... Objects of class `CounterfactualVariable`.
+#' @param ... `counterfactual_variable`.objects.
 #'
 #' @details
 #' A counterfactual conjunction is a conjunction (or a set in some contexts)
@@ -16,12 +16,12 @@
 #' written as \eqn{y \wedge y'_x}.
 #'
 #' Conjunctions can also be constructed
-#' via the alias `conj` or iteratively from `CounterfactualVariable`
+#' via the alias `conj` or iteratively from `counterfactual_variable`
 #' objects (see examples).
 #'
-#' @return An object of class `CounterfactualConjunction`.
+#' @return An object of class `counterfactual_conjunction`.
 #'
-#' @seealso [cfid::CounterfactualVariable]
+#' @seealso [cfid::counterfactual_variable]
 #'
 #' @examples
 #' # The conjunction described under 'details'
@@ -43,100 +43,102 @@
 #' v5 <- cf("Y", 1, c("X" = 0))
 #' c3 <- try(conj(v4, v5))
 #' @export
-CounterfactualConjunction <- function(...) {
-    dots <- list(...)
-    if (all(sapply(dots, is.CounterfactualVariable))) {
-        check_conflicts(dots)
-        structure(unique(dots), class = "CounterfactualConjunction")
+counterfactual_conjunction <- function(...) {
+  dots <- list(...)
+  if (all(sapply(dots, is.counterfactual_variable))) {
+    check_conflicts(dots)
+    structure(unique(dots), class = "counterfactual_conjunction")
+  } else {
+    stop_("All arguments must be `counterfactual_variable` objects.")
+  }
+}
+
+as.counterfactual_conjunction <- function(x) {
+  UseMethod("as.counterfactual_conjunction")
+}
+
+as.counterfactual_conjunction.list <- function(x) {
+  do.call(counterfactual_conjunction, x)
+}
+
+as.counterfactual_conjunction.default <- function(x) {
+  if (is.counterfactual_conjunction(x)) {
+    x
+  } else {
+    stop_("Cannot object to class `counterfactual_conjunction`", x)
+  }
+}
+
+is.counterfactual_conjunction <- function(x) {
+  inherits(x, "counterfactual_conjunction")
+}
+
+#' @export
+format.counterfactual_conjunction <- function(x, varsep = " \u2227 ", ...) {
+  cf <- sapply(x, function(y) format.counterfactual_variable(y, ...))
+  paste0(cf, collapse = varsep)
+}
+
+#' @export
+print.counterfactual_conjunction <- function(x, ...) {
+  cat(format(x, ...), "\n")
+}
+
+#' @export
+`+.counterfactual_conjunction` <- function(e1, e2) {
+  if (is.counterfactual_conjunction(e1)) {
+    if (is.counterfactual_conjunction(e2)) {
+      y <- c(e1, e2)
+      check_conflicts(y)
+      out <- structure(unique(y), class = "counterfactual_conjunction")
+    } else if (is.counterfactual_variable(e2)) {
+      x <- list(e2)
+      if (x %in% e1) {
+        y <- e1
+      } else {
+        check_conflicts(e2, e1)
+        y <- c(e1, x)
+      }
+      out <- structure(y, class = "counterfactual_conjunction")
     } else {
-        stop_("All arguments must be of class `CounterfactualVariable`")
+      stop_(
+        "Unable to add object of class `", class(e2), "` ",
+        "to a counterfactual conjunction"
+      )
     }
-}
-
-as.CounterfactualConjunction <- function(x) {
-    UseMethod("as.CounterfactualConjunction")
-}
-
-as.CounterfactualConjunction.list <- function(x) {
-    do.call(CounterfactualConjunction, x)
-}
-
-as.CounterfactualConjunction.default <- function(x) {
-    if (is.CounterfactualConjunction(x)) {
-        x
+  } else if (is.counterfactual_variable(e1)) {
+    if (is.counterfactual_conjunction(e2)) {
+      x <- list(e1)
+      if (x %in% e2) {
+        y <- e2
+      } else {
+        check_conflicts(e1, e2)
+        y <- c(x, e2)
+      }
+      out <- structure(y, class = "counterfactual_conjunction")
+    } else if (is.counterfactual_variable(e2)) {
+      out <- counterfactual_conjunction(e1, e2)
     } else {
-        stop_("Cannot object to class `CounterfactualConjunction`", x)
+      stop_(
+        "Unable to add object of class `", class(e2), "` ",
+        "to a counterfactual variable"
+      )
     }
-
-}
-
-is.CounterfactualConjunction <- function(x) {
-    inherits(x, "CounterfactualConjunction")
-}
-
-#' @export
-format.CounterfactualConjunction <- function(x, varsep = " \u2227 ", ...) {
-    cf <- sapply(x, function(y) format.CounterfactualVariable(y, ...))
-    paste0(cf, collapse = varsep)
+  } else {
+    stop_("Unsupported input for method `+.counterfactual_conjunction`")
+  }
+  out
 }
 
 #' @export
-print.CounterfactualConjunction <- function(x, ...) {
-    cat(format(x, ...), "\n")
+`[.counterfactual_conjunction` <- function(x, i) {
+  as.counterfactual_conjunction(NextMethod())
 }
 
 #' @export
-`+.CounterfactualConjunction` <- function(e1, e2) {
-    if (is.CounterfactualConjunction(e1)) {
-        if (is.CounterfactualConjunction(e2)) {
-            y <- c(e1, e2)
-            check_conflicts(y)
-            out <- structure(unique(y),
-                             class = "CounterfactualConjunction")
-        } else if (is.CounterfactualVariable(e2)) {
-            x <- list(e2)
-            if (x %in% e1) {
-                y <- e1
-            } else {
-                check_conflicts(e2, e1)
-                y <- c(e1, x)
-            }
-            out <- structure(y, class = "CounterfactualConjunction")
-        } else {
-            stop_("Unable to add object of class `", class(e2),
-                  "` to a counterfactual conjunction")
-        }
-    } else if (is.CounterfactualVariable(e1)) {
-        if (is.CounterfactualConjunction(e2)) {
-            x <- list(e1)
-            if (x %in% e2) {
-                y <- e2
-            } else {
-                check_conflicts(e1, e2)
-                y <- c(x, e2)
-            }
-            out <- structure(y, class = "CounterfactualConjunction")
-        } else if (is.CounterfactualVariable(e2)) {
-            out <- CounterfactualConjunction(e1, e2)
-        } else {
-            stop_("Unable to add object of class `", class(e2),
-                  "` to a counterfactual variable")
-        }
-    } else {
-        stop_("Unsupported input for method `+.CounterfactualConjunction`")
-    }
-    out
-}
+`+.counterfactual_variable` <- `+.counterfactual_conjunction`
 
+
+#' @rdname counterfactual_conjunction
 #' @export
-`[.CounterfactualConjunction` <- function(x, i) {
-    as.CounterfactualConjunction(NextMethod())
-}
-
-#' @export
-`+.CounterfactualVariable` <- `+.CounterfactualConjunction`
-
-
-#' @rdname CounterfactualConjunction
-#' @export
-conj <- CounterfactualConjunction
+conj <- counterfactual_conjunction

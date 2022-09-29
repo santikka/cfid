@@ -8,6 +8,7 @@
 #' and counterfactual conjunctions are defined via a simple interface.
 #'
 #' # Counterfactuals
+#'
 #' In simple terms, counterfactual are statements involving multiple
 #' conceptual 'worlds' where the observed state of the worlds is different.
 #' As an example, consider two variables, Y = "headache", and X = "aspirin".
@@ -22,6 +23,7 @@
 #' two different values of \eqn{X}.
 #'
 #' # Identifiability
+#'
 #' Pearl's ladder of causation consists of the associational,
 #' interventional and counterfactual levels, with counterfactual being
 #' the highest level. The goal of identification is to find a transformation
@@ -42,6 +44,7 @@
 #' interventional queries (and observational, when possible).
 #'
 #' # Algorithms
+#'
 #' Identification is carried out in terms of \eqn{G} and \eqn{P_*} and where
 #' \eqn{G} is a directed acyclic graph (DAG) depicting the causal model
 #' in question (a causal graph for short), and
@@ -56,6 +59,7 @@
 #' always construct a counterexample, witnessing non-identifiability.
 #'
 #' # Graphs
+#'
 #' The causal graph associated with the causal model is given via a simple
 #' text-based interface, similar to `dagitty` package syntax. Directed edges
 #' are given as `X -> Y`, and bidirected edges as `X <-> Y`, which is a
@@ -74,10 +78,10 @@
 #' Here, `var` defines the name of the variable, `obs` gives level the variable
 #' is assigned to (not the actual value), and `int` defines the vector of
 #' interventions that define the counterfactual world. For more details,
-#' see [cfid::CounterfactualVariable]. Counterfactual conjunctions on the
+#' see [cfid::counterfactual_variable]. Counterfactual conjunctions on the
 #' other hand, are simply counterfactual statements (variables) that are
 #' observed at the same time. For more details, see
-#' [cfid::CounterfactualConjunction].
+#' [cfid::counterfactual_conjunction].
 #'
 #' For complete examples of identifiable counterfactual queries, see
 #' [cfid::identifiable], which is the main function of the package.

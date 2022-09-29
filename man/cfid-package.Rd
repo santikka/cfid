@@ -75,17 +75,19 @@ construction, see \link{dag}.
 Counterfactual variables are defined by their name, value and the conceptual
 world that they belong to. A world is defined by a unique set of actions
 (interventions) via the do-operator (Pearl, 2009). We can define the two
-counterfactual variables of the headache/aspirin example as follows:\preformatted{cf(var = "Y", obs = 0, int = c(X = 0))
+counterfactual variables of the headache/aspirin example as follows:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{cf(var = "Y", obs = 0, int = c(X = 0))
 cf(var = "Y", obs = 1, int = c(X = 1))
-}
+}\if{html}{\out{</div>}}
 
 Here, \code{var} defines the name of the variable, \code{obs} gives level the variable
 is assigned to (not the actual value), and \code{int} defines the vector of
 interventions that define the counterfactual world. For more details,
-see \link{CounterfactualVariable}. Counterfactual conjunctions on the
+see \link{counterfactual_variable}. Counterfactual conjunctions on the
 other hand, are simply counterfactual statements (variables) that are
 observed at the same time. For more details, see
-\link{CounterfactualConjunction}.
+\link{counterfactual_conjunction}.
 
 For complete examples of identifiable counterfactual queries, see
 \link{identifiable}, which is the main function of the package.

@@ -4,13 +4,13 @@
 #'
 #' @param g A `DAG` object describing the causal graph
 #'     (to obtain a `DAG` from another format, see [cfid::import_graph].
-#' @param gamma An object of class `CounterfactualConjunction`
+#' @param gamma A `counterfactual_conjunction` object
 #'     representing the counterfactual causal query.
-#' @param delta An object of class `CounterfactualConjunction`
+#' @param delta A `counterfactual_conjunction` object
 #'     representing the conditioning conjunction (optional).
 #'
-#' @seealso [cfid::dag], [cfid::CounterfactualVariable],
-#'     [cfid::CounterfactualConjunction], [cfid::Probability]
+#' @seealso [cfid::dag], [cfid::counterfactual_variable],
+#'     [cfid::counterfactual_conjunction], [cfid::probability]
 #'
 #' @details
 #' To identify a non-conditional conjunction \eqn{p(\gamma)}, the argument
@@ -48,16 +48,17 @@
 #' **9(64)**:1941--1979.
 #'
 #' @return A list containing one or more of the following:
+#'
 #' * `id` A logical value that is `TRUE` if the query is identifiable and
 #'     `FALSE` otherwise. Note that in cases where `gamma` is itself
 #'     inconsistent, the query will be identifiable, but with probability 0.
-#' * `prob` An object of class `Probability` giving the formula of the query in
+#' * `prob` An object of class `probability` giving the formula of the query in
 #'     LaTeX syntax via format or print, if identifiable.
 #'     This expression is given in terms of \eqn{P_*},
 #'     the set of all interventional distributions over `g`. For tautological
 #'     statements, the resulting probability is 1, and for inconsistent
 #'     statements, the resulting probability is 0. For formatting options,
-#'     see [cfid::format.Probability].
+#'     see [cfid::format.probability].
 #' * `undefined` A logical value that is `TRUE` if
 #'     a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
 #'     for example when \eqn{p(\delta) = 0}, and `FALSE` otherwise.
@@ -84,46 +85,58 @@
 #' identifiable(g2, c3)
 #' @export
 identifiable <- function(g, gamma, delta = NULL) {
-    if (missing(g)) {
-        stop_("Argument `g` is missing")
-    } else if (!is_dag(g)) {
-        stop_("Argument `g` must be an object of class `DAG`")
-    }
-    if (missing(gamma)) {
-        stop_("Argument `gamma` is missing")
-    } else if (!is.CounterfactualConjunction(gamma)) {
-        if (is.CounterfactualVariable(gamma)) {
-            if (!length(gamma$obs)) {
-                stop_("Argument `gamma` contains counterfactual variables without a value assignment")
-            }
-            gamma <- CounterfactualConjunction(gamma)
-        } else {
-            stop_("Argument `gamma` must be an object of class `CounterfactualConjunction`")
-        }
-    }
-    if (any(!assigned(gamma))) {
-        stop_("Argument `gamma` contains counterfactual variables without a value assignment")
-    }
-    if (is.null(delta)) {
-        out <- id_star(g, gamma)
+  if (missing(g)) {
+    stop_("Argument `g` is missing.")
+  } else if (!is_dag(g)) {
+    stop_("Argument `g` must be a `dag` object.")
+  }
+  if (missing(gamma)) {
+    stop_("Argument `gamma` is missing.")
+  } else if (!is.counterfactual_conjunction(gamma)) {
+    if (is.counterfactual_variable(gamma)) {
+      if (length(gamma$obs) == 0L) {
+        stop_(
+          "Argument `gamma` contains counterfactual variables ",
+          "without a value assignment"
+        )
+      }
+      gamma <- counterfactual_conjunction(gamma)
     } else {
-        if (!is.CounterfactualConjunction(delta)) {
-            if (is.CounterfactualVariable(delta)) {
-                if (!length(delta$obs)) {
-                    stop_("Argument `delta` contains counterfactual variables without a value assignment")
-                }
-                delta <- CounterfactualConjunction(delta)
-            } else {
-                stop_("Argument `delta` must be an object of class `CounterfactualConjunction`")
-            }
-        }
-        if (any(!assigned(delta))) {
-            stop_("Argument `delta` contains counterfactual variables without a value assignment")
-        }
-        out <- idc_star(g, gamma, delta)
+      stop_("Argument `gamma` must be a `counterfactual_conjunction` object.")
     }
-    if (is.null(out$undefined)) {
-        out$undefined <- FALSE
+  }
+  if (any(!assigned(gamma))) {
+    stop_(
+      "Argument `gamma` contains counterfactual variables ",
+      "without a value assignment."
+    )
+  }
+  if (is.null(delta)) {
+    out <- id_star(g, gamma)
+  } else {
+    if (!is.counterfactual_conjunction(delta)) {
+      if (is.counterfactual_variable(delta)) {
+        if (length(delta$obs) == 0L) {
+          stop_(
+            "Argument `delta` contains counterfactual variables ",
+            "without a value assignment."
+          )
+        }
+        delta <- counterfactual_conjunction(delta)
+      } else {
+        stop_("Argument `delta` must be a `counterfactual_conjunction` object.")
+      }
     }
-    out
+    if (any(!assigned(delta))) {
+      stop_(
+        "Argument `delta` contains counterfactual variables ",
+        "without a value assignment"
+      )
+    }
+    out <- idc_star(g, gamma, delta)
+  }
+  if (is.null(out$undefined)) {
+    out$undefined <- FALSE
+  }
+  out
 }

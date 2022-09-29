@@ -10,10 +10,10 @@ identifiable(g, gamma, delta = NULL)
 \item{g}{A \code{DAG} object describing the causal graph
 (to obtain a \code{DAG} from another format, see \link{import_graph}.}
 
-\item{gamma}{An object of class \code{CounterfactualConjunction}
+\item{gamma}{A \code{counterfactual_conjunction} object
 representing the counterfactual causal query.}
 
-\item{delta}{An object of class \code{CounterfactualConjunction}
+\item{delta}{A \code{counterfactual_conjunction} object
 representing the conditioning conjunction (optional).}
 }
 \value{
@@ -22,13 +22,13 @@ A list containing one or more of the following:
 \item \code{id} A logical value that is \code{TRUE} if the query is identifiable and
 \code{FALSE} otherwise. Note that in cases where \code{gamma} is itself
 inconsistent, the query will be identifiable, but with probability 0.
-\item \code{prob} An object of class \code{Probability} giving the formula of the query in
+\item \code{prob} An object of class \code{probability} giving the formula of the query in
 LaTeX syntax via format or print, if identifiable.
 This expression is given in terms of \eqn{P_*},
 the set of all interventional distributions over \code{g}. For tautological
 statements, the resulting probability is 1, and for inconsistent
 statements, the resulting probability is 0. For formatting options,
-see \link{format.Probability}.
+see \link{format.probability}.
 \item \code{undefined} A logical value that is \code{TRUE} if
 a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
 for example when \eqn{p(\delta) = 0}, and \code{FALSE} otherwise.
@@ -94,6 +94,6 @@ methods for the causal hierarchy. \emph{Journal of Machine Learning Research},
 \strong{9(64)}:1941--1979.
 }
 \seealso{
-\link{dag}, \link{CounterfactualVariable},
-\link{CounterfactualConjunction}, \link{Probability}
+\link{dag}, \link{counterfactual_variable},
+\link{counterfactual_conjunction}, \link{probability}
 }

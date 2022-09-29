@@ -12,14 +12,14 @@ export_graph(
 )
 }
 \arguments{
-\item{g}{An object of class \code{DAG}.}
+\item{g}{An object of class \code{dag}.}
 
 \item{type}{A character string matching one of the following:
-"dagitty", "causaleffect" or "dosearch".}
+\code{"dagitty"}, \code{"causaleffect"} or \code{"dosearch"}.}
 
 \item{use_bidirected}{A logical value indicating if bidirected edges
 should be used in the resulting object.
-If \code{TRUE}, the result will have explicit \verb{X <-> Y} type
+If \code{TRUE}, the result will have explicit \verb{X <-> Y}
 edges. If \code{FALSE}, an explicit latent variable \code{X <- U[X,Y] -> Y} will
 be used instead (only applicable if \code{type} is \code{"dosearch"}).}
 

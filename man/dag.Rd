@@ -12,12 +12,12 @@ of edges in the form \code{X -> Y}, \code{X <- Y} or \verb{X <-> Y}.
 See details for more advanced constructs.}
 }
 \value{
-An object of class \code{DAG}, which is a square adjacency matrix
+An object of class \code{dag}, which is a square adjacency matrix
 with the following attributes:
 \itemize{
-\item \code{labels} A character vector (or a list) of vertex labels.
-\item \code{latent} A logical vector indicating latent variables.
-\item \code{order} An integer vector giving a topological order for the vertices.
+\item \code{labels} A \code{character} vector (or a list) of vertex labels.
+\item \code{latent} A \code{logical} vector indicating latent variables.
+\item \code{order} An \code{integer} vector giving a topological order for the vertices.
 .
 }
 }
