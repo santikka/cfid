@@ -46,7 +46,7 @@ c1 <- v1 + v2
 v3 <- cf("X", 1)
 c2 <- c1 + v3
 
-# A specific variable (a unique combination of `var` and `int`)
+# A specific variable (a unique combination of `var` and `sub`)
 # can only appear once in a given conjunction,
 # otherwise the conjunction would be trivially inconsistent
 v4 <- cf("Y", 0, c("X" = 0))

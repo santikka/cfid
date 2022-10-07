@@ -6,7 +6,7 @@
 #'     the variable (i.e., \eqn{Y}).
 #' @param obs An integer vector of length one or zero. If given, denotes
 #'     the observed value of `var` (i.e., \eqn{Y = y})
-#' @param int A named integer vector where the names correspond to the variables
+#' @param sub A named integer vector where the names correspond to the variables
 #'     intervened on (via \eqn{do(X = x)}) and values to the
 #'     value assignments (their levels, e.g., \eqn{x}).
 #'
@@ -14,10 +14,10 @@
 #' Assume that \eqn{Y} is a single variable and \eqn{X} is a vector
 #' of variables. Here, The notation \eqn{y_x} means that the variable
 #' \eqn{Y} (`var`) attains the value \eqn{y} (`obs`) under the
-#' intervention \eqn{do(X = x)} (`int`).
+#' intervention \eqn{do(X = x)} (`sub`).
 #'
 #' Note that different values of `obs` for a two variables with the same `var`
-#' and the same `int` do not denote their actual values, but the levels
+#' and the same `sub` do not denote their actual values, but the levels
 #' (i.e., `obs = 0` is different from `obs = 1`, but the variables do not
 #' actually attain values 0 and 1). In other words, if `var` is different for
 #' two counterfactual variables, but they have the same value `obs`, this
@@ -54,21 +54,21 @@
 #' # than the previous (x != x') and Z is also assigned the value z
 #' cf("Y", 2, c("X" = 1, "Z" = 0))
 #' @export
-counterfactual_variable <- function(var, obs = integer(0), int = integer(0)) {
+counterfactual_variable <- function(var, obs = integer(0L), sub = integer(0L)) {
   var <- toupper(try_type(var = var, type = "character")[1])
   if (length(obs) > 0L) {
     obs <- try_type(obs = obs, type = "integer")[1]
   }
   names(var) <- names(obs) <- NULL
-  if (length(int) > 0L) {
-    if (is.null(names(int))) {
-      stop_("Argument `int` must be named")
+  if (length(sub) > 0L) {
+    if (is.null(names(sub))) {
+      stop_("Argument `sub` must be named")
     }
-    int <- try_type(int = int, type = "integer")
-    names(int) <- toupper(names(int))
+    sub <- try_type(sub = sub, type = "integer")
+    names(sub) <- toupper(names(sub))
   }
   structure(
-    list(var = var, obs = obs, int = int),
+    list(var = var, obs = obs, sub = sub),
     class = "counterfactual_variable"
   )
 }
@@ -80,8 +80,8 @@ is.counterfactual_variable <- function(x) {
 #' @export
 format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
   super_var <- character(0L)
-  super_int <- character(0L)
-  form <- list(var = x$var, int = character(0L))
+  super_sub <- character(0L)
+  form <- list(var = x$var, sub = character(0L))
   out <- ""
   if (length(x$obs)) {
     if (x$obs > 0L) {
@@ -95,18 +95,18 @@ format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
   } else {
     form$var <- x$var
   }
-  if (length(x$int)) {
+  if (length(x$sub)) {
     if (use_primes) {
-      super_int <- sapply(x$int, function(y) rep_char("'", y))
+      super_sub <- sapply(x$sub, function(y) rep_char("'", y))
     } else {
-      super_int <- sapply(x$int, function(y) paste0("^{(", y, ")}"))
-      super_int[x$int == 0L] <- ""
+      super_sub <- sapply(x$sub, function(y) paste0("^{(", y, ")}"))
+      super_sub[x$sub == 0L] <- ""
     }
-    form$int <- paste0(
-      paste0(tolower(names(x$int)), super_int),
+    form$sub <- paste0(
+      paste0(tolower(names(x$sub)), super_sub),
       collapse = ","
     )
-    out <- collapse(form$var, "_{", form$int, "}")
+    out <- collapse(form$var, "_{", form$sub, "}")
   } else {
     out <- form$var
   }
@@ -124,10 +124,10 @@ cf <- counterfactual_variable
 
 # Check if x is a tautological statement
 is_tautology <- function(x) {
-  if (length(x$int) > 0L) {
-    if (x$var %in% names(x$int)) {
-      y <- which(names(x$int) %in% x$var)
-      if (x$obs == x$int[y]) {
+  if (length(x$sub) > 0L) {
+    if (x$var %in% names(x$sub)) {
+      y <- which(names(x$sub) %in% x$var)
+      if (x$obs == x$sub[y]) {
         return(TRUE)
       }
     }
@@ -137,10 +137,10 @@ is_tautology <- function(x) {
 
 # Check if x is an inconsistent statement
 is_inconsistent <- function(x) {
-  if (length(x$int) > 0L) {
-    if (x$var %in% names(x$int)) {
-      y <- which(names(x$int) %in% x$var)
-      if (x$obs != x$int[y]) {
+  if (length(x$sub) > 0L) {
+    if (x$var %in% names(x$sub)) {
+      y <- which(names(x$sub) %in% x$var)
+      if (x$obs != x$sub[y]) {
         return(TRUE)
       }
     }

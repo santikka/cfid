@@ -17,7 +17,11 @@ cfvars <- function(gamma) {
 }
 
 cfvar <- function(x) {
-  cf(x$var, int = x$int)
+  cf(x$var, sub = x$sub)
+}
+
+cflist <- function(x) {
+  lapply(x, cf)
 }
 
 #' Determines the values present in a counterfactual conjunction.
@@ -46,8 +50,8 @@ assigned <- function(gamma) {
 #' @param gamma A `counterfactual_conjunction` object.
 #' @return The `integer` vectors of interventions as a list.
 #' @noRd
-ints <- function(gamma) {
-  lapply(gamma, "[[", "int")
+subs <- function(gamma) {
+  lapply(gamma, "[[", "sub")
 }
 
 #' Determines the intervened and observed values in a counterfactual conjunction
@@ -59,11 +63,11 @@ ints <- function(gamma) {
 evs <- function(gamma) {
   lapply(gamma, function(x) {
     if (length(x$obs) > 0L) {
-      y <- c(x$obs, x$int)
+      y <- c(x$obs, x$sub)
       names(y)[1L] <- x$var
       y
     } else {
-      x$int
+      x$sub
     }
   })
 }
@@ -117,7 +121,7 @@ trivial_conflict <- function(y, gamma) {
 #' @noRd
 val <- function(x, gamma) {
   for (y in gamma) {
-    if (identical(x$var, y$var) && identical(x$int, y$int)) {
+    if (identical(x$var, y$var) && identical(x$sub, y$sub)) {
       return(y$obs)
     }
   }

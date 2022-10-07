@@ -3,7 +3,7 @@
 \docType{package}
 \name{cfid-package}
 \alias{cfid-package}
-\title{The 'cfid' package}
+\title{The \code{cfid} package}
 \description{
 Identification of Counterfactual Queries in Causal Models
 }
@@ -77,12 +77,12 @@ world that they belong to. A world is defined by a unique set of actions
 (interventions) via the do-operator (Pearl, 2009). We can define the two
 counterfactual variables of the headache/aspirin example as follows:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{cf(var = "Y", obs = 0, int = c(X = 0))
-cf(var = "Y", obs = 1, int = c(X = 1))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{cf(var = "Y", obs = 0, sub = c(X = 0))
+cf(var = "Y", obs = 1, sub = c(X = 1))
 }\if{html}{\out{</div>}}
 
 Here, \code{var} defines the name of the variable, \code{obs} gives level the variable
-is assigned to (not the actual value), and \code{int} defines the vector of
+is assigned to (not the actual value), and \code{sub} defines the vector of
 interventions that define the counterfactual world. For more details,
 see \link{counterfactual_variable}. Counterfactual conjunctions on the
 other hand, are simply counterfactual statements (variables) that are
@@ -107,4 +107,8 @@ In \emph{Proceedings of the 23rd Conference on Uncertainty}
 Shpitser, I. and Pearl, J. (2008). Complete identification
 methods for the causal hierarchy. \emph{Journal of Machine Learning Research},
 \strong{9(64)}:1941--1979.
+
+Makhlouf, K., Zhioua, S. and Palamidessi, C. (2021).
+Survey on causal-based machine learning fairness notions.
+\emph{arXiv:2010.09553}
 }

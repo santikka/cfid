@@ -22,7 +22,7 @@ try_type <- function(..., type) {
   dots <- list(...)
   arg_name <- names(dots)[1L]
   out <- try(do.call(paste0("as.", type), list(dots[[1L]])), silent = TRUE)
-  if ("try-error" %in% class(out)) {
+  if (inherits(out, "try-error")) {
     stop_("Unable to coerce argument `", arg_name, "` to `", type, "`.")
   }
   names(out) <- names(dots[[1L]])
@@ -30,20 +30,21 @@ try_type <- function(..., type) {
 }
 
 val_consistent <- function(x, y) {
-  if (is.null(x)) {
-    return(TRUE)
+  if (is.null(x) || is.null(y) || identical(x, y)) {
+    TRUE
+  } else {
+    FALSE
   }
-  if (is.null(y)) {
-    return(TRUE)
-  }
-  if (identical(x, y)) {
-    return(TRUE)
-  }
-  return(FALSE)
 }
 
 stop_ <- function(...) {
   stop(..., call. = FALSE)
+}
+
+stopifnot_ <- function(cond, message) {
+  if (!cond) {
+    stop_(message)
+  }
 }
 
 check_conflicts <- function(x, y) {

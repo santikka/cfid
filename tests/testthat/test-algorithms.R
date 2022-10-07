@@ -45,7 +45,7 @@ test_that("undefined conditional conjunction", {
 
 test_that("joint gamma/delta inconsistent", {
   out <- identifiable(g1, conj(v1, v2, v3), conj(v4, v5, v6))
-  expect_equal(out$prob$val, 0L)
+  expect_equal(out$formula$terms[[1L]]$val, 0L)
 })
 
 test_that("incompatible interventions", {
@@ -56,13 +56,13 @@ test_that("incompatible interventions", {
 test_that("tautology", {
   out <- identifiable(g1, conj(v8))
   expect_true(out$id)
-  expect_equal(out$prob$val, 1L)
+  expect_equal(out$formula$terms[[1L]]$val, 1L)
 })
 
 test_that("inconsistent", {
   out <- identifiable(g1, conj(v7))
   expect_true(out$id)
-  expect_equal(out$prob$val, 0L)
+  expect_equal(out$formula$terms[[1L]]$val, 0L)
 })
 
 test_that("remove tautology", {
@@ -96,8 +96,10 @@ test_that("various counterfactuals", {
   d2o <- conj(w1o, w2o, w3o)
   expect_true(identifiable(h, d1)$id) # Identifiable
   expect_true(identifiable(h, d2)$id) # Identifiable
-  expect_true(identifiable(h, d2, d2o)$prob$val == 0L) # Inconsistent
-  expect_true(identifiable(h, d2, d2o[-3] + cf("X", 0))$prob$val == 1L) # Trivial
+  expect_true(identifiable(h, d2, d2o)$formula$terms[[1]]$val == 0L) # Inconsistent
+  expect_true(
+    identifiable(h, d2, d2o[-3L] + cf("X", 0))$formula$terms[[1]]$val == 1L
+  ) # Trivial
 })
 
 test_that("length zero delta via recursion", {

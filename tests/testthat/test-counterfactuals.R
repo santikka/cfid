@@ -9,8 +9,8 @@ test_that("variable format", {
   expect_identical(format(cf("Y", 0)), "y")
   expect_identical(format(cf("Y", 0, c("X" = 0))), "y_{x}")
   expect_identical(format(cf("Y", 1, c("X" = 0))), "y'_{x}")
-  expect_identical(format(cf("Y", int = c("X" = 0))), "Y_{x}")
-  expect_identical(format(cf("Y", int = c("X" = 1))), "Y_{x'}")
+  expect_identical(format(cf("Y", sub = c("X" = 0))), "Y_{x}")
+  expect_identical(format(cf("Y", sub = c("X" = 1))), "Y_{x'}")
   expect_identical(
     format(cf("Y", 1, c("X" = 1)), use_primes = FALSE),
     "y^{(1)}_{x^{(1)}}"
@@ -76,7 +76,7 @@ test_that("produces conflicts", {
 test_that("both obs and int values received", {
   v1 <- cf("Y", 0, c(X = 1, Z = 0))
   v2 <- cf("X", 1, c(W = 2, Z = 0))
-  v3 <- list(var = "X", int = c(W = 1))
+  v3 <- list(var = "X", sub = c(W = 1))
   expect_identical(
     evs(list(v1, v2, v3)),
     list(

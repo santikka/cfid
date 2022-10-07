@@ -15,20 +15,31 @@ representing the counterfactual causal query.}
 
 \item{delta}{A \code{counterfactual_conjunction} object
 representing the conditioning conjunction (optional).}
+
+\item{data}{A \code{character} string that accepts one of the following:
+\code{"interventions"} (the default), \code{"observations"}or \code{"both"}. This argument
+defines the available data for identification. If \code{"interventions"} is used,
+the identification is attempted down to the intervention level. If
+\code{"observations"} is used, identification is attempted down to the
+observational level. If \code{"both"} is used, identification is carried out
+term wise, where identificaion of each interventional distribution that
+appears in the identifying functional is further attempted in terms of the
+joint observed probability distribution.}
 }
 \value{
 A list containing one or more of the following:
 \itemize{
 \item \code{id} A logical value that is \code{TRUE} if the query is identifiable and
-\code{FALSE} otherwise. Note that in cases where \code{gamma} is itself
+\code{FALSE} otherwise from the available \code{data} in \code{g}.
+Note that in cases where \code{gamma} itself is
 inconsistent, the query will be identifiable, but with probability 0.
-\item \code{prob} An object of class \code{probability} giving the formula of the query in
-LaTeX syntax via format or print, if identifiable.
-This expression is given in terms of \eqn{P_*},
-the set of all interventional distributions over \code{g}. For tautological
-statements, the resulting probability is 1, and for inconsistent
-statements, the resulting probability is 0. For formatting options,
-see \link{format.probability}.
+\item \code{formula} An object of class \code{functional} giving the identifying
+functional of the query in LaTeX syntax via \code{format} or \code{print},
+if identifiable. This expression is given in terms of the
+available \code{data}. For tautological statements, the resulting
+probability is 1, and for inconsistent statements, the resulting
+probability is 0. For formatting options, see
+\code{\link[=format.functional]{format.functional()}} and \code{\link[=format.probability]{format.probability()}}.
 \item \code{undefined} A logical value that is \code{TRUE} if
 a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
 for example when \eqn{p(\delta) = 0}, and \code{FALSE} otherwise.
@@ -48,9 +59,8 @@ First, a parallel worlds graph is constructed based on the query. In a
 parallel worlds graph, for each \eqn{do}-action that appears in \eqn{gamma}
 (and \eqn{delta}) a copy of the original graph is created with the new
 observational variables attaining their post-interventional values
-but sharing the latent variables.
-This graph is known as a parallel worlds graph.
-From the parallel worlds graph, a counterfactual graph
+but sharing the latent variables. This graph is known as a parallel worlds
+graph. From the parallel worlds graph, a counterfactual graph
 is derived such that each variable is unique, which might not be the case
 in a parallel worlds graph.
 
@@ -58,6 +68,9 @@ Finally, the ID* (or IDC*) algorithm is applied to determine identifiability
 of the query. Similar to the ID and IDC algorithms for causal effects,
 these algorithms exploit the so called c-component factorization to split
 the query into smaller subproblems, which are then solved recursively.
+If argument \code{data} is \code{"observations"} or \code{"both"}, identification of
+interventional probabilities in the resulting functional is further
+attempted in terms of the joint probability distribution.
 }
 \examples{
 # Examples that appears in Shpitser and Pearl (2008)
@@ -79,19 +92,6 @@ identifiable(g1, c3)
 
 # Non-identifiable conjunction
 identifiable(g2, c3)
-}
-\references{
-Shpitser, I. and Pearl, J. (2006). Identification of joint interventional
-distributions in semi-Markovian causal models.
-In \emph{21st National Conference on Artificial Intelligence}.
-
-Shpitser, I. and Pearl, J. (2007). What counterfactuals can be tested.
-In \emph{Proceedings of the 23rd Conference on Uncertainty}
-\emph{in Artificial Intelligence}, 352--359.
-
-Shpitser, I. and Pearl, J. (2008). Complete identification
-methods for the causal hierarchy. \emph{Journal of Machine Learning Research},
-\strong{9(64)}:1941--1979.
 }
 \seealso{
 \link{dag}, \link{counterfactual_variable},

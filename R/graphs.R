@@ -158,9 +158,9 @@ pwg <- function(g, gamma) {
   lab <- attr(g, "labels")
   lat <- attr(g, "latent")
   ord <- attr(g, "order")
-  intv_lst <- unique(ints(gamma))
-  intv_var <- lapply(intv_lst, function(i) which(lab %in% names(i)))
-  n_worlds <- length(intv_lst)
+  sub_lst <- unique(subs(gamma))
+  sub_var <- lapply(sub_lst, function(i) which(lab %in% names(i)))
+  n_worlds <- length(sub_lst)
   n_unobs <- sum(lat)
   n_obs <- length(lab) - n_unobs
   no_err <- integer(0L)
@@ -201,13 +201,13 @@ pwg <- function(g, gamma) {
     } else {
       order_pw[n_unobs_pw + ix] <- offset + ord
     }
-    intv_ix <- offset + intv_var[[w]]
-    A_pw[, intv_ix] <- 0L
-    labels_pw[from:to] <- lapply(ix_obs, function(v) {
-      if (v %in% intv_var[[w]]) {
-        cf(var = lab[v], obs = intv_lst[[w]])
+    sub_ix <- offset + sub_var[[w]]
+    A_pw[, sub_ix] <- 0L
+    labels_pw[seq.int(from, to)] <- lapply(ix_obs, function(v) {
+      if (v %in% sub_var[[w]]) {
+        cf(var = lab[v], obs = sub_lst[[w]])
       } else {
-        cf(var = lab[v], int = intv_lst[[w]])
+        cf(var = lab[v], sub = sub_lst[[w]])
       }
     })
   }
@@ -315,12 +315,21 @@ cg <- function(p, gamma) {
             }
             world_skip[b] <- TRUE
             ch_beta <- children(beta_ix, A)
-            A_cg[pa_beta,alpha_ix] <- 1L
-            A_cg[alpha_ix,ch_beta] <- 1L
+            A_cg[pa_beta, alpha_ix] <- 1L
+            A_cg[alpha_ix, ch_beta] <- 1L
             keep[beta_ix] <- FALSE
+            # sub_alpha <- length(alpha$sub)
+            # sub_beta <- length(beta$sub)
+            # replacement <- alpha
+            # original <- beta
+            # if (sub_alpha > sub_beta) {
+            #   replacement <- beta
+            #   original <- alpha
+            # }
             merged <- c(
               merged,
               list(
+                #list(original = original, replacement = replacement)
                 list(original = beta, replacement = alpha)
               )
             )
@@ -368,9 +377,9 @@ cg <- function(p, gamma) {
   for (g in seq_len(n_cf)) {
     for (l in seq_along(labels_cg)) {
       var_match <- FALSE
-      int_match <- FALSE
+      sub_match <- FALSE
       if (identical(gamma[[g]]$var, labels_cg[[l]]$var)) {
-        if (length(labels_cg[[l]]$obs)) {
+        if (length(labels_cg[[l]]$obs) > 0L) {
           if (gamma[[g]]$obs == labels_cg[[l]]$obs) {
             var_match <- TRUE
           }
@@ -378,10 +387,10 @@ cg <- function(p, gamma) {
           var_match <- TRUE
         }
       }
-      if (identical(gamma[[g]]$int, labels_cg[[l]]$int)) {
-        int_match <- TRUE
+      if (identical(gamma[[g]]$sub, labels_cg[[l]]$sub)) {
+        sub_match <- TRUE
       }
-      if (var_match && int_match) {
+      if (var_match && sub_match) {
         query_vars[g] <- l
       }
     }
@@ -444,7 +453,7 @@ import_graph <- function(x) {
         obs_ind <- igraph::get.edges(x, obs_edges)
         g_obs <- paste(v[obs_ind[,1]], "->", v[obs_ind[, 2L]], collapse = " ")
       }
-      if (length(unobs_edges)) {
+      if (length(unobs_edges) > 0L) {
         unobs_ind <- igraph::get.edges(x, unobs_edges)
         unobs_ind <- unobs_ind[unobs_ind[,1] < unobs_ind[, 2L],,drop=FALSE]
         g_unobs <- paste(

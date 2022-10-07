@@ -74,7 +74,11 @@ components <- function(A) {
 c_components <- function(g) {
   # In a counterfactual graph, the only assigned
   # variables (labels) will be those fixed by interventions
-  g <- subgraph(!assigned(attr(g, "labels")), g)
+  lab <- attr(g, "labels")
+  if (!is.character(lab)) {
+    g <- subgraph(!assigned(lab), g)
+  }
+  lab <- attr(g, "lab")
   latent <- attr(g, "latent")
   if (any(latent)) {
     lat <- which(latent)
@@ -90,8 +94,8 @@ c_components <- function(g) {
     B <- diag(ncol(g))
   }
   comp_ix <- components(B)
-  lab <- attr(g, "labels")
-  lapply(comp_ix, function(x) lab[x])
+  obs_lab <- lab[!latent]
+  lapply(comp_ix, function(x) obs_lab[x])
 }
 
 # Check whether a DAG is connected based on its adjacency matrix
@@ -228,10 +232,9 @@ fixed <- function(g) {
 #' @return `TRUE` if X is d-separated from Y given Z in G, else `FALSE`.
 #' @noRd
 dsep <- function(g, x, y, z = integer(0L)) {
+  an_z <- integer(0L)
   if (length(z) > 0L) {
     an_z <- union(ancestors(z, g), z)
-  } else {
-    an_z <- integer(0L)
   }
   n <- ncol(g)
   xyz <- union(union(x, y), z)
@@ -254,22 +257,22 @@ dsep <- function(g, x, y, z = integer(0L)) {
       if (d && !(v %in% z)) {
         vis_pa <- intersect(parents(v, g), an_xyz)
         vis_ch <- intersect(children(v, g), an_xyz)
-        if (length(vis_pa)) {
+        if (length(vis_pa) > 0L) {
           L[vis_pa] <- TRUE
         }
-        if (length(vis_ch)) {
+        if (length(vis_ch) > 0L) {
           L[vis_ch + n] <- TRUE
         }
       } else if (!d) {
         if (!(v %in% z)) {
           vis_ch <- intersect(children(v, g), an_xyz)
-          if (length(vis_ch)) {
+          if (length(vis_ch) > 0L) {
             L[vis_ch + n] <- TRUE
           }
         }
         if (v %in% an_z) {
           vis_pa <- intersect(parents(v, g), an_xyz)
-          if (length(vis_pa)) {
+          if (length(vis_pa) > 0L) {
             L[vis_pa] <- TRUE
           }
         }

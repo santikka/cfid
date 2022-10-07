@@ -4,62 +4,31 @@
 \alias{probability}
 \title{Symbolic Probability Distributions}
 \usage{
-probability(
-  val = NULL,
-  var = NULL,
-  do = NULL,
-  sumset = NULL,
-  summand = NULL,
-  terms = NULL,
-  numerator = NULL,
-  denominator = NULL
-)
+probability(val = NULL, var = NULL, do = NULL, cond = NULL)
 }
 \arguments{
 \item{val}{An \code{integer} value of either 0 or 1 for almost sure events.}
 
 \item{var}{A \code{list} of objects of class \code{counterfactual_variable}
 (without interventions and with value assignments).
-\code{var} defines the observations \eqn{y} in \eqn{p(y|...)}.}
+\code{var} defines the observations \eqn{y} in \eqn{p(y|do(x),z)}.}
 
-\item{do}{A \code{list} of objects of class \code{counterfactual_variable}
-(without interventions and with value assignments).
-If an interventional probability is defined, these depict the \eqn{do(.)}
-variables.}
+\item{do}{A \code{list} of \code{counterfactual_variable} variable objects
+(without interventions and with value assignments). Defines the
+intervention set \eqn{x} in \eqn{p(y|do(x),z)}.}
 
-\item{sumset}{A \code{list} of objects of class \code{counterfactual_variable}
-(without interventions and with value assignments).
-If the probability depicts marginalization, \code{sumset}
-defines the set of variable to be marginalized over.}
-
-\item{summand}{A \code{probability} object. If \code{sumset}
-is not \code{NULL}, this defines the probability being marginalized.}
-
-\item{terms}{A \code{list} of \code{probability} objects if the object in question
-is meant to represent a product of terms.}
-
-\item{numerator}{A\code{probability} object. If the probability
-depicts a conditional probability that cannot be expressed simply
-in terms of the set of inputs \eqn{P*}, this is the numerator
-of the quotient representation.}
-
-\item{denominator}{A \code{probability} object. The denominator
-of the quotient representation.}
+\item{cond}{A \code{list} of \code{counterfactual_variable} variable objects
+(without interventions and with value assignments).Defines the
+conditioning set \eqn{z} in \eqn{p(y|do(x),z)}.}
 }
 \value{
 An object of class \code{probability}, which is a \code{list} containing
 all of the arguments of the constructor.
 }
 \description{
-Defines an interventional or observational probability \eqn{p(y|do(x))}.
-}
-\details{
-For formatting options, see \link{format.probability}.
-When formatted via \code{print} or \code{format}, the  arguments are
-prioritized in the following order if conflicting definitions are given:
-\code{val}, (\code{var}, \code{do}), (\code{sumset}, \code{summand}), \code{terms},
-(\code{numerator}, \code{denominator})
+Defines an interventional or observational (conditional) probability
+\eqn{p(y|do(x),z)}. For formatting options, see \code{\link[=format.probability]{format.probability()}}.
 }
 \seealso{
-\link{counterfactual_variable}
+\code{\link[=counterfactual_variable]{counterfactual_variable()}}, \code{\link[=functional]{functional()}}
 }

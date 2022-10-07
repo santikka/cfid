@@ -17,10 +17,10 @@ as many primes in the superscript as the value of \code{obs}, e.g.,
 to simply denote the \code{obs} value via superscript directly as
 \code{"y^{(obs)}"}, where obs is evaluated.}
 
-\item{use_do}{A \code{logical} value. If \code{TRUE}, the explicit do-operation is used
-to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+\item{use_do}{A \code{logical} value. If \code{TRUE}, the explicit do-operation is
+used to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
 If \code{FALSE} (the default), the subscript notation is used instead
-(e.g., \eqn{p_x(y})).}
+(e.g., \eqn{p_x(y)}).}
 
 \item{...}{Additional arguments passed to \code{format}.}
 }
@@ -52,9 +52,4 @@ format(p, use_do = TRUE)
 # Without primes, with do-operator
 format(p, use_primes = FALSE, use_do = TRUE)
 
-}
-\references{
-Makhlouf, K., Zhioua, S. and Palamidessi, C. (2021).
-Survey on causal-based machine learning fairness notions.
-\emph{arXiv:2010.09553}
 }

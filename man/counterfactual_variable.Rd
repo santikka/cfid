@@ -5,9 +5,9 @@
 \alias{cf}
 \title{Counterfactual Variable}
 \usage{
-counterfactual_variable(var, obs = integer(0), int = integer(0))
+counterfactual_variable(var, obs = integer(0L), sub = integer(0L))
 
-cf(var, obs = integer(0), int = integer(0))
+cf(var, obs = integer(0L), sub = integer(0L))
 }
 \arguments{
 \item{var}{A character vector of length one naming
@@ -16,7 +16,7 @@ the variable (i.e., \eqn{Y}).}
 \item{obs}{An integer vector of length one or zero. If given, denotes
 the observed value of \code{var} (i.e., \eqn{Y = y})}
 
-\item{int}{A named integer vector where the names correspond to the variables
+\item{sub}{A named integer vector where the names correspond to the variables
 intervened on (via \eqn{do(X = x)}) and values to the
 value assignments (their levels, e.g., \eqn{x}).}
 }
@@ -30,10 +30,10 @@ Defines a counterfactual variable \eqn{y_x}.
 Assume that \eqn{Y} is a single variable and \eqn{X} is a vector
 of variables. Here, The notation \eqn{y_x} means that the variable
 \eqn{Y} (\code{var}) attains the value \eqn{y} (\code{obs}) under the
-intervention \eqn{do(X = x)} (\code{int}).
+intervention \eqn{do(X = x)} (\code{sub}).
 
 Note that different values of \code{obs} for a two variables with the same \code{var}
-and the same \code{int} do not denote their actual values, but the levels
+and the same \code{sub} do not denote their actual values, but the levels
 (i.e., \code{obs = 0} is different from \code{obs = 1}, but the variables do not
 actually attain values 0 and 1). In other words, if \code{var} is different for
 two counterfactual variables, but they have the same value \code{obs}, this
