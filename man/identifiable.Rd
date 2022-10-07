@@ -4,7 +4,7 @@
 \alias{identifiable}
 \title{Identify a Counterfactual Query}
 \usage{
-identifiable(g, gamma, delta = NULL)
+identifiable(g, gamma, delta = NULL, data)
 }
 \arguments{
 \item{g}{A \code{DAG} object describing the causal graph
@@ -22,7 +22,7 @@ defines the available data for identification. If \code{"interventions"} is used
 the identification is attempted down to the intervention level. If
 \code{"observations"} is used, identification is attempted down to the
 observational level. If \code{"both"} is used, identification is carried out
-term wise, where identificaion of each interventional distribution that
+term wise, where identification of each interventional distribution that
 appears in the identifying functional is further attempted in terms of the
 joint observed probability distribution.}
 }

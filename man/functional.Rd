@@ -2,24 +2,21 @@
 % Please edit documentation in R/functional.R
 \name{functional}
 \alias{functional}
+\alias{format.functional}
+\alias{print.functional}
 \title{Identifying Functional of a Counterfactual Query}
 \usage{
-functional(
-  sumset = NULL,
-  summand = NULL,
-  terms = NULL,
-  numerator = NULL,
-  denominator = NULL
-)
+functional(sumset = NULL, terms = NULL, numerator = NULL, denominator = NULL)
+
+\method{format}{functional}(x, use_primes = TRUE, use_do = FALSE, ...)
+
+\method{print}{functional}(x, ...)
 }
 \arguments{
 \item{sumset}{A \code{list} of objects of class \code{counterfactual_variable}
 (without interventions and with value assignments).
 If the probability depicts marginalization, \code{sumset}
 defines the set of variables to be marginalized over.}
-
-\item{summand}{A \code{functional} or a \code{probability} object. If \code{sumset}
-is not \code{NULL}, this defines the probability being marginalized.}
 
 \item{terms}{A \code{list} of \code{functional} objects if the object in question
 is meant to represent a product of terms.}
@@ -31,10 +28,30 @@ this is the numerator of the quotient representation.}
 
 \item{denominator}{A \code{functional} or a \code{probability} object.
 The denominator of the quotient representation.}
+
+\item{x}{A \code{functional} object.}
+
+\item{use_primes}{A \code{logical} value. If \code{TRUE} (the default), any value
+assignment of a counterfactual variable with \code{obs} will be formatted with
+as many primes in the superscript as the value of \code{obs}, e.g.,
+\code{obs = 0} outputs \code{"y"}, \code{obs = 1} outputs \code{"y'"},
+\code{obs = 2} outputs \code{"y''"} and so forth. The alternative when \code{FALSE} is
+to simply denote the \code{obs} value via superscript directly as
+\code{"y^{(obs)}"}, where obs is evaluated.}
+
+\item{use_do}{A \code{logical} value. If \code{TRUE}, the explicit do-operation is
+used to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+If \code{FALSE} (the default), the subscript notation is used instead
+(e.g., \eqn{p_x(y)}).}
+
+\item{...}{Additional arguments passed to \code{format}.}
 }
 \value{
 An object of class \code{functional}, which is a \code{list} containing
 all of the arguments of the constructor.
+
+A \code{character} representation of the \code{functional} object
+in LaTeX syntax.
 }
 \description{
 Identifying functionals are more complicated probabilistic expressions
@@ -43,5 +60,5 @@ that cannot be expressed as simple observational or interventional
 \details{
 When formatted via \code{print} or \code{format}, the arguments are
 prioritized in the following order if conflicting definitions are given:
-(\code{sumset}, \code{summand}), \code{terms}, (\code{numerator}, \code{denominator}).
+(\code{sumset}, \code{terms}), (\code{numerator}, \code{denominator}).
 }

@@ -2,9 +2,15 @@
 % Please edit documentation in R/probability.R
 \name{probability}
 \alias{probability}
+\alias{format.probability}
+\alias{print.probability}
 \title{Symbolic Probability Distributions}
 \usage{
 probability(val = NULL, var = NULL, do = NULL, cond = NULL)
+
+\method{format}{probability}(x, use_primes = TRUE, use_do = FALSE, ...)
+
+\method{print}{probability}(x, ...)
 }
 \arguments{
 \item{val}{An \code{integer} value of either 0 or 1 for almost sure events.}
@@ -20,14 +26,56 @@ intervention set \eqn{x} in \eqn{p(y|do(x),z)}.}
 \item{cond}{A \code{list} of \code{counterfactual_variable} variable objects
 (without interventions and with value assignments).Defines the
 conditioning set \eqn{z} in \eqn{p(y|do(x),z)}.}
+
+\item{x}{A \code{probability} object.}
+
+\item{use_primes}{A \code{logical} value. If \code{TRUE} (the default), any value
+assignment of a counterfactual variable with \code{obs} will be formatted with
+as many primes in the superscript as the value of \code{obs}, e.g.,
+\code{obs = 0} outputs \code{"y"}, \code{obs = 1} outputs \code{"y'"},
+\code{obs = 2} outputs \code{"y''"} and so forth. The alternative when \code{FALSE} is
+to simply denote the \code{obs} value via superscript directly as
+\code{"y^{(obs)}"}, where obs is evaluated.}
+
+\item{use_do}{A \code{logical} value. If \code{TRUE}, the explicit do-operation is
+used to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+If \code{FALSE} (the default), the subscript notation is used instead
+(e.g., \eqn{p_x(y)}).}
+
+\item{...}{Additional arguments passed to \code{format}.}
 }
 \value{
 An object of class \code{probability}, which is a \code{list} containing
 all of the arguments of the constructor.
+
+A \code{character} representation of the \code{probability} object
+in LaTeX syntax.
 }
 \description{
 Defines an interventional or observational (conditional) probability
 \eqn{p(y|do(x),z)}. For formatting options, see \code{\link[=format.probability]{format.probability()}}.
+}
+\examples{
+# Example from Makhlouf, Zhioua and Palamidessi (2021)
+g2 <- dag("C -> A -> Y; C -> Y")
+v1 <- cf("Y", 0, c(A = 1))
+v2 <- cf("A", 0)
+c1 <- conj(v1)
+c2 <- conj(v2)
+f <- identifiable(g2, c1, c2)$formula
+
+# Default, using primes and subscript notation
+format(f)
+
+# Without primes, no do-operator
+format(f, use_primes = FALSE)
+
+# Primes, with do-operator
+format(f, use_do = TRUE)
+
+# Without primes, with do-operator
+format(f, use_primes = FALSE, use_do = TRUE)
+
 }
 \seealso{
 \code{\link[=counterfactual_variable]{counterfactual_variable()}}, \code{\link[=functional]{functional()}}

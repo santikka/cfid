@@ -55,8 +55,7 @@ is.probability <- function(x) {
   inherits(x, "probability")
 }
 
-#' Format a `probability` object representing \eqn{p(y|do(x))}.
-#'
+#' @rdname probability
 #' @param x A `probability` object.
 #' @param use_primes A `logical` value. If `TRUE` (the default), any value
 #' assignment of a counterfactual variable with `obs` will be formatted with
@@ -70,8 +69,8 @@ is.probability <- function(x) {
 #' If `FALSE` (the default), the subscript notation is used instead
 #' (e.g., \eqn{p_x(y)}).
 #' @param ... Additional arguments passed to `format`.
-#' @return An character representation of the `probability` object
-#'   in LaTeX syntax.
+#' @return A `character` representation of the `probability` object
+#' in LaTeX syntax.
 
 #' @examples
 #' # Example from Makhlouf, Zhioua and Palamidessi (2021)
@@ -125,6 +124,7 @@ format.probability <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
   paste0("p", sub, "(", var, rhs, ")")
 }
 
+#' @rdname probability
 #' @export
 print.probability <- function(x, ...) {
   cat(format(x, ...), "\n")

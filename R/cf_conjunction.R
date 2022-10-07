@@ -1,10 +1,8 @@
 #' Counterfactual Conjunction
 #'
-#' Defines a conjunction of counterfactual statements (variables).
+#' `conj` defines a conjunction of counterfactual statements (variables).
 #'
-#' @param ... `counterfactual_variable`.objects.
-#'
-#' @details
+#' @section Counterfactual Conjunctions:
 #' A counterfactual conjunction is a conjunction (or a set in some contexts)
 #' of counterfactual statements that are assumed to hold simultaneously.
 #'
@@ -19,9 +17,10 @@
 #' via the alias `conj` or iteratively from `counterfactual_variable`
 #' objects (see examples).
 #'
-#' @return An object of class `counterfactual_conjunction`.
-#'
-#' @seealso [cfid::counterfactual_variable]
+#' @rdname counterfactuals
+#' @param ... For `conj`, `counterfactual_variable` objects. For `print` and
+#' `format` methods, additional arguments passed to [base::format()].
+#' @return `conj` returns an object of class `counterfactual_conjunction`.
 #'
 #' @examples
 #' # The conjunction described under 'details'
@@ -73,17 +72,30 @@ is.counterfactual_conjunction <- function(x) {
   inherits(x, "counterfactual_conjunction")
 }
 
+#' @method format counterfactual_conjunction
+#' @rdname counterfactuals
+#' @param varsep A `character` string to separate counterfactual variables.
+#' @param ... Additional arguments passed to
+#' [cfid::format.counterfactual_variable()].
 #' @export
 format.counterfactual_conjunction <- function(x, varsep = " \u2227 ", ...) {
   cf <- sapply(x, function(y) format.counterfactual_variable(y, ...))
   paste0(cf, collapse = varsep)
 }
 
+#' @method print counterfactual_conjunction
+#' @rdname counterfactuals
 #' @export
 print.counterfactual_conjunction <- function(x, ...) {
   cat(format(x, ...), "\n")
 }
 
+#' @method + counterfactual_conjunction
+#' @rdname counterfactuals
+#' @param e1 A `counterfactual_variable` or a `counterfactual_conjunction`
+#' object.
+#' @param e2 A `counterfactual_variable` or a `counterfactual_conjunction`
+#' object.
 #' @export
 `+.counterfactual_conjunction` <- function(e1, e2) {
   if (is.counterfactual_conjunction(e1)) {
@@ -130,15 +142,20 @@ print.counterfactual_conjunction <- function(x, ...) {
   out
 }
 
+#' @method [ counterfactual_conjunction
+#' @rdname counterfactuals
+#' @param i An `integer` index vector.
 #' @export
 `[.counterfactual_conjunction` <- function(x, i) {
   as.counterfactual_conjunction(NextMethod())
 }
 
+#' @method + counterfactual_variable
+#' @rdname counterfactuals
 #' @export
 `+.counterfactual_variable` <- `+.counterfactual_conjunction`
 
 
-#' @rdname counterfactual_conjunction
+#' @rdname counterfactuals
 #' @export
 conj <- counterfactual_conjunction

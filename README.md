@@ -2,6 +2,7 @@
 
 <!-- Badges -->
 [![codecov](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg?token=13KFY7ULZ4)](https://codecov.io/gh/santikka/cfid)
+[![R-CMD-check](https://github.com/santikka/cfid/workflows/R-CMD-check/badge.svg)](https://github.com/santikka/cfid/actions)
   
 ## Overview
 

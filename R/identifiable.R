@@ -37,7 +37,7 @@
 #' the identification is attempted down to the intervention level. If
 #' `"observations"` is used, identification is attempted down to the
 #' observational level. If `"both"` is used, identification is carried out
-#' term wise, where identificaion of each interventional distribution that
+#' term wise, where identification of each interventional distribution that
 #' appears in the identifying functional is further attempted in terms of the
 #' joint observed probability distribution.
 #'
@@ -82,7 +82,7 @@
 #' # Non-identifiable conjunction
 #' identifiable(g2, c3)
 #' @export
-identifiable <- function(g, gamma, delta = NULL) {
+identifiable <- function(g, gamma, delta = NULL, data) {
   if (missing(g)) {
     stop_("Argument `g` is missing.")
   } else if (!is_dag(g)) {

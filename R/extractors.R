@@ -99,6 +99,7 @@ trivial_conflicts <- function(cf_list) {
 #' @param y A `counterfactual_variable` object.
 #' @param gamma A `Counterfactual_conjunction` object.
 #' @return A `list` of conflicting variables.
+#' @noRd
 trivial_conflict <- function(y, gamma) {
   y_cf <- list(cfvar(y))
   x <- cfvars(gamma)

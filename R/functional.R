@@ -77,6 +77,23 @@ is.functional <- function(x) {
   inherits(x, "functional")
 }
 
+#' @rdname functional
+#' @param x A `functional` object.
+#' @param use_primes A `logical` value. If `TRUE` (the default), any value
+#' assignment of a counterfactual variable with `obs` will be formatted with
+#' as many primes in the superscript as the value of `obs`, e.g.,
+#' `obs = 0` outputs `"y"`, `obs = 1` outputs `"y'"`,
+#' `obs = 2` outputs `"y''"` and so forth. The alternative when `FALSE` is
+#' to simply denote the `obs` value via superscript directly as
+#' `"y^{(obs)}"`, where obs is evaluated.
+#' @param use_do A `logical` value. If `TRUE`, the explicit do-operation is
+#' used to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+#' If `FALSE` (the default), the subscript notation is used instead
+#' (e.g., \eqn{p_x(y)}).
+#' @param ... Additional arguments passed to `format`.
+#' @return A `character` representation of the `functional` object
+#' in LaTeX syntax.
+#'
 #' @export
 format.functional <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
   terms <- ""
@@ -118,6 +135,7 @@ format.functional <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
   paste0(sumset, terms, fraction)
 }
 
+#' @rdname functional
 #' @export
 print.functional <- function(x, ...) {
   cat(format(x, ...), "\n")

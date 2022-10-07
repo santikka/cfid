@@ -1,16 +1,8 @@
 #' Counterfactual Variable
 #'
-#' Defines a counterfactual variable \eqn{y_x}.
+#' `cf` defines a counterfactual variable \eqn{y_x}.
 #'
-#' @param var A character vector of length one naming
-#'     the variable (i.e., \eqn{Y}).
-#' @param obs An integer vector of length one or zero. If given, denotes
-#'     the observed value of `var` (i.e., \eqn{Y = y})
-#' @param sub A named integer vector where the names correspond to the variables
-#'     intervened on (via \eqn{do(X = x)}) and values to the
-#'     value assignments (their levels, e.g., \eqn{x}).
-#'
-#' @details
+#' @section Counterfactual Variables:
 #' Assume that \eqn{Y} is a single variable and \eqn{X} is a vector
 #' of variables. Here, The notation \eqn{y_x} means that the variable
 #' \eqn{Y} (`var`) attains the value \eqn{y} (`obs`) under the
@@ -28,13 +20,16 @@
 #' \eqn{do}-operator, see Pearl (2009). The shortcut alias `cf` can also
 #' be used to construct counterfactual variables.
 #'
-#' @references
-#' Pearl, J. (2009) *Causality: Models, Reasoning, and Inference*. Cambridge
-#' University Press, 2nd edition.
-#'
-#' @return An object of class `counterfactual_variable`.
-#'
-#' @seealso [cfid::counterfactual_conjunction]
+#' @rdname counterfactuals
+#' @param var A character vector of length one naming the variable
+#' (i.e., \eqn{Y}).
+#' @param obs An integer vector of length one or zero. If given, denotes
+#' the observed value of `var` (i.e., \eqn{Y = y})
+#' @param sub A named integer vector where the names correspond to the
+#' variables intervened on (via \eqn{do(X = x)}) and values to the
+#' value assignments (their levels, e.g., \eqn{x}).
+#
+#' @return `cf` returns an object of class `counterfactual_variable`.
 #'
 #' @examples
 #' # Y without an assigned value or any interventions
@@ -77,6 +72,12 @@ is.counterfactual_variable <- function(x) {
   inherits(x, "counterfactual_variable")
 }
 
+#' @method format counterfactual_variable
+#' @rdname counterfactuals
+#' @param x A `counterfactual_variable` or a `counterfactual_conjunction`
+#' object.
+#' @param use_primes A `logical` value indicating whether primes should be
+#' used to differentiate between value assignments
 #' @export
 format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
   super_var <- character(0L)
@@ -113,12 +114,14 @@ format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
   out
 }
 
+#' @method print counterfactual_variable
+#' @rdname counterfactuals
 #' @export
 print.counterfactual_variable <- function(x, ...) {
   cat(format(x, ...), "\n")
 }
 
-#' @rdname counterfactual_variable
+#' @rdname counterfactuals
 #' @export
 cf <- counterfactual_variable
 
