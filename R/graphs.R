@@ -496,7 +496,7 @@ import_graph <- function(x) {
 #' @export
 export_graph <- function(g, type = c("dagitty", "causaleffect", "dosearch"),
                          use_bidirected = TRUE, ...) {
-  if (!is_dag(g)) {
+  if (!is.dag(g)) {
     stop_("Argument `x` must be a `dag` object.")
   }
   out <- NULL
@@ -581,7 +581,7 @@ export_graph <- function(g, type = c("dagitty", "causaleffect", "dosearch"),
 #'
 #' @param x An R object.
 #' @noRd
-is_dag <- function(x) {
+is.dag <- function(x) {
   inherits(x, "dag")
 }
 

@@ -91,6 +91,8 @@ format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
       } else {
         super_var <- paste0("^{(", x$obs, ")}")
       }
+    } else if (x$obs < 0L) {
+      super_var <- "^{*}"
     }
     form$var <- collapse(tolower(x$var), super_var)
   } else {

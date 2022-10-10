@@ -200,15 +200,24 @@ idc_star <- function(g, gamma, delta) {
       return(idc_star(g, gamma_prime, delta_prime[-i]))
     }
   }
-  out <- id_star(g, gamma_prime + delta_prime)
+  gamma_delta <- gamma_prime + delta_prime
+  out <- id_star(g, gamma_delta)
   if (out$id) {
     if ((is.probability(out$formula) && length(out$formula$val) == 0L) ||
         is.functional(out$formula)) {
-      num <- out$formula
-      den <- id_star(g, delta_prime)$formula
-      if (identical(num, den)) {
+      if (identical(gamma_prime, gamma_delta)) {
         out$formula <- probability(val = 1L)
+      } else if (is.probability(out$formula)) {
+        gamma_vars <- which(vars(out$formula$var) %in% vars(gamma_prime))
+        delta_vars <- which(vars(out$formula$var) %in% vars(delta_prime))
+        out$formula <- probability(
+          var = out$formula$var[gamma_vars],
+          do = out$formula$do,
+          cond = out$formula$var[delta_vars]
+        )
       } else {
+        num <- out$formula
+        den <- id_star(g, delta_prime)$formula
         out$formula <- functional(numerator = num, denominator = den)
       }
     }
@@ -258,7 +267,7 @@ id <- function(y_var, x_var, p, g) {
     return(id(y_var, vu_var[union(x, w)], p, g))
   }
   # Line 4
-  comp_gmx <- c_components(subgraph(vmx, g))
+  comp_gmx <- c_components(subgraph(setdiff(vu, x), g))
   n_s <- length(comp_gmx)
   if (n_s > 1L) {
     c_factors <- vector(mode = "list", length = n_s)

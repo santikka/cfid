@@ -4,7 +4,7 @@
 \alias{identifiable}
 \title{Identify a Counterfactual Query}
 \usage{
-identifiable(g, gamma, delta = NULL, data)
+identifiable(g, gamma, delta = NULL, data = "interventions")
 }
 \arguments{
 \item{g}{A \code{DAG} object describing the causal graph
