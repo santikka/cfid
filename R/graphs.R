@@ -2,9 +2,9 @@
 #'
 #' Define a directed acyclic graph (DAG).
 #'
-#' @param x A character string containing a sequence of definitions
-#'     of edges in the form `X -> Y`, `X <- Y` or `X <-> Y`.
-#'     See details for more advanced constructs.
+#' @param x A `character` string containing a sequence of paths consisting of
+#' of edges in the form `X -> Y`, `X <- Y` or `X <-> Y`.
+#' See details for more advanced constructs.
 #'
 #' @details
 #' The syntax for `x` follows the `dagitty` package closely for compatibility.
@@ -49,7 +49,7 @@
 #' # Semicolons can be used to distinguish individual statements
 #' dag("x -> z -> y; x <-> y")
 #'
-#' # Commas can be used to distinguish variables for example
+#' # Commas can be used to distinguish variables
 #' dag("{x, y, z} -> w")
 #'
 #' # Line breaks are also allowed
@@ -82,7 +82,7 @@ dag <- function(x) {
   A_bi <- matrix(0L, n_v, n_v)
   rownames(A_obs) <- colnames(A_obs) <- v_names
   rownames(A_bi) <- colnames(A_bi) <- v_names
-  if (n_e) {
+  if (n_e > 0L) {
     for (i in e_lst) {
       if (i == 1L || i == length(g_lst)) {
         stop_("Invalid edge construct in argument `x`.")
@@ -419,13 +419,11 @@ cg <- function(p, gamma) {
 #'
 #' Import and construct a valid DAG from an external format.
 #'
-#' @param x A graph object in a valid external format, see details.
-#'
-#' @details
 #' Argument `x` accepts `dagitty` graphs, `igraph` graphs
 #' in the `causaleffect` package syntax and character strings
 #' in the `dosearch` package syntax.
 #'
+#' @param x A graph object in a valid external format, see details.
 #' @return A `dag` object.
 #' @export
 import_graph <- function(x) {
@@ -480,25 +478,28 @@ import_graph <- function(x) {
 #'
 #' @param g An object of class `dag`.
 #' @param type A character string matching one of the following:
-#'     `"dagitty"`, `"causaleffect"` or `"dosearch"`.
+#' `"dagitty"`, `"causaleffect"` or `"dosearch"`. For `"dagitty"` and
+#' `"causaleffec"`, the packages `dagitty` and `igraph` must be available,
+#' respectively.
 #' @param use_bidirected A logical value indicating if bidirected edges
-#'     should be used in the resulting object.
-#'     If `TRUE`, the result will have explicit `X <-> Y`
-#'     edges. If `FALSE`, an explicit latent variable `X <- U[X,Y] -> Y` will
-#'     be used instead (only applicable if `type` is `"dosearch"`).
+#' should be used in the resulting object.
+#' If `TRUE`, the result will have explicit `X <-> Y`
+#' edges. If `FALSE`, an explicit latent variable `X <- U[X,Y] -> Y` will
+#' be used instead (only applicable if `type` is `"dosearch"`).
 #' @param ... Additional arguments passed to `format` for formatting
-#'     vertex labels.
+#' vertex labels.
 #' @return If `type` is `"dagitty"`, returns a `dagitty` object.
-#'     If `type` is `"causaleffect"`, returns an `igraph` graph, with its edge
-#'     attributes set according to the `causaleffect` package syntax. If `type`
-#'     is `"dosearch"`, returns a character vector of length one that describes
-#'     `g` in the `dosearch` package syntax.
+#' If `type` is `"causaleffect"`, returns an `igraph` graph, with its edge
+#' attributes set according to the `causaleffect` package syntax. If `type`
+#' is `"dosearch"`, returns a character vector of length one that describes
+#' `g` in the `dosearch` package syntax.
 #' @export
 export_graph <- function(g, type = c("dagitty", "causaleffect", "dosearch"),
                          use_bidirected = TRUE, ...) {
-  if (!is.dag(g)) {
-    stop_("Argument `x` must be a `dag` object.")
-  }
+  stopifnot_(
+    is.dag(g),
+    "Argument `x` must be a `dag` object."
+  )
   out <- NULL
   type <- match.arg(type)
   lab <- attr(g, "labels")
@@ -535,37 +536,37 @@ export_graph <- function(g, type = c("dagitty", "causaleffect", "dosearch"),
     }
   }
   if (identical(type, "dagitty")) {
-    if (requireNamespace("dagitty", quietly = TRUE)) {
-      e_str <- collapse(
-        paste0(e_di_str, collapse = " "),
-        " ",
-        paste0(e_bi_str, collapse = " ")
-      )
-      out <- dagitty::dagitty(collapse("dag {", e_str, "}"))
-    } else {
-      stop_("Package `dagitty` is not available for exporting the graph.")
-    }
+    stopifnot_(
+      requireNamespace("dagitty", quietly = TRUE),
+      "Package `dagitty` is not available."
+    )
+    e_str <- collapse(
+      paste0(e_di_str, collapse = " "),
+      " ",
+      paste0(e_bi_str, collapse = " ")
+    )
+    out <- dagitty::dagitty(collapse("dag {", e_str, "}"))
   } else if (identical(type, "causaleffect")) {
-    if (requireNamespace("igraph", quietly = TRUE)) {
-      ig <- igraph::make_empty_graph(n = sum(!lat))
-      obs_e_ix <- c(t(obs_e))
-      unobs_e_ix <- e_ix[e_ix[, 1L] %in% lat_ix, 2L]
-      if (n_o > 0L) {
-        ig <- ig + igraph::edges(obs_e_ix)
-      }
-      if (n_u > 0L) {
-        ig <- ig + igraph::edges(c(unobs_e_ix, rev(unobs_e_ix)))
-        ig <- igraph::set_edge_attr(
-          ig, "description",
-          index = seq.int(n_o + 1, n_u + n_o),
-          value = "U"
-        )
-      }
-      ig <- igraph::set_vertex_attr(ig, "name", igraph::V(ig), lab_form[!lat])
-      out <- ig
-    } else {
-      stop_("Package `igraph` is not available for exporting the graph.")
+    stopifnot_(
+      requireNamespace("igraph", quietly = TRUE),
+      "Package `igraph` is not available."
+    )
+    ig <- igraph::make_empty_graph(n = sum(!lat))
+    obs_e_ix <- c(t(obs_e))
+    unobs_e_ix <- e_ix[e_ix[, 1L] %in% lat_ix, 2L]
+    if (n_o > 0L) {
+      ig <- ig + igraph::edges(obs_e_ix)
     }
+    if (n_u > 0L) {
+      ig <- ig + igraph::edges(c(unobs_e_ix, rev(unobs_e_ix)))
+      ig <- igraph::set_edge_attr(
+        ig, "description",
+        index = seq.int(n_o + 1, n_u + n_o),
+        value = "U"
+      )
+    }
+    ig <- igraph::set_vertex_attr(ig, "name", igraph::V(ig), lab_form[!lat])
+    out <- ig
   } else if (identical(type, "dosearch")) {
     e_str <- collapse(
       paste0(e_di_str, collapse = "\n"),

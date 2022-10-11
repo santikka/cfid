@@ -15,7 +15,9 @@ export_graph(
 \item{g}{An object of class \code{dag}.}
 
 \item{type}{A character string matching one of the following:
-\code{"dagitty"}, \code{"causaleffect"} or \code{"dosearch"}.}
+\code{"dagitty"}, \code{"causaleffect"} or \code{"dosearch"}. For \code{"dagitty"} and
+\code{"causaleffec"}, the packages \code{dagitty} and \code{igraph} must be available,
+respectively.}
 
 \item{use_bidirected}{A logical value indicating if bidirected edges
 should be used in the resulting object.

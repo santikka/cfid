@@ -7,7 +7,7 @@
 dag(x)
 }
 \arguments{
-\item{x}{A character string containing a sequence of definitions
+\item{x}{A \code{character} string containing a sequence of paths consisting of
 of edges in the form \code{X -> Y}, \code{X <- Y} or \verb{X <-> Y}.
 See details for more advanced constructs.}
 }
@@ -59,7 +59,7 @@ dag("{x z} -> {y w}")
 # Semicolons can be used to distinguish individual statements
 dag("x -> z -> y; x <-> y")
 
-# Commas can be used to distinguish variables for example
+# Commas can be used to distinguish variables
 dag("{x, y, z} -> w")
 
 # Line breaks are also allowed

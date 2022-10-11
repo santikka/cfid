@@ -68,7 +68,7 @@ The causal graph associated with the causal model is given via a simple
 text-based interface, similar to \code{dagitty} package syntax. Directed edges
 are given as \code{X -> Y}, and bidirected edges as \verb{X <-> Y}, which is a
 shorthand notation for latent confounders. For more details on graph
-construction, see \link{dag}.
+construction, see \code{\link[=dag]{dag()}}.
 }
 
 \section{Counterfactual variables and conjunctions}{
@@ -84,13 +84,13 @@ cf(var = "Y", obs = 1, sub = c(X = 1))
 Here, \code{var} defines the name of the variable, \code{obs} gives level the variable
 is assigned to (not the actual value), and \code{sub} defines the vector of
 interventions that define the counterfactual world. For more details,
-see \link{counterfactual_variable}. Counterfactual conjunctions on the
+see \code{\link[=counterfactual_variable]{counterfactual_variable()}}. Counterfactual conjunctions on the
 other hand, are simply counterfactual statements (variables) that are
 observed at the same time. For more details, see
-\link{counterfactual_conjunction}.
+\code{\link[=counterfactual_conjunction]{counterfactual_conjunction()}}.
 
 For complete examples of identifiable counterfactual queries, see
-\link{identifiable}, which is the main function of the package.
+\code{\link[=identifiable]{identifiable()}}, which is the main function of the package.
 }
 
 \references{

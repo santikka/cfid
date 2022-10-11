@@ -22,24 +22,25 @@
 #'
 #' @export
 probability <- function(val = NULL, var = NULL, do = NULL, cond = NULL) {
-  if (is.null(val) && is.null(var)) {
-    stop_("Either `val` or `var` must be provided.")
-  }
+  stopifnot_(
+    !is.null(val) || !is.null(var),
+    "Either `val` or `var` must be provided."
+  )
   if (!is.null(val)) {
     val <- try_type(val = val, type = "integer")[1]
   }
-  if (!is.null(var) &&
-      !all(vapply(var, is.counterfactual_variable, logical(1L)))) {
-    stop_("All elements of `var` must be `counterfactual_variable` objects.")
-  }
-  if (!is.null(do) &&
-      !all(vapply(do, is.counterfactual_variable, logical(1L)))) {
-    stop_("All elements of `do` must be `counterfactual_variable` objects.")
-  }
-  if (!is.null(cond) &&
-      !all(vapply(cond, is.counterfactual_variable, logical(1L)))) {
-    stop_("All elements of `cond` must be `counterfactual_variable` objects.")
-  }
+  stopifnot_(
+    is.null(var) || all(vapply(var, is.counterfactual_variable, logical(1L))),
+    "All elements of `var` must be `counterfactual_variable` objects."
+  )
+  stopifnot_(
+    is.null(do) || all(vapply(do, is.counterfactual_variable, logical(1L))),
+    "All elements of `do` must be `counterfactual_variable` objects."
+  )
+  stopifnot_(
+    is.null(cond) || all(vapply(cond, is.counterfactual_variable, logical(1L))),
+    "All elements of `cond` must be `counterfactual_variable` objects."
+  )
   structure(
     list(
       val = val,
@@ -55,6 +56,7 @@ is.probability <- function(x) {
   inherits(x, "probability")
 }
 
+#' @method format probability
 #' @rdname probability
 #' @param x A `probability` object.
 #' @param use_primes A `logical` value. If `TRUE` (the default), any value
@@ -124,6 +126,7 @@ format.probability <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
   paste0("p", sub, "(", var, rhs, ")")
 }
 
+#' @method print probability
 #' @rdname probability
 #' @export
 print.probability <- function(x, ...) {

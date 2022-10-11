@@ -1,8 +1,7 @@
-#' The ID* algorithm
+#' The ID* Algorithm
 #'
 #' @param g A `dag` object.
 #' @param gamma A `counterfactual_conjunction` object.
-#' @importFrom stats setNames
 #' @noRd
 id_star <- function(g, gamma) {
   n_cf <- length(gamma)
@@ -60,7 +59,7 @@ id_star <- function(g, gamma) {
         }
         comp[[i]][[j]]$sub <- c(
           comp[[i]][[j]]$sub,
-          stats::setNames(integer(length(s_sub)), s_sub)
+          set_names(integer(length(s_sub)), s_sub)
         )
       }
       s_conj <- do.call(counterfactual_conjunction, comp[[i]])
@@ -144,12 +143,11 @@ id_star <- function(g, gamma) {
   }
 }
 
-#' The IDC* algorithm
+#' The IDC* Algorithm
 #'
-#' @param g A `dag` object
+#' @param g A `dag` object.
 #' @param gamma A `counterfactual_conjunction` object.
 #' @param delta A `counterfactual_conjunction` object.
-#' @importFrom stats setNames
 #' @noRd
 idc_star <- function(g, gamma, delta) {
   if (length(delta) == 0L) {
@@ -190,7 +188,7 @@ idc_star <- function(g, gamma, delta) {
     if (dsep(g_temp, d_prime_ix, gamma_prime_ix, fixed_ix)) {
       d_ix <- which(lab %in% delta_var[i])
       de <- intersect(descendants(d_ix, g), gamma_ix)
-      new_sub <- stats::setNames(delta_prime[[i]]$obs, delta_prime[[i]]$var)
+      new_sub <- set_names(delta_prime[[i]]$obs, delta_prime[[i]]$var)
       de_gamma <- which(vars(gamma) %in% lab)
       for (j in de_gamma) {
         if (!delta_prime[[i]]$var %in% names(gamma_prime[[j]]$sub)) {
@@ -225,6 +223,13 @@ idc_star <- function(g, gamma, delta) {
   out
 }
 
+#' The ID Algorithm
+#'
+#' @param y_var A `character` vector of response variables.
+#' @param x_var A `character` vector of intervention variables.
+#' @param p A `probability` object
+#' @param g A `dag` object.
+#' @noRd
 id <- function(y_var, x_var, p, g) {
   lat <- attr(g, "latent")
   pi_obs <- setdiff(attr(g, "order"), which(lat))
@@ -237,7 +242,6 @@ id <- function(y_var, x_var, p, g) {
   v_var <- v_var[ord]
   y <- which(vu_var %in% y_var)
   x <- which(vu_var %in% x_var)
-
   # Line 1
   if (length(x) == 0) {
     if (is.probability(p)) {
@@ -319,6 +323,14 @@ id <- function(y_var, x_var, p, g) {
   return(id(y_var, intersect(s_prime_var, x_var), p_new, subgraph(s_vu, g)))
 }
 
+#' The IDC Algorithm
+#'
+#' @param y_var A `character` vector of response variables.
+#' @param x_var A `character` vector of intervention variables.
+#' @param z_var A `character` vector of conditioning variables.
+#' @param p A `probability` object
+#' @param g A `dag` object.
+#' @noRd
 idc <- function(y_var, x_var, z_var, p, g) {
   lat <- attr(g, "latent")
   pi_obs <- setdiff(attr(g, "order"), which(lat))
@@ -369,6 +381,12 @@ idc <- function(y_var, x_var, z_var, p, g) {
   }
 }
 
+#' Compute the C-component Factorization of a Probability Distribution
+#'
+#' @param s_var A `character` vector of the variables in the C-component.
+#' @param v_var A `character` vector of observed variables in the graph.
+#' @param p A `probability` object.
+#' @noRd
 factorize_probability <- function(s_var, v_var, p) {
   n_s <- length(s_var)
   p_terms <- vector(mode = "list", length = n_s)

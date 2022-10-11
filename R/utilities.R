@@ -15,6 +15,16 @@ reg_match <- function(x, pattern, perl = TRUE) {
   regmatches(x, m)[[1L]]
 }
 
+#' Set the names of an object
+#'
+#' @param object an R object
+#' @param nm A `character` vector of names to assign
+#' @noRd
+set_names <- function(object, nm) {
+  names(object) <- nm
+  object
+}
+
 try_type <- function(..., type) {
   if (missing(type)) {
     stop_("Argument `type` must be given.")

@@ -1,6 +1,6 @@
 #' Construct a vertex subgraph
 #'
-#' @param x An `integer` vector giving the vertex indices.
+#' @param x An `integer` vector giving the vertex indices to keep.
 #' @param g A `dag` object.
 #' @return A `dag` object representing the subgraph.
 #' @noRd
@@ -69,7 +69,7 @@ components <- function(A) {
 #'
 #' @param g A `dag` object
 #' @return A `list` where each element gives the labels of vertices
-#'   belonging to that component.
+#' belonging to that component.
 #' @noRd
 c_components <- function(g) {
   # In a counterfactual graph, the only assigned
@@ -98,21 +98,11 @@ c_components <- function(g) {
   lapply(comp_ix, function(x) obs_lab[x])
 }
 
-# Check whether a DAG is connected based on its adjacency matrix
-#
-# @param A An adjacency matrix or a `dag` object
-# is_connected <- function(A) {
-#     A_sym <- A + t(A)
-#     n <- ncol(A_sym)
-#     diag(A_sym) <- 1L
-#     length(components(A_sym)) == 1L
-# }
-
 #' Computes a topological ordering for the vertices of a DAG.
 #'
 #' @param A An adjacency matrix or a `dag` object.
 #' @param latent An optional logical vector with
-#'     `TRUE` indicating latent variables.
+#' `TRUE` indicating latent variables.
 #' @return An `integer` vector giving a topological order of the vertices.
 #' @noRd
 topological_order <- function(A, latent) {
@@ -142,10 +132,11 @@ topological_order <- function(A, latent) {
   ord
 }
 
-#' Ancestors of a vertex set
+#' Ancestors of a vertex set in a DAG
 #'
 #' @param x An `integer` vector giving the vertex indices.
 #' @param A An adjacency matrix or a `dag` object.
+#' @return An `integer` vector indicating the ancestors.
 #' @noRd
 ancestors <- function(x, A) {
   B <- t(A)
@@ -158,7 +149,7 @@ ancestors <- function(x, A) {
   setdiff(children(x, X), x)
 }
 
-#' Children of a vertex set
+#' Children of a vertex set in a DAG
 #'
 #' @param x An `integer` vector giving the vertex indices.
 #' @param A An adjacency matrix or a `dag` object.
@@ -172,7 +163,7 @@ children <- function(x, A) {
   }
 }
 
-#' Descendants of a vertex set
+#' Descendants of a vertex set in a DAG
 #'
 #' @param x An `integer` vector giving the vertex indices.
 #' @param A An adjacency matrix or a `dag` object.
@@ -188,7 +179,7 @@ descendants <- function(x, A) {
   setdiff(children(x, X), x)
 }
 
-#' Parents of a vertex set
+#' Parents of a vertex set in a DAG
 #'
 #' @param x An integer vector giving the vertex indices.
 #' @param A An adjacency matrix or a `dag` object.
@@ -205,6 +196,7 @@ parents <- function(x, A) {
 #' Fixed vertices of a counterfactual graph
 #'
 #' @param g A `dag` object.
+#' @return An `integer` vector of indices of fixed vertices in the graph.
 #' @noRd
 fixed <- function(g) {
   lab <- attr(g, "labels")

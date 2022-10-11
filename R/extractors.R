@@ -16,10 +16,20 @@ cfvars <- function(gamma) {
   lapply(gamma, cfvar)
 }
 
+#' Remove a value assignment from a counterfactual Variable
+#'
+#' @param x A `counterfactual_variable` object.
+#' @return A modification of `x` without value assignment.
+#' @noRd
 cfvar <- function(x) {
   cf(x$var, sub = x$sub)
 }
 
+#' Create a list of counterfactual variables from a character vector
+#'
+#' @param x A `character` vector of variable names.
+#' @return A list of corresponding `counterfactual_variable` objects.
+#' @noRd
 cflist <- function(x) {
   lapply(x, cf)
 }
@@ -58,7 +68,7 @@ subs <- function(gamma) {
 #'
 #' @param gamma A `counterfactual_conjunction` object.
 #' @return Both observational and interventional assignments
-#'   as a `list` of `counterfactual_variable` objects.
+#' as a `list` of `counterfactual_variable` objects.
 #' @noRd
 evs <- function(gamma) {
   lapply(gamma, function(x) {
@@ -117,8 +127,8 @@ trivial_conflict <- function(y, gamma) {
 #'
 #' @param x A `counterfactual_variable` object.
 #' @param gamma A `counterfactual_conjunction` object.
-#' @return An integer correspodning to the value assignment if present
-#'   or `NULL`.
+#' @return An `integer` correspodning to the value assignment if present
+#' or `NULL`.
 #' @noRd
 val <- function(x, gamma) {
   for (y in gamma) {

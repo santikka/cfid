@@ -64,7 +64,7 @@
 #' text-based interface, similar to `dagitty` package syntax. Directed edges
 #' are given as `X -> Y`, and bidirected edges as `X <-> Y`, which is a
 #' shorthand notation for latent confounders. For more details on graph
-#' construction, see [cfid::dag].
+#' construction, see [cfid::dag()].
 #'
 #' # Counterfactual variables and conjunctions
 #' Counterfactual variables are defined by their name, value and the conceptual
@@ -78,13 +78,13 @@
 #' Here, `var` defines the name of the variable, `obs` gives level the variable
 #' is assigned to (not the actual value), and `sub` defines the vector of
 #' interventions that define the counterfactual world. For more details,
-#' see [cfid::counterfactual_variable]. Counterfactual conjunctions on the
+#' see [cfid::counterfactual_variable()]. Counterfactual conjunctions on the
 #' other hand, are simply counterfactual statements (variables) that are
 #' observed at the same time. For more details, see
-#' [cfid::counterfactual_conjunction].
+#' [cfid::counterfactual_conjunction()].
 #'
 #' For complete examples of identifiable counterfactual queries, see
-#' [cfid::identifiable], which is the main function of the package.
+#' [cfid::identifiable()], which is the main function of the package.
 #'
 #' @docType package
 #' @name cfid-package

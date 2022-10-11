@@ -8,7 +8,7 @@ identifiable(g, gamma, delta = NULL, data = "interventions")
 }
 \arguments{
 \item{g}{A \code{DAG} object describing the causal graph
-(to obtain a \code{DAG} from another format, see \link{import_graph}.}
+(to obtain a \code{DAG} from another format, see \code{\link[=import_graph]{import_graph()}}.}
 
 \item{gamma}{A \code{counterfactual_conjunction} object
 representing the counterfactual causal query.}
@@ -18,29 +18,27 @@ representing the conditioning conjunction (optional).}
 
 \item{data}{A \code{character} string that accepts one of the following:
 \code{"interventions"} (the default), \code{"observations"}or \code{"both"}. This argument
-defines the available data for identification. If \code{"interventions"} is used,
+defines the target level of identification. If \code{"interventions"} is used,
 the identification is attempted down to the intervention level. If
 \code{"observations"} is used, identification is attempted down to the
 observational level. If \code{"both"} is used, identification is carried out
-term wise, where identification of each interventional distribution that
-appears in the identifying functional is further attempted in terms of the
-joint observed probability distribution.}
+termwise to the lowest level where the term is still identifiable.}
 }
 \value{
-A list containing one or more of the following:
+A \code{list} containing one or more of the following:
 \itemize{
-\item \code{id} A logical value that is \code{TRUE} if the query is identifiable and
+\item \code{id}\cr A \code{logical} value that is \code{TRUE} if the query is identifiable and
 \code{FALSE} otherwise from the available \code{data} in \code{g}.
 Note that in cases where \code{gamma} itself is
 inconsistent, the query will be identifiable, but with probability 0.
-\item \code{formula} An object of class \code{functional} giving the identifying
+\item \code{formula}\cr An object of class \code{functional} giving the identifying
 functional of the query in LaTeX syntax via \code{format} or \code{print},
 if identifiable. This expression is given in terms of the
 available \code{data}. For tautological statements, the resulting
 probability is 1, and for inconsistent statements, the resulting
 probability is 0. For formatting options, see
 \code{\link[=format.functional]{format.functional()}} and \code{\link[=format.probability]{format.probability()}}.
-\item \code{undefined} A logical value that is \code{TRUE} if
+\item \code{undefined}\cr A logical value that is \code{TRUE} if
 a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
 for example when \eqn{p(\delta) = 0}, and \code{FALSE} otherwise.
 }
@@ -56,8 +54,8 @@ To identify a conditional conjunction \eqn{p(\gamma|\delta)}, both \code{gamma}
 and \code{delta} should be specified.
 
 First, a parallel worlds graph is constructed based on the query. In a
-parallel worlds graph, for each \eqn{do}-action that appears in \eqn{gamma}
-(and \eqn{delta}) a copy of the original graph is created with the new
+parallel worlds graph, for each \eqn{do}-action that appears in \eqn{\gamma}
+(and \eqn{\delta}) a copy of the original graph is created with the new
 observational variables attaining their post-interventional values
 but sharing the latent variables. This graph is known as a parallel worlds
 graph. From the parallel worlds graph, a counterfactual graph
@@ -70,7 +68,8 @@ these algorithms exploit the so called c-component factorization to split
 the query into smaller subproblems, which are then solved recursively.
 If argument \code{data} is \code{"observations"} or \code{"both"}, identification of
 interventional probabilities in the resulting functional is further
-attempted in terms of the joint probability distribution.
+attempted in terms of the joint probability distribution by using the
+ID and IDC algorithms (see \link{causal_effect}).
 }
 \examples{
 # Examples that appears in Shpitser and Pearl (2008)
@@ -92,8 +91,9 @@ identifiable(g1, c3)
 
 # Non-identifiable conjunction
 identifiable(g2, c3)
+
 }
 \seealso{
-\link{dag}, \link{counterfactual_variable},
-\link{counterfactual_conjunction}, \link{probability}
+\code{\link[=dag]{dag()}}, \code{\link[=counterfactual_variable]{counterfactual_variable()}},
+\code{\link[=probability]{probability()}}
 }
