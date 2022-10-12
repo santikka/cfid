@@ -1,4 +1,4 @@
-# Inputs
+# Inputs ------------------------------------------------------------------
 
 test_that("valid inputs", {
   expect_error(probability(val = function(x) x))
@@ -20,7 +20,7 @@ id2 <- identifiable(g1, conj(v1), conj(v2, v3, v4))
 prob3 <- id2$formula
 prob3$denominator <- probability(val = 1L)
 
-# Formatting
+# Format ------------------------------------------------------------------
 
 test_that("probability format", {
   expect_identical(

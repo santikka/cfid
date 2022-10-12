@@ -50,15 +50,23 @@
 #' cf("Y", 2, c("X" = 1, "Z" = 0))
 #' @export
 counterfactual_variable <- function(var, obs = integer(0L), sub = integer(0L)) {
-  var <- toupper(try_type(var = var, type = "character")[1])
-  if (length(obs) > 0L) {
-    obs <- try_type(obs = obs, type = "integer")[1]
-  }
-  names(var) <- names(obs) <- NULL
+  stopifnot_(
+    length(var) == 1L,
+    "Argument `var` must be a signle character string."
+  )
+  var <- toupper(try_type(var = var, type = "character"))
+  stopifnot_(
+    length(obs) < 2L,
+    "Argument `obs` must a single integer if provided."
+  )
+  obs <- try_type(obs = obs, type = "integer")
+  names(var) <- NULL
+  names(obs) <- NULL
   if (length(sub) > 0L) {
-    if (is.null(names(sub))) {
-      stop_("Argument `sub` must be named")
-    }
+    stopifnot_(
+      !is.null(names(sub)),
+      "Argument `sub` must be named."
+    )
     sub <- try_type(sub = sub, type = "integer")
     names(sub) <- toupper(names(sub))
   }
@@ -84,7 +92,7 @@ format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
   super_sub <- character(0L)
   form <- list(var = x$var, sub = character(0L))
   out <- ""
-  if (length(x$obs)) {
+  if (length(x$obs) > 0L) {
     if (x$obs > 0L) {
       if (use_primes) {
         super_var <- rep_char("'", x$obs)
@@ -92,7 +100,10 @@ format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
         super_var <- paste0("^{(", x$obs, ")}")
       }
     } else if (x$obs < 0L) {
-      super_var <- "^{*}"
+      more <- x$obs < -1L
+      lhs <- ifelse(more, "{", "")
+      rhs <- ifelse(more, "}", "")
+      super_var <- paste0("^", lhs, "*", rhs)
     }
     form$var <- collapse(tolower(x$var), super_var)
   } else {

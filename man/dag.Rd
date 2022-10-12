@@ -2,14 +2,17 @@
 % Please edit documentation in R/graphs.R
 \name{dag}
 \alias{dag}
+\alias{print.dag}
 \title{Directed Acyclic Graph}
 \usage{
 dag(x)
+
+\method{print}{dag}(x, ...)
 }
 \arguments{
-\item{x}{A \code{character} string containing a sequence of paths consisting of
-of edges in the form \code{X -> Y}, \code{X <- Y} or \verb{X <-> Y}.
-See details for more advanced constructs.}
+\item{x}{A \code{dag} object}
+
+\item{...}{Not used}
 }
 \value{
 An object of class \code{dag}, which is a square adjacency matrix

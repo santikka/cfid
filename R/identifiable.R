@@ -38,12 +38,13 @@
 #' the identification is attempted down to the intervention level. If
 #' `"observations"` is used, identification is attempted down to the
 #' observational level. If `"both"` is used, identification is carried out
-#' termwise to the lowest level where the term is still identifiable.
+#' for each term to the lowest level where the term is still identifiable.
 #'
 #' @seealso [cfid::dag()], [cfid::counterfactual_variable()],
 #' [cfid::probability()]
 #'
-#' @return A `list` containing one or more of the following:
+#' @return An object of class `query` which is a `list` containing
+#' one or more of the following:
 #'
 #' * `id`\cr A `logical` value that is `TRUE` if the query is identifiable and
 #' `FALSE` otherwise from the available `data` in `g`.
@@ -140,34 +141,54 @@ identifiable <- function(g, gamma, delta = NULL, data = "interventions") {
     out$formula <- functional(terms = list(out$formula))
   }
   if (out$id && data != "interventions") {
-    if (!is.null(out$formula$numerator)) {
-      n <- out$formula$numerator
-      sumset <- out$formula$denominator$sumset
-      terms <- identify_terms(n)
-      if (terms$id) {
-        d <- terms
-        d$sumset <- sumset
-        out <- list(
-          id = TRUE,
-          formula = functional(
-            numerator = terms$formula,
-            denominator = d
-          )
-        )
-      } else {
-        out$identifiable <- FALSE
-        out$formula <- NULL
-      }
-    }
     out <- identify_terms(out$formula, data, g)
     out$undefined <- FALSE
   }
-  out
+  out$counterfactual <- TRUE
+  out$gamma <- gamma
+  out$delta <- delta
+  out$data <- data
+  structure(
+    out,
+    class = "query"
+  )
+}
+
+#' @method print query
+#' @param x A `query` object
+#' @param ... Not used.
+#' @export
+print.query <- function(x, ...) {
+  if (x$counterfactual) {
+    delta_str <- ifelse(
+      is.null(x$delta),
+      "",
+      paste0("|", format(x$delta))
+    )
+    query_str <- paste0("p(", format(x$gamma), delta_str, ")")
+    cat("The query", query_str)
+  } else {
+    cat("The query", format(x$causaleffect))
+  }
+  id_str <- ifelse(x$id, "identifiable", "not identifiable")
+  data_str <- switch(
+    x$data,
+    both = "(P_*, p(v)).",
+    observations = "p(v).",
+    interventions = "P_*."
+  )
+  cat(" is", id_str, "from", data_str)
+  if (x$undefined) {
+    cat("\nThe query is undefined.")
+  }
+  if (x$id) {
+    cat("\nFormula:", format(x$formula))
+  }
 }
 
 #' Attempt to Identify Terms from the Output of IDC*
 #'
-#' @param x A `functional` object
+#' @param x A `functional` or a `probability` object.
 #' @param data Either `"observations"` or `"both"`
 #' @param g A `dag` object
 #' @noRd
@@ -178,27 +199,51 @@ identify_terms <- function(x, data, g) {
     terms <- vector(mode = "list", length = n_terms)
     for (i in seq_len(n_terms)) {
       terms[[i]] <- identify_terms(x$terms[[i]], data, g)
-      if (data == "observations" && !terms[[i]]$id) {
-        return(list(id = FALSE, formula = NULL))
+      if (!terms[[i]]$id) {
+        if (data == "observations") {
+          return(list(id = FALSE, formula = NULL))
+        }
+        terms[[i]] <- x$terms[[i]]
       }
     }
     formulas <- lapply(terms, "[[", "formula")
     out <- list(
       id = TRUE,
-      formula = functional(sumset = x$subset, terms = formulas)
+      formula = functional(sumset = x$sumset, terms = formulas)
+    )
+  } else if (!is.null(x$numerator)) {
+    n <- identify_terms(x$numerator, data, g)
+    if (!n$id) {
+      if (data == "observations") {
+        return(list(id = FALSE, formula = NULL))
+      }
+      n <- x$numerator
+    }
+    d <- identify_terms(x$denominator, data, g)
+    if (!d$id) {
+      if (data == "observations") {
+        return(list(id = FALSE, formula = NULL))
+      }
+      d <- x$numerator
+    }
+    out <- list(
+      id = TRUE,
+      formula = functional(
+        sumset = x$sumset,
+        numerator = n$formula,
+        denominator = d$formula
+      )
     )
   } else {
-    var <- vars(x$var)
     do <- vars(x$do)
-    cond <- vars(x$cond)
-    prob_vals <- unlist(evs(c(x$var, x$do, x$cond)))
-    prob_names <- names(prob_vals)
-    lab <- attr(g, "labels")[!attr(g, "latent")]
-    lab <- lab[!lab %in% prob_names]
-    v_mis <- integer(length(lab))
-    names(v_mis) <- lab
-    v <- c(prob_vals, v_mis)
-    out <- causal_effect(y = var, x = do, z = cond, v = v, g = g)
+    if (length(do) > 0L) {
+      var <- vars(x$var)
+      cond <- vars(x$cond)
+      v <- unlist(evs(c(x$var, x$do, x$cond)))
+      out <- causal_effect(g = g, y = var, x = do, z = cond, v = v)
+    } else {
+      out <- list(id = TRUE, formula = x)
+    }
   }
   out
 }

@@ -58,65 +58,78 @@
 #'
 #' @export
 dag <- function(x) {
+  stopifnot_(
+    length(x) == 1L,
+    "Argument `x` must be a single character string."
+  )
   x <- try_type(x = x, type = "character")
   x <- toupper(x)
   x <- gsub("[;\\,\r\n\t]", " ", x)
-  if (!nzchar(trimws(x))) {
-    stop_("Argument `x` contains only whitespace or special characters.")
-  }
+  stopifnot_(
+    nzchar(trimws(x)),
+    "Argument `x` contains only whitespace or special characters."
+  )
   e_within <- grepl("\\{[^\\}]+[<>\\-]+[^\\{]+\\}", x)
-  if (e_within) {
-    stop_("Edges are not allowed within groups defined by {...}.")
-  }
+  stopifnot_(
+    !e_within,
+    "Edges are not allowed within groups defined by {...}."
+  )
   g_str <- reg_match(x, "\\{([^<>\\-]+)\\}|([^<> \\-]+)|(<->|<-|->)")
-  g_str[2L,] <- trimws(g_str[2L, ])
+  g_str[2L, ] <- trimws(g_str[2L, ])
   g_type <- apply(g_str[-1L, , drop = FALSE], 2L, nzchar)
   g_str <- g_str[rbind(FALSE, g_type)]
   g_lst <- strsplit(g_str, "[ ]+", perl = TRUE)
-  e_lst <- which(sapply(g_lst, function(e) e[1L] %in% c("<->", "<-", "->")))
+  e_lst <- which(
+    vapply(g_lst, function(e) e[1L] %in% c("<-", "->", "<->"), logical(1L))
+  )
   v_lst <- Filter(function(v) all(!v %in% c("<->", "<-", "->")), g_lst)
   v_names <- unique(unlist(v_lst))
   n_v <- length(v_names)
   n_e <- length(e_lst)
+  n_g <- length(g_lst)
   A_obs <- matrix(0L, n_v, n_v)
   A_bi <- matrix(0L, n_v, n_v)
   rownames(A_obs) <- colnames(A_obs) <- v_names
   rownames(A_bi) <- colnames(A_bi) <- v_names
-  if (n_e > 0L) {
-    for (i in e_lst) {
-      if (i == 1L || i == length(g_lst)) {
-        stop_("Invalid edge construct in argument `x`.")
-      }
-      pairs <- expand.grid(
-        g_lst[[i - 1L]],
-        g_lst[[i + 1L]],
-        stringsAsFactors = FALSE
+  for (i in e_lst) {
+    stopifnot_(
+      i > 1L && i < n_g,
+      "Invalid edge construct in argument `x`."
+    )
+    pairs <- expand.grid(
+      g_lst[[i - 1L]],
+      g_lst[[i + 1L]],
+      stringsAsFactors = FALSE
+    )
+    p <- seq_len(nrow(pairs))
+    if (g_lst[[i]] %in% c("<-", "->")) {
+      right <- identical(g_lst[[i]], "->")
+      lhs <- ifelse(right, 1L, 2L)
+      rhs <- ifelse(right, 2L, 1L)
+      ix <- cbind(pairs[p, lhs], pairs[p, rhs])
+      A_obs[ix] <- 1L
+    } else {
+      ix <- rbind(
+        cbind(pairs[p, 1L], pairs[p, 2L]),
+        cbind(pairs[p, 2L], pairs[p, 1L])
       )
-      if (identical(g_lst[[i]], "->")) {
-        for (j in seq_len(nrow(pairs))) {
-          A_obs[pairs[j, 1L], pairs[j, 2L]] <- 1L
-        }
-      } else if (identical(g_lst[[i]], "<-")) {
-        for (j in seq_len(nrow(pairs))) {
-          A_obs[pairs[j, 2L], pairs[j, 1L]] <- 1L
-        }
-      } else if (identical(g_lst[[i]], "<->")) {
-        for (j in seq_len(nrow(pairs))) {
-          if (identical(pairs[j, 1L], pairs[j, 2L])) {
-            stop_(
-              "Invalid bidirected edge: ", pairs[j, 1L], " <-> ", pairs[j, 1L]
-            )
-          }
-          A_bi[pairs[j, 2L], pairs[j, 1L]] <- 1L
-          A_bi[pairs[j, 1L], pairs[j, 2L]] <- 1L
-        }
-      }
+      invalid <- which(ix[, 1L] == ix[, 2L])
+      stopifnot_(
+        length(invalid) == 0L,
+        paste0(
+          "Invalid bidirected edge in `g`: ",
+          pairs[invalid[1], 1L], " <-> ", pairs[invalid[1], 1L], "."
+        )
+      )
+      A_bi[ix] <- 1L
     }
   }
-  if (detect_cycles(A_obs)) {
-    stop_("The graph specified by argument `x` is not acyclic.")
-  }
-  n_u <- sum(A_bi[lower.tri(A_bi)])
+  stopifnot_(
+    !detect_cycles(A_obs),
+    "The graph specified by argument `x` is not acyclic."
+  )
+  A_bi[lower.tri(A_bi)] <- 0L
+  n_u <- sum(A_bi)
   n_vu <- n_v + n_u
   A <- matrix(0L, n_vu, n_vu)
   labels <- character(n_vu)
@@ -124,26 +137,72 @@ dag <- function(x) {
   A[seq_len(n_v), seq_len(n_v)] <- A_obs
   labels[seq_len(n_v)] <- v_names
   if (n_u > 0L) {
-    k <- n_v
-    for (i in seq_len(n_v - 1L)) {
-      for (j in seq.int(i + 1L, n_v)) {
-        if (A_bi[i, j]) {
-          k <- k + 1L
-          A[k, i] <- 1L
-          A[k, j] <- 1L
-          labels[k] <- paste0("U[", v_names[i], ",", v_names[j], "]")
-        }
-      }
-    }
-    latent[seq.int(n_v + 1L, n_vu)] <- TRUE
+    u_ix <- seq.int(n_v + 1L, n_vu)
+    lhs_ix <- rep(u_ix, 2L)
+    rhs_ix <- which(A_bi == 1L, arr.ind = TRUE)
+    A[cbind(lhs_ix, c(rhs_ix))] <- 1L
+    labels[u_ix] <- paste0(
+      "U[", v_names[rhs_ix[, 1L]], ",", v_names[rhs_ix[, 2L]], "]"
+    )
+    latent[u_ix] <- TRUE
   }
+  ord <- topological_order(A, latent)
+  dag_str <- dag_string(A, labels, latent, ord)
   structure(
     A,
     labels = labels,
     latent = latent,
-    order = topological_order(A, latent),
+    order = ord,
+    text = dag_str,
     class = "dag"
   )
+}
+
+#' Convert a DAG into a character string
+#'
+#' @param A An adjacency matrix.
+#' @param lab A `character` vector of vertex labels.
+#' @param lat A `logical` vector indicating latent variables by `TRUE`
+#' @param ord An `integer` vector giving a topological order of `A`.
+#' @return A `character` representation of the DAG.
+#' @noRd
+dag_string <- function(A, lab, lat, ord) {
+  ord <- ord[!lat[ord]]
+  e <- character(ncol(A))
+  for (i in ord) {
+    ch <- lab[children(i, A)]
+    n_ch <- length(ch)
+    if (n_ch > 0L) {
+      lhs <- ifelse(n_ch > 1L, "{", "")
+      rhs <- ifelse(n_ch > 1L, "}", "")
+      e[i] <- paste0(lab[i], " -> ", lhs, paste0(ch, collapse = ", "), rhs)
+    }
+  }
+  for (i in which(lat)) {
+    e[i] <- paste0(lab[children(i, A)], collapse = " <-> ")
+  }
+  paste0(e[nzchar(e)], collapse = "; ")
+}
+
+#' Verify that argument is a valid DAG
+#'
+#' @param x An R object.
+#' @noRd
+is.dag <- function(x) {
+  inherits(x, "dag")
+}
+
+#' @method print dag
+#' @rdname dag
+#' @param x A `dag` object
+#' @param ... Not used
+#' @export
+print.dag <- function(x, ...) {
+  stopifnot_(
+    is.dag(x),
+    "Argument `x` must be a `dag` object."
+  )
+  print(attr(x, "text"))
 }
 
 #' Parallel Worlds Graph
@@ -205,7 +264,8 @@ pwg <- function(g, gamma) {
     A_pw[, sub_ix] <- 0L
     labels_pw[seq.int(from, to)] <- lapply(ix_obs, function(v) {
       if (v %in% sub_var[[w]]) {
-        cf(var = lab[v], obs = sub_lst[[w]])
+        v_ix <- which(sub_var[[w]] %in% v)
+        cf(var = lab[v], obs = sub_lst[[w]][v_ix])
       } else {
         cf(var = lab[v], sub = sub_lst[[w]])
       }
@@ -246,7 +306,7 @@ cg <- function(p, gamma) {
   n_total <- p$n_obs + p$n_unobs
   merged <- list()
   keep <- rep(TRUE, n_total)
-  eq_val <- rep(-(p$n_worlds + 1L), n_total)
+  eq_val <- integer(n_total)
   eq_val[seq_len(p$n_obs)] <-
     -1L * rep(seq_len(p$n_worlds), each = p$n_obs_orig)
   if (p$n_worlds > 1L) {
@@ -270,6 +330,8 @@ cg <- function(p, gamma) {
           val_alpha <- val(alpha, gamma)
           if (!is.null(val_alpha)) {
             eq_val[alpha_ix] <- val_alpha
+          } else if (a == 1L) {
+            eq_val[alpha_ix] <- 0L
           }
           val_pa_alpha <- eq_val[pa_alpha]
         }
@@ -318,18 +380,9 @@ cg <- function(p, gamma) {
             A_cg[pa_beta, alpha_ix] <- 1L
             A_cg[alpha_ix, ch_beta] <- 1L
             keep[beta_ix] <- FALSE
-            # sub_alpha <- length(alpha$sub)
-            # sub_beta <- length(beta$sub)
-            # replacement <- alpha
-            # original <- beta
-            # if (sub_alpha > sub_beta) {
-            #   replacement <- beta
-            #   original <- alpha
-            # }
             merged <- c(
               merged,
               list(
-                #list(original = original, replacement = replacement)
                 list(original = beta, replacement = alpha)
               )
             )
@@ -417,53 +470,53 @@ cg <- function(p, gamma) {
 
 #' Import Graph
 #'
-#' Import and construct a valid DAG from an external format.
+#' Import and construct a valid DAG from an external format. Accepts
+#' `dagitty` graphs, `igraph` graphs in the `causaleffect` package syntax,
+#' and character strings in the `dosearch` package syntax.
 #'
-#' Argument `x` accepts `dagitty` graphs, `igraph` graphs
-#' in the `causaleffect` package syntax and character strings
-#' in the `dosearch` package syntax.
-#'
-#' @param x A graph object in a valid external format, see details.
+#' @param x A graph object in a valid external format.
 #' @return A `dag` object.
 #' @export
 import_graph <- function(x) {
+  stopifnot_(
+    !missing(x),
+    "Argument `x` is missing."
+  )
   out <- NULL
   if (inherits(x, "dagitty")) {
     names(x) <- NULL
     class(x) <- NULL
     x <- trimws(gsub("[;\\,\r\n\t]", " ", x))
     x_def <- reg_match(x, "dag \\{(.+)\\}")
-    if (length(x_def) > 0L) {
-      out <- dag(x_def[2L, 1L])
-    } else {
-      stop_("Unable to parse argument `x` into an object of class `dag`.")
-    }
+    stopifnot_(
+      length(x_def) > 0L,
+      "Unable to parse argument `x` into an object of class `dag`."
+    )
+    out <- dag(x_def[2L, 1L])
   } else if (inherits(x, "igraph")) {
-    if (requireNamespace("igraph", quietly = TRUE)) {
-      e <- igraph::E(x)
-      v <- igraph::vertex_attr(x, "name")
-      g_obs <- ""
-      g_unobs <- ""
-      description <- NULL
-      obs_edges <- e[(is.na(description) | description != "U")]
-      unobs_edges <- e[description == "U" & !is.na(description)]
-      if (length(obs_edges) > 0L) {
-        obs_ind <- igraph::get.edges(x, obs_edges)
-        g_obs <- paste(v[obs_ind[,1]], "->", v[obs_ind[, 2L]], collapse = " ")
-      }
-      if (length(unobs_edges) > 0L) {
-        unobs_ind <- igraph::get.edges(x, unobs_edges)
-        unobs_ind <- unobs_ind[unobs_ind[,1] < unobs_ind[, 2L],,drop=FALSE]
-        g_unobs <- paste(
-          v[unobs_ind[, 1L]], "<->", v[unobs_ind[, 2L]], collapse = " "
-        )
-      }
-      out <- dag(paste0(c(g_obs, g_unobs), collapse = " "))
-    } else {
-      stop_(
-        "Attempting to use `igraph` input, but the package is not available."
+    stopifnot_(
+      requireNamespace("igraph", quietly = TRUE),
+      "Attempting to use `igraph` input, but the package is not available."
+    )
+    e <- igraph::E(x)
+    v <- igraph::vertex_attr(x, "name")
+    g_obs <- ""
+    g_unobs <- ""
+    description <- NULL
+    obs_edges <- e[(is.na(description) | description != "U")]
+    unobs_edges <- e[description == "U" & !is.na(description)]
+    if (length(obs_edges) > 0L) {
+      obs_ind <- igraph::get.edges(x, obs_edges)
+      g_obs <- paste(v[obs_ind[,1]], "->", v[obs_ind[, 2L]], collapse = " ")
+    }
+    if (length(unobs_edges) > 0L) {
+      unobs_ind <- igraph::get.edges(x, unobs_edges)
+      unobs_ind <- unobs_ind[unobs_ind[,1] < unobs_ind[, 2L],,drop=FALSE]
+      g_unobs <- paste(
+        v[unobs_ind[, 1L]], "<->", v[unobs_ind[, 2L]], collapse = " "
       )
     }
+    out <- dag(paste0(c(g_obs, g_unobs), collapse = " "))
   } else if (is.character(x)) {
     out <- dag(x)
   } else if (is.null(out)) {
@@ -497,8 +550,12 @@ import_graph <- function(x) {
 export_graph <- function(g, type = c("dagitty", "causaleffect", "dosearch"),
                          use_bidirected = TRUE, ...) {
   stopifnot_(
+    !missing(g),
+    "Argument `g` is missing."
+  )
+  stopifnot_(
     is.dag(g),
-    "Argument `x` must be a `dag` object."
+    "Argument `g` must be a `dag` object."
   )
   out <- NULL
   type <- match.arg(type)
@@ -576,14 +633,6 @@ export_graph <- function(g, type = c("dagitty", "causaleffect", "dosearch"),
     out <- trimws(e_str)
   }
   out
-}
-
-#' Verify that argument is a valid DAG
-#'
-#' @param x An R object.
-#' @noRd
-is.dag <- function(x) {
-  inherits(x, "dag")
 }
 
 #' Create a counterfactual graph directly from a DAG

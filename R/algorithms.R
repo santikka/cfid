@@ -36,6 +36,8 @@ id_star <- function(g, gamma) {
   )
   gamma_prime <- tmp$conjunction
   gamma_var <- vars(gamma)
+  gamma_obs <- obs(gamma)
+  gamma_obs_var <- vars(gamma_obs)
   merged <- tmp$merged
   comp <- c_components(g_prime)
   n_comp <- length(comp)
@@ -57,10 +59,17 @@ id_star <- function(g, gamma) {
         if (length(sub_var) > 0L) {
           s_sub <- setdiff(s_sub, sub_var)
         }
-        comp[[i]][[j]]$sub <- c(
-          comp[[i]][[j]]$sub,
-          set_names(integer(length(s_sub)), s_sub)
-        )
+        s_len <- length(s_sub)
+        if (s_len > 0) {
+          sub_new <- set_names(integer(s_len), s_sub)
+          obs_ix <- which(gamma_obs_var %in% s_sub)
+          if (length(obs_ix) > 0) {
+            s_val <- unlist(evs(gamma_obs)[obs_ix])
+            s_ix <- which(s_sub %in% gamma_var)
+            sub_new[s_ix] <- s_val
+          }
+          comp[[i]][[j]]$sub <- c(comp[[i]][[j]]$sub, sub_new)
+        }
       }
       s_conj <- do.call(counterfactual_conjunction, comp[[i]])
       c_factors[[i]] <- id_star(g, s_conj)
@@ -406,17 +415,17 @@ factorize_probability <- function(s_var, v_var, p) {
   } else {
     for (i in seq_along(s_var)) {
       j <- which(v_var == s_var[i])
+      n <- p
+      d <- p
       if (j > 1L) {
-        n <- functional(
-          sumset = cflist(setdiff(v_var, v_var[seq_len(j)])),
-          terms = list(p)
+        n$sumset <- union(
+          p$sumset,
+          cflist(setdiff(v_var, v_var[seq_len(j)]))
         )
-      } else {
-        n <- p
       }
-      d <- functional(
-        sumset = cflist(setdiff(v_var, v_var[seq_len(j - 1L)])),
-        terms = list(p)
+      d$sumset <- union(
+        p$sumset,
+        cflist(setdiff(v_var, v_var[seq_len(j - 1L)]))
       )
       p_terms[[n_s + 1 - i]] <- functional(numerator = n, denominator = d)
     }

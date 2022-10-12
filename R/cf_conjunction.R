@@ -35,21 +35,22 @@
 #' v3 <- cf("X", 1)
 #' c2 <- c1 + v3
 #'
-#' # A specific variable (a unique combination of `var` and `sub`)
+#' # A specific value of a variable (a unique combination of `var` and `sub`)
 #' # can only appear once in a given conjunction,
 #' # otherwise the conjunction would be trivially inconsistent
 #' v4 <- cf("Y", 0, c("X" = 0))
 #' v5 <- cf("Y", 1, c("X" = 0))
 #' c3 <- try(conj(v4, v5))
+#'
 #' @export
 counterfactual_conjunction <- function(...) {
   dots <- list(...)
-  if (all(sapply(dots, is.counterfactual_variable))) {
-    check_conflicts(dots)
-    structure(unique(dots), class = "counterfactual_conjunction")
-  } else {
-    stop_("All arguments must be `counterfactual_variable` objects.")
-  }
+  stopifnot_(
+    all(vapply(dots, is.counterfactual_variable, logical(1L))),
+    "All arguments must be `counterfactual_variable` objects."
+  )
+  check_conflicts(dots)
+  structure(unique(dots), class = "counterfactual_conjunction")
 }
 
 as.counterfactual_conjunction <- function(x) {
@@ -159,3 +160,16 @@ print.counterfactual_conjunction <- function(x, ...) {
 #' @rdname counterfactuals
 #' @export
 conj <- counterfactual_conjunction
+
+
+check_conflicts <- function(x, y) {
+  if (missing(y)) {
+    conf <- trivial_conflicts(x)
+  } else {
+    conf <- trivial_conflict(x, y)
+  }
+  if (length(conf) > 0L) {
+    conf_form <- comma_sep(vapply(conf, format, character(1L)))
+    stop_("Inconsistent definitions given for variables: ", conf_form)
+  }
+}

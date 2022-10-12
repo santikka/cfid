@@ -56,15 +56,3 @@ stopifnot_ <- function(cond, message) {
     stop_(message)
   }
 }
-
-check_conflicts <- function(x, y) {
-  if (missing(y)) {
-    conf <- trivial_conflicts(x)
-  } else {
-    conf <- trivial_conflict(x, y)
-  }
-  if (length(conf) > 0L) {
-    conf_form <- comma_sep(vapply(conf, format, character(1L)))
-    stop_("Inconsistent definitions given for variables: ", conf_form)
-  }
-}

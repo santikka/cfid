@@ -22,10 +22,11 @@ defines the target level of identification. If \code{"interventions"} is used,
 the identification is attempted down to the intervention level. If
 \code{"observations"} is used, identification is attempted down to the
 observational level. If \code{"both"} is used, identification is carried out
-termwise to the lowest level where the term is still identifiable.}
+for each term to the lowest level where the term is still identifiable.}
 }
 \value{
-A \code{list} containing one or more of the following:
+An object of class \code{query} which is a \code{list} containing
+one or more of the following:
 \itemize{
 \item \code{id}\cr A \code{logical} value that is \code{TRUE} if the query is identifiable and
 \code{FALSE} otherwise from the available \code{data} in \code{g}.

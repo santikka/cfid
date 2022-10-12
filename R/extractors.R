@@ -82,6 +82,15 @@ evs <- function(gamma) {
   })
 }
 
+#' Determines the non-interventional variables in a counterfactual conjunction
+#'
+#' @param gamma A `counterfactual_conjunction` object.
+#' @return A subset `gamma` with only observations
+#' @noRd
+obs <- function(gamma) {
+  gamma[vapply(gamma, function(x) length(x$sub) == 0, logical(1L))]
+}
+
 #' Determines trivially conflicting variables in a counterfactual conjunction
 #'
 #' @param cf_list A list of `counterfactual_variable` objects.

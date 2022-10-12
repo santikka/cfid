@@ -4,19 +4,20 @@
 \alias{causal_effect}
 \title{Causal Effect Identification}
 \usage{
-causal_effect(y, x = character(0), z = character(0), v = integer(0), g)
+causal_effect(g, y, x = character(0), z = character(0), v = integer(0))
 }
 \arguments{
-\item{y}{A \code{character} vector of response variables.}
+\item{g}{A \code{dag} object depicting the causal diagram \eqn{G}.}
 
-\item{x}{A \code{character} vector of intervention variables.}
+\item{y}{A \code{character} vector of response variables \eqn{Y}.}
 
-\item{z}{An optional \code{character} vector of conditioning variables}
+\item{x}{A \code{character} vector of intervention variables \eqn{X}.}
+
+\item{z}{An optional \code{character} vector of conditioning variables \eqn{Z}.}
 
 \item{v}{An optional named \code{integer} vector giving the value assignments
-for observed variables in the model.}
-
-\item{g}{A \code{dag} object depicting the causal diagram \eqn{G}.}
+for observed variables in the model, i.e. \eqn{V = v} or
+for a subset of \eqn{V}.}
 }
 \value{
 A \code{list} with two components:

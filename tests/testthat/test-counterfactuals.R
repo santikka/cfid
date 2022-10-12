@@ -1,4 +1,4 @@
-# Counterfactual variables
+# Counterfactual variables ------------------------------------------------
 
 test_that("named interventions", {
   expect_error(cf("Y", 0, c(0)))
@@ -20,12 +20,11 @@ test_that("variable format", {
 test_that("variable print", {
   expect_output(print(cf("Y")))
 })
-
-# Counterfactual conjunctions
-
 v1 <- cf("Y", 0)
 v2 <- cf("X", 0)
 c1 <- conj(v1, v2)
+
+# Counterfactual conjunctions ---------------------------------------------
 
 test_that("all variables counterfactual", {
   expect_error(conj(v1, "X"))
@@ -61,7 +60,8 @@ test_that("arithmetic", {
   expect_error(`+.counterfactual_conjunction`("X", "Y"))
 })
 
-# Test conflicts
+# Conflicts ---------------------------------------------------------------
+
 test_that("produces conflicts", {
   v1 <- cf("Y", 0, c(X = 0))
   v2 <- cf("Y", 1, c(X = 0))
@@ -72,7 +72,8 @@ test_that("produces conflicts", {
   expect_error(check_conflicts(v1, list(v2, v3)))
 })
 
-# Value extraction
+# Value extraction --------------------------------------------------------
+
 test_that("both obs and int values received", {
   v1 <- cf("Y", 0, c(X = 1, Z = 0))
   v2 <- cf("X", 1, c(W = 2, Z = 0))
