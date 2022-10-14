@@ -1,6 +1,6 @@
 # Inputs ------------------------------------------------------------------
 
-test_that("valid inputs", {
+test_that("invalid probability/functional inputs fail", {
   expect_error(probability(val = function(x) x))
   expect_error(probability(var = "X"))
   expect_error(probability(do = "X"))
@@ -22,7 +22,7 @@ prob3$denominator <- probability(val = 1L)
 
 # Format ------------------------------------------------------------------
 
-test_that("probability format", {
+test_that("probability format works", {
   expect_identical(
     format(id1$formula),
     "\\sum_{w} p_{x}(w)p_{w,z}(y,x')p_{d}(z)p(d)"
@@ -49,6 +49,14 @@ test_that("probability format", {
   )
 })
 
-test_that("probability print", {
-  expect_output(print(id1$formula))
+test_that("probability printing works", {
+  expect_output(
+    print(id1$formula),
+    paste0(
+      "\\\\sum_\\{w\\} p_\\{x\\}\\(w\\)p_\\{w,z\\}",
+      "\\(y,x'\\)p_\\{d\\}\\(z\\)p\\(d\\)"
+    )
+  )
+  prob <- probability(var = list(cf("X", 0)), cond = list(cf("Z", 0)))
+  expect_output(print(prob), "p\\(x|z\\)")
 })

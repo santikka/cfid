@@ -43,7 +43,7 @@ functional <- function(sumset = NULL, terms = NULL,
   )
   stopifnot_(
     all(valid_terms),
-    "Argument `terms` must contain only `functional` or `probability` objects."
+    "Argument `terms` must be a list of `functional` or `probability` objects."
   )
   stopifnot_(
     is.null(numerator) ||

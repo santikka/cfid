@@ -1,6 +1,7 @@
 # cfid 0.1.4
 
   * Fixed an issue related to fixed variables in the counterfactual graph.
+  * Fixed an issue related to counterfactual graph generation and equality of random variables.
   * Now uses lower case and snake case for classes.
   * Added `id` and `idc` algorithms for full identification pipeline. These algorithms can also be used directly via `causal_effect`.
   * Improved the package documentation.

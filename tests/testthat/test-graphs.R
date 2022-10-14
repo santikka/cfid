@@ -1,4 +1,4 @@
-# Tests for DAGs
+# DAGs --------------------------------------------------------------------
 
 test_that("no self-loops or cycles", {
   expect_error(dag("X -> X"))
@@ -46,8 +46,6 @@ test_that("allowed structures", {
   expect_error(dag("z -> w\nx -> y"), NA)
 })
 
-# Tests for Parallel Worlds Graphs
-
 g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")
 v1 <- cf("Y", 0, c(X = 0))
 v2 <- cf("X", 1)
@@ -63,11 +61,7 @@ test_that("generated worlds", {
   expect_identical(p1$n_worlds, 3L)
 })
 
-# Tests for Counterfactual Graphs
-
-# c1 <- cfid:::cg(p1, gamma1)
-
-# Tests for graph operations
+# Graph operations --------------------------------------------------------
 
 A <- matrix(
   c(
@@ -83,17 +77,17 @@ A <- matrix(
 )
 
 test_that("vertex ordering", {
-  expect_identical(cfid:::topological_order(A), c(1L, 2L, 4L, 3L, 5L))
+  expect_identical(topological_order(A), c(1L, 2L, 4L, 3L, 5L))
 })
 
 test_that("children", {
-  expect_setequal(cfid:::children(1, A), c(2, 4))
-  expect_setequal(cfid:::children(c(2, 4), A), 3)
+  expect_setequal(children(1, A), c(2, 4))
+  expect_setequal(children(c(2, 4), A), 3)
 })
 
 test_that("parents", {
-  expect_setequal(cfid:::parents(c(2, 4), A), 1)
-  expect_setequal(cfid:::parents(5, A), 3)
+  expect_setequal(parents(c(2, 4), A), 1)
+  expect_setequal(parents(5, A), 3)
 })
 
 test_that("d-separation", {
@@ -105,7 +99,26 @@ test_that("d-separation", {
   expect_false(dsep(A, 2, 4))
 })
 
-# Tests for imports
+test_that("print", {
+  expect_error(
+    print.dag(1L),
+    "Argument `x` must be a `dag` object"
+  )
+  expect_output(
+    print(dag("X -> Z -> Y")),
+    "X -> Z; Z -> Y"
+  )
+  expect_output(
+    print(dag("X -> {Z, W} -> Y")),
+    "X -> \\{Z, W\\}; Z -> Y; W -> Y"
+  )
+  expect_output(
+    print(dag("X -> Z; X -> Y; Z -> Y; Z -> W; W -> Y")),
+    "X -> \\{Z, Y\\}; Z -> \\{Y, W\\}; W -> Y"
+  )
+})
+
+# Imported Graphs ---------------------------------------------------------
 
 test_that("dagitty dag supported", {
   dgty <- "dag {\nx\ny\nx -> y\n}\n"
@@ -119,8 +132,7 @@ test_that("dagitty mag not supported", {
   expect_error(import_graph(dgty))
 })
 
-
-test_that("causaleffect / igraph supported", {
+test_that("causaleffect syntax with igraph supported", {
   ig <- igraph::graph.formula(X -+ Z -+ Y, Y -+ X, X -+ Y)
   ig <- igraph::set.edge.attribute(ig, "description", c(2, 4), "U")
   expect_identical(import_graph(ig), dag("X -> Z -> Y X <-> Y"))
@@ -147,7 +159,7 @@ test_that("unsupported format", {
   expect_error(import_graph(g))
 })
 
-# Tests for exports
+# Exported Graphs ---------------------------------------------------------
 
 test_that("dags only", {
   g <- data.frame()

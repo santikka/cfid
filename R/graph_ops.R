@@ -112,7 +112,7 @@ topological_order <- function(A, latent) {
   }
   lat <- which(latent)
   ord <- integer(n)
-  v <- seq.int(n)
+  v <- seq_int(n)
   j <- 1L
   n_unobs <- length(lat)
   if (n_unobs > 0L) {
@@ -124,7 +124,7 @@ topological_order <- function(A, latent) {
   while (j <= n) {
     roots <- which(!colSums(A))
     n_r <- length(roots)
-    ord[seq.int(j, j + n_r - 1L)] <- v[roots]
+    ord[seq_int(j, j + n_r - 1L)] <- v[roots]
     v <- v[-roots]
     A <- A[-roots, -roots, drop = FALSE]
     j <- j + n_r
@@ -139,6 +139,9 @@ topological_order <- function(A, latent) {
 #' @return An `integer` vector indicating the ancestors.
 #' @noRd
 ancestors <- function(x, A) {
+  if (length(x) == 0L) {
+    return(x)
+  }
   B <- t(A)
   diag(B) <- 1L
   X <- B
@@ -156,7 +159,11 @@ ancestors <- function(x, A) {
 #' @return An `integer` vector indicating the children.
 #' @noRd
 children <- function(x, A) {
-  if (length(x) == 1L) {
+  x_len <- length(x)
+  if (x_len == 0L) {
+    return(integer(0))
+  }
+  if (x_len == 1L) {
     which(A[x, ] > 0L)
   } else {
     unique(which(A[x, ] > 0L, arr.ind = TRUE)[, 2L])
@@ -224,11 +231,8 @@ fixed <- function(g) {
 #' @return `TRUE` if X is d-separated from Y given Z in G, else `FALSE`.
 #' @noRd
 dsep <- function(g, x, y, z = integer(0L)) {
-  an_z <- integer(0L)
-  if (length(z) > 0L) {
-    an_z <- union(ancestors(z, g), z)
-  }
   n <- ncol(g)
+  an_z <- union(ancestors(z, g), z)
   xyz <- union(union(x, y), z)
   an_xyz <- union(ancestors(xyz, g), xyz)
   # indices from 1:n = 1st direction ("up"), map to TRUE
@@ -241,33 +245,26 @@ dsep <- function(g, x, y, z = integer(0L)) {
     L[el] <- FALSE
     d <- el <= n
     v <- el - (n * !d)
-    if (!V[el]) {
-      if (v %in% y) {
-        return(FALSE)
-      }
-      V[el] <- TRUE
-      if (d && !(v %in% z)) {
-        vis_pa <- intersect(parents(v, g), an_xyz)
+    if (V[el]) {
+      next
+    }
+    if (v %in% y) {
+      return(FALSE)
+    }
+    V[el] <- TRUE
+    if (d && !(v %in% z)) {
+      vis_pa <- intersect(parents(v, g), an_xyz)
+      vis_ch <- intersect(children(v, g), an_xyz)
+      L[vis_pa] <- TRUE
+      L[vis_ch + n] <- TRUE
+    } else if (!d) {
+      if (!v %in% z) {
         vis_ch <- intersect(children(v, g), an_xyz)
-        if (length(vis_pa) > 0L) {
-          L[vis_pa] <- TRUE
-        }
-        if (length(vis_ch) > 0L) {
-          L[vis_ch + n] <- TRUE
-        }
-      } else if (!d) {
-        if (!(v %in% z)) {
-          vis_ch <- intersect(children(v, g), an_xyz)
-          if (length(vis_ch) > 0L) {
-            L[vis_ch + n] <- TRUE
-          }
-        }
-        if (v %in% an_z) {
-          vis_pa <- intersect(parents(v, g), an_xyz)
-          if (length(vis_pa) > 0L) {
-            L[vis_pa] <- TRUE
-          }
-        }
+        L[vis_ch + n] <- TRUE
+      }
+      if (v %in% an_z) {
+        vis_pa <- intersect(parents(v, g), an_xyz)
+        L[vis_pa] <- TRUE
       }
     }
   }

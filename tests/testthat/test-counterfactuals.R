@@ -1,53 +1,63 @@
 # Counterfactual variables ------------------------------------------------
 
-test_that("named interventions", {
-  expect_error(cf("Y", 0, c(0)))
+test_that("unnamed interventions fail", {
+  expect_error(
+    cf("Y", 0L, 0L),
+    "Argument `sub` must be a named integer vector"
+  )
 })
 
-test_that("variable format", {
+test_that("variable format is correct", {
   expect_identical(format(cf("Y")), "Y")
-  expect_identical(format(cf("Y", 0)), "y")
-  expect_identical(format(cf("Y", 0, c("X" = 0))), "y_{x}")
-  expect_identical(format(cf("Y", 1, c("X" = 0))), "y'_{x}")
-  expect_identical(format(cf("Y", sub = c("X" = 0))), "Y_{x}")
-  expect_identical(format(cf("Y", sub = c("X" = 1))), "Y_{x'}")
+  expect_identical(format(cf("Y", 0L)), "y")
+  expect_identical(format(cf("Y", 0L, c("X" = 0L))), "y_{x}")
+  expect_identical(format(cf("Y", 1L, c("X" = 0L))), "y'_{x}")
+  expect_identical(format(cf("Y", sub = c("X" = 0L))), "Y_{x}")
+  expect_identical(format(cf("Y", sub = c("X" = 1L))), "Y_{x'}")
   expect_identical(
     format(cf("Y", 1, c("X" = 1)), use_primes = FALSE),
     "y^{(1)}_{x^{(1)}}"
   )
 })
 
-test_that("variable print", {
-  expect_output(print(cf("Y")))
+test_that("variable printing works", {
+  expect_output(print(cf("Y")), "Y")
 })
+
+# Counterfactual conjunctions ---------------------------------------------
+
 v1 <- cf("Y", 0)
 v2 <- cf("X", 0)
 c1 <- conj(v1, v2)
 
-# Counterfactual conjunctions ---------------------------------------------
-
-test_that("all variables counterfactual", {
-  expect_error(conj(v1, "X"))
+test_that("non-counterfactual variables to conjunction fails", {
+  expect_error(
+    conj(v1, "X"),
+    "All arguments must be `counterfactual_variable` object."
+  )
 })
 
-test_that("list coerce", {
+test_that("list coercion is supported", {
   expect_identical(as.counterfactual_conjunction(list(v1, v2)), c1)
 })
 
-test_that("default coerce", {
+test_that("default coercion is supported for conjunctions", {
   expect_identical(as.counterfactual_conjunction(c1), c1)
-  expect_error(as.counterfactual_conjunction(0L))
+  expect_error(
+    as.counterfactual_conjunction(0L),
+    "Cannot coerce object to class `counterfactual_conjunction`"
+  )
 })
 
-test_that("conjunction format", {
+test_that("conjunction format is correct", {
   expect_identical(format(c1), "y \u2227 x")
 })
 
-test_that("conjunction print", {
-  expect_output(print(c1))
+test_that("conjunction printing works", {
+  expect_output(print(c1), "y \u2227 x")
 })
 
-test_that("arithmetic", {
+test_that("counterfactual arithmetic is correct", {
   expect_identical(v1 + v2, c1)
   expect_identical(conj(v1) + v2, c1)
   expect_identical(v1 + conj(v2), c1)
@@ -55,9 +65,18 @@ test_that("arithmetic", {
   expect_identical(v1 + v1, conj(v1))
   expect_identical(c1 + v1, c1)
   expect_identical(v1 + c1, c1)
-  expect_error(v1 + "Y")
-  expect_error(c1 + "Y")
-  expect_error(`+.counterfactual_conjunction`("X", "Y"))
+  expect_error(
+    v1 + "Y",
+    "Cannot add an object of class `character` to a counterfactual variable"
+  )
+  expect_error(
+    c1 + "Y",
+    "Cannot add an object of class `character` to a counterfactual conjunction"
+  )
+  expect_error(
+    `+.counterfactual_conjunction`("X", "Y"),
+    "Unsupported input for method"
+  )
 })
 
 # Conflicts ---------------------------------------------------------------

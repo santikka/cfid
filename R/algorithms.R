@@ -2,26 +2,20 @@
 #'
 #' @param g A `dag` object.
 #' @param gamma A `counterfactual_conjunction` object.
+#' @return A `list` with two components: `id` and `formula` giving
+#' the identifiability status as a `logical` value and the identifying
+#' functional as a `functional` or a `probability` object, respectively.
 #' @noRd
 id_star <- function(g, gamma) {
-  n_cf <- length(gamma)
-  # Line 1
-  if (n_cf == 0L) {
-    return(list(id = TRUE, formula = probability(val = 1L)))
-  }
-  taut <- logical(n_cf)
-  for (i in seq_len(n_cf)) {
-    # Line 2
-    if (is_inconsistent(gamma[[i]])) {
-      return(list(id = TRUE, formula = probability(val = 0L)))
-    }
-    if (is_tautology(gamma[[i]])) {
-      taut[i] <- TRUE
-    }
+  # Line 2
+  if (is_inconsistent(gamma)) {
+    return(list(id = TRUE, formula = probability(val = 0L)))
   }
   # Line 3
-  if (any(taut)) {
-    return(id_star(g, gamma[!taut]))
+  gamma <- remove_tautologies(gamma)
+  # Line 1
+  if (length(gamma) == 0L) {
+    return(list(id = TRUE, formula = probability(val = 1L)))
   }
   # Line 4
   tmp <- make_cg(g, gamma)
@@ -50,28 +44,28 @@ id_star <- function(g, gamma) {
       s_sub <- setdiff(v_g, s_var)
       for (j in seq_along(comp[[i]])) {
         gamma_val <- val(comp[[i]][[j]], gamma_prime)
-        if (!is.null(gamma_val)) {
-          comp[[i]][[j]]$obs <- gamma_val
-        } else {
-          comp[[i]][[j]]$obs <- 0L
-        }
+        comp[[i]][[j]]$obs <- ifelse_(is.null(gamma_val), 0L, gamma_val)
         sub_var <- names(comp[[i]][[j]]$sub)
-        if (length(sub_var) > 0L) {
-          s_sub <- setdiff(s_sub, sub_var)
-        }
-        s_len <- length(s_sub)
+        s_sub_j <- setdiff(s_sub, sub_var)
+        s_len <- length(s_sub_j)
         if (s_len > 0) {
-          sub_new <- set_names(integer(s_len), s_sub)
-          obs_ix <- which(gamma_obs_var %in% s_sub)
+          sub_new <- set_names(integer(s_len), s_sub_j)
+          obs_ix <- which(gamma_obs_var %in% s_sub_j)
           if (length(obs_ix) > 0) {
             s_val <- unlist(evs(gamma_obs)[obs_ix])
-            s_ix <- which(s_sub %in% gamma_var)
+            s_ix <- which(s_sub_j %in% gamma_obs_var)
             sub_new[s_ix] <- s_val
           }
           comp[[i]][[j]]$sub <- c(comp[[i]][[j]]$sub, sub_new)
         }
       }
-      s_conj <- do.call(counterfactual_conjunction, comp[[i]])
+      #s_conj <- do.call(counterfactual_conjunction, comp[[i]])
+      s_conj <- try(
+        do.call(counterfactual_conjunction, comp[[i]]), silent = TRUE
+      )
+      if (inherits(s_conj, "try-error")) {
+        return(list(id = TRUE, formula = probability(val = 0L)))
+      }
       c_factors[[i]] <- id_star(g, s_conj)
       if (!c_factors[[i]]$id) {
         return(list(id = FALSE, formula = NULL))
@@ -79,77 +73,73 @@ id_star <- function(g, gamma) {
       if (is.probability(c_factors[[i]]$formula) &&
           length(c_factors[[i]]$formula$val) > 0L &&
           c_factors[[i]]$formula$val == 0L) {
-        prob_zero <- TRUE
+        return(list(id = TRUE, formula = probability(val = 0L)))
       }
     }
-    if (prob_zero) {
-      return(list(id = TRUE, formula = probability(val = 0L)))
+    sumset <- setdiff(v_g, gamma_var)
+    form_terms <- lapply(c_factors, "[[", "formula")
+    if (length(sumset) > 0L) {
+      form_out <- functional(
+        sumset = lapply(sumset, function(x) cf(var = x, obs = 0L)),
+        terms = form_terms
+      )
     } else {
-      sumset <- setdiff(v_g, gamma_var)
-      form_terms <- lapply(c_factors, "[[", "formula")
-      if (length(sumset) > 0L) {
-        form_out <- functional(
-          sumset = lapply(sumset, function(x) cf(var = x, obs = 0L)),
-          terms = form_terms
-        )
-      } else {
-        form_out <- functional(terms = form_terms)
-      }
-      return(list(id = TRUE, formula = form_out))
+      form_out <- functional(terms = form_terms)
     }
-  } else {
-    # Line 7
-    gamma_sub <- subs(gamma)
-    gamma_cfvar <- cfvars(gamma_prime)
-    gamma_sub_var <- lapply(gamma_sub, names)
-    for (i in seq_along(gamma_prime)) {
-      if (length(gamma_sub_var[[i]]) > 0L) {
-        g_ix <- which(lab_prime %in% gamma_cfvar[i])
-        an <- ancestors(g_ix, g_prime)
-        an_var <- vars(lab_prime[an])
-        an_sub <- which(gamma_sub_var[[i]] %in% an_var)
-        gamma_prime[[i]]$sub <- gamma_prime[[i]]$sub[an_sub]
-      }
+    return(list(id = TRUE, formula = form_out))
+
+  }
+  # Line 7
+  gamma_sub <- subs(gamma)
+  gamma_cfvar <- cfvars(gamma_prime)
+  gamma_sub_var <- lapply(gamma_sub, names)
+  for (i in seq_along(gamma_prime)) {
+    if (length(gamma_sub_var[[i]]) > 0L) {
+      g_ix <- which(lab_prime %in% gamma_cfvar[i])
+      an <- ancestors(g_ix, g_prime)
+      an_var <- vars(lab_prime[an])
+      an_sub <- which(gamma_sub_var[[i]] %in% an_var)
+      gamma_prime[[i]]$sub <- gamma_prime[[i]]$sub[an_sub]
     }
-    s_sub <- unlist(unique(subs(gamma_prime)))
-    s_sub <- split(s_sub, names(s_sub))
-    if (any(lengths(s_sub) > 1L)) {
-      return(list(id = FALSE, formula = NULL))
-    }
-    s_val <- unlist(evs(gamma_prime))
-    s_val <- split(s_val, names(s_val))
-    s_val_names <- names(s_val)
-    for (i in seq_along(s_val)) {
-      uniq_val <- unique(s_val[[i]])
-      n_val <- length(uniq_val)
-      if (n_val > 1L) {
-        val_pairs <- which(
-          lower.tri(matrix(0L, n_val, n_val)),
-          arr.ind = TRUE
-        )
-        sub_i <- s_sub[[s_val_names[[i]]]]
-        val_i <- s_val[[s_val_names[[i]]]]
-        for (j in seq_len(nrow(val_pairs))) {
-          if (val_i[val_pairs[, 1L]] %in% sub_i ||
-              val_i[val_pairs[, 2L]] %in% sub_i) {
-            return(list(id = FALSE, formula = NULL))
-          }
+  }
+  s_sub <- unlist(unique(subs(gamma_prime)))
+  s_sub <- split(s_sub, names(s_sub))
+  if (any(lengths(s_sub) > 1L)) {
+    return(list(id = FALSE, formula = NULL))
+  }
+  s_val <- unlist(evs(gamma_prime))
+  s_val <- split(s_val, names(s_val))
+  s_val_names <- names(s_val)
+  for (i in seq_along(s_val)) {
+    uniq_val <- unique(s_val[[i]])
+    n_val <- length(uniq_val)
+    if (n_val > 1L) {
+      val_pairs <- which(
+        lower.tri(matrix(0L, n_val, n_val)),
+        arr.ind = TRUE
+      )
+      sub_i <- s_sub[[s_val_names[[i]]]]
+      val_i <- s_val[[s_val_names[[i]]]]
+      for (j in seq_len(nrow(val_pairs))) {
+        if (val_i[val_pairs[, 1L]] %in% sub_i ||
+            val_i[val_pairs[, 2L]] %in% sub_i) {
+          return(list(id = FALSE, formula = NULL))
         }
       }
     }
-    lab <- attr(g, "labels")
-    obs <- vals(gamma_prime)
-    obs_var <- vars(obs)
-    obs_ix <- which(lab %in% obs_var)
-    obs_an <- ancestors(obs_ix, g)
-    s_sub_an <- intersect(names(s_sub), lab[obs_an])
-    if (length(s_sub_an) > 0L) {
-      do <- lapply(s_sub_an, function(i) cf(var = i, obs = s_sub[i]))
-    } else {
-      do <- integer(0L)
-    }
-    return(list(id = TRUE, formula = probability(var = obs, do = do)))
   }
+  lab <- attr(g, "labels")
+  obs <- vals(gamma_prime)
+  obs_var <- vars(obs)
+  obs_ix <- which(lab %in% obs_var)
+  obs_an <- ancestors(obs_ix, g)
+  s_sub_an <- intersect(names(s_sub), lab[obs_an])
+  if (length(s_sub_an) > 0L) {
+    do <- lapply(s_sub_an, function(i) cf(var = i, obs = s_sub[i]))
+  } else {
+    do <- integer(0L)
+  }
+  list(id = TRUE, formula = probability(var = obs, do = do))
 }
 
 #' The IDC* Algorithm
@@ -157,6 +147,11 @@ id_star <- function(g, gamma) {
 #' @param g A `dag` object.
 #' @param gamma A `counterfactual_conjunction` object.
 #' @param delta A `counterfactual_conjunction` object.
+#' @return A `list` with two components: `id` and `formula` giving
+#' the identifiability status as a `logical` value and the identifying
+#' functional as a `functional` or a `probability` object, respectively.
+#' If the probability is undefined, a `list` with the components `id`
+#' and `undefined` are returned, with values `FALSE` and `TRUE`, respectively.
 #' @noRd
 idc_star <- function(g, gamma, delta) {
   if (length(delta) == 0L) {
@@ -238,6 +233,9 @@ idc_star <- function(g, gamma, delta) {
 #' @param x_var A `character` vector of intervention variables.
 #' @param p A `probability` object
 #' @param g A `dag` object.
+#' @return A `list` with two components: `id` and `formula` giving
+#' the identifiability status as a `logical` value and the identifying
+#' functional as a `functional` or a `probability` object, respectively.
 #' @noRd
 id <- function(y_var, x_var, p, g) {
   lat <- attr(g, "latent")
@@ -254,11 +252,11 @@ id <- function(y_var, x_var, p, g) {
   # Line 1
   if (length(x) == 0) {
     if (is.probability(p)) {
-      return(list(id = TRUE, formula = probability(var = cflist(y_var))))
+      p <- probability(var = cflist(y_var))
     } else {
       p$sumset <- union(p$sumset, cflist(vu_var[setdiff(v, y)]))
-      return(list(id = TRUE, formula = p))
     }
+    return(list(id = TRUE, formula = p))
   }
   # Line 2
   an <- sort(union(ancestors(y, g), y))
@@ -276,7 +274,7 @@ id <- function(y_var, x_var, p, g) {
   g_xbar[, x] <- 0L
   vmx <- setdiff(v, x)
   w <- setdiff(vmx, union(ancestors(y, g_xbar), y))
-  if (length(w) > 0) {
+  if (length(w) > 0L) {
     return(id(y_var, vu_var[union(x, w)], p, g))
   }
   # Line 4
@@ -329,7 +327,7 @@ id <- function(y_var, x_var, p, g) {
   s_prime <- which(vu_var %in% s_prime_var)
   s_prime_lat <- intersect(parents(s_prime, g), which(lat))
   s_vu <- union(s_prime, s_prime_lat)
-  return(id(y_var, intersect(s_prime_var, x_var), p_new, subgraph(s_vu, g)))
+  id(y_var, intersect(s_prime_var, x_var), p_new, subgraph(s_vu, g))
 }
 
 #' The IDC Algorithm
@@ -339,6 +337,9 @@ id <- function(y_var, x_var, p, g) {
 #' @param z_var A `character` vector of conditioning variables.
 #' @param p A `probability` object
 #' @param g A `dag` object.
+#' @return A `list` with two components: `id` and `formula` giving
+#' the identifiability status as a `logical` value and the identifying
+#' functional as a `functional` or a `probability` object, respectively.
 #' @noRd
 idc <- function(y_var, x_var, z_var, p, g) {
   lat <- attr(g, "latent")
@@ -363,7 +364,7 @@ idc <- function(y_var, x_var, z_var, p, g) {
       return(idc(y_var, union(x_var, vu_var[zi]), vu_var[zmzi], p, g))
     }
   }
-  # line 2
+  # Line 2
   if (length(z_var) == 0) {
     # Simplify cases where denominator would be equal to 1.
     return(id(y_var, x_var, p, g))
@@ -372,22 +373,15 @@ idc <- function(y_var, x_var, z_var, p, g) {
   if (!out$id) {
     return(list(id = FALSE, formula = NULL))
   }
-  if (is.probability(out$formula)) {
-    list(
-      id = TRUE,
-      formula = probability(var = cflist(y_var), cond = cflist(z_var))
+  d <- out$formula
+  d$sumset <- union(d$sumset, cflist(y_var))
+  list(
+    id = TRUE,
+    formula = functional(
+      numerator = out$formula,
+      denominator = d
     )
-  } else {
-    d <- out$formula
-    d$sumset <- union(d$sumset, cflist(y_var))
-    list(
-      id = TRUE,
-      formula = functional(
-        numerator = out$formula,
-        denominator = d
-      )
-    )
-  }
+  )
 }
 
 #' Compute the C-component Factorization of a Probability Distribution
@@ -395,39 +389,39 @@ idc <- function(y_var, x_var, z_var, p, g) {
 #' @param s_var A `character` vector of the variables in the C-component.
 #' @param v_var A `character` vector of observed variables in the graph.
 #' @param p A `probability` object.
+#' @return The C-factors a `list` of `probability` or `functional` objects.
 #' @noRd
 factorize_probability <- function(s_var, v_var, p) {
   n_s <- length(s_var)
   p_terms <- vector(mode = "list", length = n_s)
   s_var <- s_var[order(match(s_var, v_var))]
   if (is.probability(p)) {
-    for (i in seq_along(s_var)) {
+    for (i in seq_len(n_s)) {
       j <- which(v_var == s_var[i])
-      cond_vars <- NULL
-      if (j > 1L) {
-        cond_vars <- cflist(v_var[seq_len(j - 1L)])
-      }
+      cond_vars <- cflist(v_var[seq_len(j - 1L)])
       p_terms[[n_s + 1 - i]] <- probability(
         var = list(cf(s_var[i])),
         cond = cond_vars
       )
     }
   } else {
-    for (i in seq_along(s_var)) {
+    for (i in seq_len(n_s)) {
       j <- which(v_var == s_var[i])
       n <- p
       d <- p
-      if (j > 1L) {
-        n$sumset <- union(
-          p$sumset,
-          cflist(setdiff(v_var, v_var[seq_len(j)]))
-        )
-      }
+      n$sumset <- union(
+        p$sumset,
+        cflist(setdiff(v_var, v_var[seq_len(j)]))
+      )
       d$sumset <- union(
         p$sumset,
         cflist(setdiff(v_var, v_var[seq_len(j - 1L)]))
       )
-      p_terms[[n_s + 1 - i]] <- functional(numerator = n, denominator = d)
+      if (length(d$sumset) == length(d$terms) && is.null(d$numerator)) {
+        p_terms[[n_s + 1 - i]] <- n
+      } else {
+        p_terms[[n_s + 1 - i]] <- functional(numerator = n, denominator = d)
+      }
     }
   }
   p_terms

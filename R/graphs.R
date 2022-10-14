@@ -1,12 +1,7 @@
 #' Directed Acyclic Graph
 #'
-#' Define a directed acyclic graph (DAG).
+#' Define a directed acyclic graph (DAG) describing the causal model.
 #'
-#' @param x A `character` string containing a sequence of paths consisting of
-#' of edges in the form `X -> Y`, `X <- Y` or `X <-> Y`.
-#' See details for more advanced constructs.
-#'
-#' @details
 #' The syntax for `x` follows the `dagitty` package closely for compatibility.
 #' However, not all features of `dagitty` graphs are supported.
 #' The resulting adjacency matrix of the definition is checked for cycles.
@@ -33,12 +28,16 @@
 #' of counterfactual variables, where capital letter denote variables,
 #' and small letters denote their value assignments.
 #'
+#' @param x A `character` string containing a sequence of paths consisting of
+#' of edges in the form `X -> Y`, `X <- Y` or `X <-> Y`.
+#' See details for more advanced constructs.
 #' @return An object of class `dag`, which is a square adjacency matrix
-#'   with the following attributes:
+#' with the following attributes:
 #'
-#' * `labels` A `character` vector (or a list) of vertex labels.
-#' * `latent` A `logical` vector indicating latent variables.
-#' * `order` An `integer` vector giving a topological order for the vertices.
+#' * `labels`\cr A `character` vector (or a list) of vertex labels.
+#' * `latent`\cr A `logical` vector indicating latent variables.
+#' * `order`\cr An `integer` vector giving a topological order for the vertices.
+#' * `text`\cr A `character` string giving representing the DAG.
 #' .
 #' @examples
 #' dag("x -> {y z} <- w <-> g")
@@ -104,8 +103,8 @@ dag <- function(x) {
     p <- seq_len(nrow(pairs))
     if (g_lst[[i]] %in% c("<-", "->")) {
       right <- identical(g_lst[[i]], "->")
-      lhs <- ifelse(right, 1L, 2L)
-      rhs <- ifelse(right, 2L, 1L)
+      lhs <- ifelse_(right, 1L, 2L)
+      rhs <- ifelse_(right, 2L, 1L)
       ix <- cbind(pairs[p, lhs], pairs[p, rhs])
       A_obs[ix] <- 1L
     } else {
@@ -136,16 +135,14 @@ dag <- function(x) {
   latent <- logical(n_vu)
   A[seq_len(n_v), seq_len(n_v)] <- A_obs
   labels[seq_len(n_v)] <- v_names
-  if (n_u > 0L) {
-    u_ix <- seq.int(n_v + 1L, n_vu)
-    lhs_ix <- rep(u_ix, 2L)
-    rhs_ix <- which(A_bi == 1L, arr.ind = TRUE)
-    A[cbind(lhs_ix, c(rhs_ix))] <- 1L
-    labels[u_ix] <- paste0(
-      "U[", v_names[rhs_ix[, 1L]], ",", v_names[rhs_ix[, 2L]], "]"
-    )
-    latent[u_ix] <- TRUE
-  }
+  u_ix <- seq_asc(n_v + 1L, n_vu)
+  lhs_ix <- rep(u_ix, 2L)
+  rhs_ix <- which(A_bi == 1L, arr.ind = TRUE)
+  A[cbind(lhs_ix, c(rhs_ix))] <- 1L
+  labels[u_ix] <- paste0(
+    "U[", v_names[rhs_ix[, 1L]], ",", v_names[rhs_ix[, 2L]], "]"
+  )
+  latent[u_ix] <- TRUE
   ord <- topological_order(A, latent)
   dag_str <- dag_string(A, labels, latent, ord)
   structure(
@@ -162,7 +159,7 @@ dag <- function(x) {
 #'
 #' @param A An adjacency matrix.
 #' @param lab A `character` vector of vertex labels.
-#' @param lat A `logical` vector indicating latent variables by `TRUE`
+#' @param lat A `logical` vector indicating latent variables by `TRUE`.
 #' @param ord An `integer` vector giving a topological order of `A`.
 #' @return A `character` representation of the DAG.
 #' @noRd
@@ -173,20 +170,23 @@ dag_string <- function(A, lab, lat, ord) {
     ch <- lab[children(i, A)]
     n_ch <- length(ch)
     if (n_ch > 0L) {
-      lhs <- ifelse(n_ch > 1L, "{", "")
-      rhs <- ifelse(n_ch > 1L, "}", "")
-      e[i] <- paste0(lab[i], " -> ", lhs, paste0(ch, collapse = ", "), rhs)
+      lhs <- ifelse_(n_ch > 1L, "{", "")
+      rhs <- ifelse_(n_ch > 1L, "}", "")
+      e[i] <- paste0(
+        format(lab[i]), " -> ", lhs, paste0(ch, collapse = ", "), rhs
+      )
     }
   }
   for (i in which(lat)) {
-    e[i] <- paste0(lab[children(i, A)], collapse = " <-> ")
+    e[i] <- paste0(format(lab[children(i, A)]), collapse = " <-> ")
   }
   paste0(e[nzchar(e)], collapse = "; ")
 }
 
-#' Verify that argument is a valid DAG
+#' Is the argument a `dag` object?
 #'
 #' @param x An R object.
+#' @return A `logical` value that is `TRUE` if the object is a `dag`.
 #' @noRd
 is.dag <- function(x) {
   inherits(x, "dag")
@@ -202,12 +202,11 @@ print.dag <- function(x, ...) {
     is.dag(x),
     "Argument `x` must be a `dag` object."
   )
-  print(attr(x, "text"))
+  cat(attr(x, "text"))
+  invisible(x)
 }
 
 #' Parallel Worlds Graph
-#'
-#' Construct a parallel worlds graph from a DAG or an ADMG.
 #'
 #' @param g A `dag` object.
 #' @param gamma A `counterfactual_conjunction` object.
@@ -218,51 +217,44 @@ pwg <- function(g, gamma) {
   lat <- attr(g, "latent")
   ord <- attr(g, "order")
   sub_lst <- unique(subs(gamma))
+  #sub_lst <- sub_lst[order(lengths(sub_lst))]
   sub_var <- lapply(sub_lst, function(i) which(lab %in% names(i)))
   n_worlds <- length(sub_lst)
+  n <- length(lab)
   n_unobs <- sum(lat)
-  n_obs <- length(lab) - n_unobs
-  no_err <- integer(0L)
-  if (n_unobs > 0L) {
-    no_err <- children(which(lat), g)
-  }
+  n_obs <- n - n_unobs
+  no_err <- children(which(lat), g)
   n_err <- n_obs - length(no_err)
   n_obs_pw <- n_worlds * n_obs
   n_unobs_pw <- n_err + n_unobs
   n_total <- n_obs_pw + n_unobs_pw
   A_pw <- matrix(0L, n_total, n_total)
   ix_obs <- seq_len(n_obs)
-  ix_err <- seq.int(n_obs_pw + 1L, n_obs_pw + n_err)
-  ix_unobs <- seq.int(n_obs_pw + n_err + 1L, n_total)
+  ix_err <- seq_asc(n_obs_pw + 1L, n_obs_pw + n_err)
+  ix_unobs <- seq_asc(n_obs_pw + n_err + 1L, n_total)
   labels_pw <- character(n_total)
   labels_pw[seq_len(n_obs)] <- lab[seq_len(n_obs)]
   order_pw <- integer(n_total)
-  if (n_err > 0L) {
-    err_vars <- paste0("U[", lab[setdiff(ix_obs, no_err)], "]")
-    labels_pw[ix_err] <- lapply(err_vars, cf)
-  }
-  if (n_unobs > 0L) {
-    labels_pw[ix_unobs] <- lapply(lab[lat], cf)
-  }
+  err_vars <- paste0("U[", lab[setdiff(ix_obs, no_err)], "]")
+  labels_pw[ix_err] <- lapply(err_vars, cf)
+  labels_pw[ix_unobs] <- lapply(lab[lat], cf)
   for (w in seq_len(n_worlds)) {
     offset <- (w - 1L) * n_obs
     from <- offset + 1L
     to <- offset + n_obs
-    ix <- from:to
-    A_pw[ix, ix] <- g[ix_obs,ix_obs]
-    if (n_err > 0L) {
-      ix_err_mat <- cbind(ix_err, setdiff(ix, offset + no_err))
-      A_pw[ix_err_mat] <- 1L
-    }
-    if (n_unobs > 0L) {
-      A_pw[ix_unobs, ix] <- g[-ix_obs, ix_obs]
-      order_pw[n_unobs_pw + ix] <- offset + ord[-seq_len(n_unobs)]
-    } else {
-      order_pw[n_unobs_pw + ix] <- offset + ord
-    }
+    ix <- seq.int(from, to)
+    A_pw[ix, ix] <- g[ix_obs, ix_obs]
+    ix_err_mat <- ifelse_(
+      n_err > 0L,
+      cbind(ix_err, setdiff(ix, offset + no_err)),
+      integer(0L)
+    )
+    A_pw[ix_err_mat] <- 1L
+    A_pw[ix_unobs, ix] <- g[-ix_obs, ix_obs]
+    order_pw[n_unobs_pw + ix] <- offset + ord[seq_asc(n_unobs + 1L, n)]
     sub_ix <- offset + sub_var[[w]]
     A_pw[, sub_ix] <- 0L
-    labels_pw[seq.int(from, to)] <- lapply(ix_obs, function(v) {
+    labels_pw[seq_int(from, to)] <- lapply(ix_obs, function(v) {
       if (v %in% sub_var[[w]]) {
         v_ix <- which(sub_var[[w]] %in% v)
         cf(var = lab[v], obs = sub_lst[[w]][v_ix])
@@ -272,14 +264,10 @@ pwg <- function(g, gamma) {
     })
   }
   latent_pw <- logical(n_obs_pw)
-  if (n_err > 0L) {
-    order_pw[seq_len(n_err)] <- ix_err
-    latent_pw[ix_err] <- TRUE
-  }
-  if (n_unobs > 0L) {
-    order_pw[seq.int(n_err + 1L, n_unobs_pw)] <- ix_unobs
-    latent_pw[ix_unobs] <- TRUE
-  }
+  order_pw[seq_len(n_err)] <- ix_err
+  latent_pw[ix_err] <- TRUE
+  order_pw[seq_asc(n_err + 1L, n_unobs_pw)] <- ix_unobs
+  latent_pw[ix_unobs] <- TRUE
   list(
     adjacency = A_pw,
     labels = labels_pw,
@@ -294,88 +282,71 @@ pwg <- function(g, gamma) {
 
 #' Counterfactual Graph
 #'
-#' Construct a counterfactual graph.
-#'
 #' @param p A list representing a parallel worlds graph from `pwg`.
 #' @param gamma A `counterfactual_conjunction` object.
-#' @return A `dag` object representing the causal graph.
+#' @return A `dag` object representing the counterfactual graph.
 #' @noRd
 cg <- function(p, gamma) {
   A <- p$adjacency
   A_cg <- p$adjacency
+  latent <- p$latent
+  obs <- which(!latent)
   n_total <- p$n_obs + p$n_unobs
+  ord <- order(match(seq_len(p$n_obs_orig), p$order))
   merged <- list()
   keep <- rep(TRUE, n_total)
-  eq_val <- integer(n_total)
-  eq_val[seq_len(p$n_obs)] <-
-    -1L * rep(seq_len(p$n_worlds), each = p$n_obs_orig)
+  eq_val <- replicate(
+    p$n_obs_orig,
+    as.list(seq_len(p$n_worlds)),
+    simplify = FALSE
+  )
   if (p$n_worlds > 1L) {
-    for (v in seq_len(p$n_obs_orig)) {
-      world_skip <- logical(p$n_worlds)
+    for (v in ord) {
       for (a in seq_len(p$n_worlds - 1L)) {
-        if (world_skip[a]) {
-          next
-        }
         val_pa_alpha <- NULL
         val_alpha <- NULL
-        a_offset <- (a - 1L) * p$n_obs_orig
-        alpha_ix <- p$order[p$n_unobs + a_offset + v]
+        alpha_offset <- (a - 1L) * p$n_obs_orig
+        alpha_ix <- v + alpha_offset
         alpha <- p$labels[[alpha_ix]]
         pa_alpha <- parents(alpha_ix, A)
         n_pa_alpha <- length(pa_alpha)
         if (n_pa_alpha == 0L) {
           val_alpha <- alpha$obs
-          eq_val[alpha_ix] <- val_alpha
         } else {
           val_alpha <- val(alpha, gamma)
-          if (!is.null(val_alpha)) {
-            eq_val[alpha_ix] <- val_alpha
-          } else if (a == 1L) {
-            eq_val[alpha_ix] <- 0L
-          }
-          val_pa_alpha <- eq_val[pa_alpha]
         }
-        for (b in seq.int(a + 1L, p$n_worlds)) {
-          if (world_skip[b]) {
-            next
-          }
+        for (b in seq_int(a + 1L, p$n_worlds)) {
           same_var <- FALSE
           val_pa_beta <- NULL
           val_beta <- NULL
-          b_offset <- (b - 1L) * p$n_obs_orig
-          beta_ix <- p$order[p$n_unobs + b_offset + v]
+          beta_offset <- (b - 1L) * p$n_obs_orig
+          beta_ix <- v + beta_offset
           beta <- p$labels[[beta_ix]]
           pa_beta <- parents(beta_ix, A)
           n_pa_beta <- length(pa_beta)
           if (n_pa_beta == 0L) {
             val_beta <- beta$obs
-            eq_val[beta_ix] <- val_beta
           } else {
             val_beta <- val(beta, gamma)
-            if (!is.null(val_beta)) {
-              eq_val[beta_ix] <- val_beta
-            }
-            val_pa_beta <- eq_val[pa_beta]
           }
           if (n_pa_alpha == 0L || n_pa_beta == 0L) {
             if (identical(val_alpha, val_beta)) {
               same_var <- TRUE
             }
-          } else if (identical(val_pa_alpha, val_pa_beta)) {
-            same_var <- TRUE
+          } else {
+            obs_pa <- intersect(pa_alpha, obs) - alpha_offset
+            if (length(obs_pa) > 0) {
+              same_var <- all_equivalent(eq_val, obs_pa, a, b)
+            } else {
+              # Latent variables are shared across worlds
+              same_var <- TRUE
+            }
           }
           if (same_var) {
             if (!val_consistent(val_alpha, val_beta)) {
               return(list(consistent = FALSE))
             }
-            if (is.null(val_alpha) && !is.null(val_beta)) {
-              eq_val[alpha_ix] <- val_beta
-            } else if (!is.null(val_alpha) && is.null(val_beta)) {
-              eq_val[beta_ix] <- val_alpha
-            } else {
-              eq_val[beta_ix] <- eq_val[alpha_ix]
-            }
-            world_skip[b] <- TRUE
+            eq_val[[v]] <- update_equivalence(eq_val[[v]], a, b)
             ch_beta <- children(beta_ix, A)
             A_cg[pa_beta, alpha_ix] <- 1L
             A_cg[alpha_ix, ch_beta] <- 1L
@@ -448,6 +419,7 @@ cg <- function(p, gamma) {
       }
     }
   }
+  #gamma <- as.counterfactual_conjunction(unique(gamma))
   an <- sort(union(query_vars, ancestors(query_vars, cg_dag)))
   cg_dag <- subgraph(an, cg_dag)
   latent_cg <- attr(cg_dag, "latent")
@@ -466,6 +438,31 @@ cg <- function(p, gamma) {
     merged = merged,
     consistent = TRUE
   )
+}
+
+update_equivalence <- function(eq, a, b) {
+  if (length(eq) == 1L) {
+    return(eq)
+  }
+  a_cl <- Position(function(x) a %in% x, eq)
+  b_cl <- Position(function(x) b %in% x, eq)
+  merged <- list(union(eq[[a_cl]], eq[[b_cl]]))
+  c(eq[-c(a_cl, b_cl)], merged)
+}
+
+all_equivalent <- function(eq, vars, a, b) {
+  for (v in vars) {
+    eq_v <- eq[[v]]
+    if (length(eq_v) == 1L) {
+      next
+    }
+    a_cl <- Position(function(x) a %in% x, eq_v)
+    b_cl <- Position(function(x) b %in% x, eq_v)
+    if (a_cl != b_cl) {
+      return(FALSE)
+    }
+  }
+  TRUE
 }
 
 #' Import Graph
@@ -527,12 +524,12 @@ import_graph <- function(x) {
 
 #' Export Graph
 #'
-#' Convert a valid graph object to a supported external format.
+#' Convert a valid graph object into a supported external format.
 #'
 #' @param g An object of class `dag`.
 #' @param type A character string matching one of the following:
 #' `"dagitty"`, `"causaleffect"` or `"dosearch"`. For `"dagitty"` and
-#' `"causaleffec"`, the packages `dagitty` and `igraph` must be available,
+#' `"causaleffect"`, the packages `dagitty` and `igraph` must be available,
 #' respectively.
 #' @param use_bidirected A logical value indicating if bidirected edges
 #' should be used in the resulting object.
@@ -639,6 +636,7 @@ export_graph <- function(g, type = c("dagitty", "causaleffect", "dosearch"),
 #'
 #' @param g A `dag` object.
 #' @param gamma A `counterfactual_conjunction` object.
+#' @return A `dag` representing the counterfactual graph.
 #' @noRd
 make_cg <- function(g, gamma) {
   cg(pwg(g, gamma), gamma)

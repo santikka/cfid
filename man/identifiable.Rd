@@ -4,17 +4,24 @@
 \alias{identifiable}
 \title{Identify a Counterfactual Query}
 \usage{
-identifiable(g, gamma, delta = NULL, data = "interventions")
+identifiable(
+  g,
+  gamma,
+  delta = NULL,
+  data = c("interventions", "observations", "both")
+)
 }
 \arguments{
-\item{g}{A \code{DAG} object describing the causal graph
-(to obtain a \code{DAG} from another format, see \code{\link[=import_graph]{import_graph()}}.}
+\item{g}{A \code{dag} object describing the causal graph
+(to obtain a \code{dag} from another format, see \code{\link[=import_graph]{import_graph()}}.}
 
-\item{gamma}{A \code{counterfactual_conjunction} object
-representing the counterfactual causal query.}
+\item{gamma}{An R object that can be coerced into a
+\code{counterfactual_conjunction} object that represents the
+counterfactual causal query.}
 
-\item{delta}{A \code{counterfactual_conjunction} object
-representing the conditioning conjunction (optional).}
+\item{delta}{An R object that can be coerced into a
+\code{counterfactual_conjunction} object that represents the conditioning
+conjunction (optional).}
 
 \item{data}{A \code{character} string that accepts one of the following:
 \code{"interventions"} (the default), \code{"observations"}or \code{"both"}. This argument
@@ -42,6 +49,9 @@ probability is 0. For formatting options, see
 \item \code{undefined}\cr A logical value that is \code{TRUE} if
 a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
 for example when \eqn{p(\delta) = 0}, and \code{FALSE} otherwise.
+\item \code{gamma}\cr The original counterfactual conjunction..
+\item \code{delta}\cr The original conditioning counterfactual conjunction.
+\item \code{data}\cr The original data.
 }
 }
 \description{
@@ -96,5 +106,5 @@ identifiable(g2, c3)
 }
 \seealso{
 \code{\link[=dag]{dag()}}, \code{\link[=counterfactual_variable]{counterfactual_variable()}},
-\code{\link[=probability]{probability()}}
+\code{\link[=probability]{probability()}}, \code{\link[=functional]{functional()}}
 }

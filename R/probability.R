@@ -3,7 +3,6 @@
 #' Defines an interventional or observational (conditional) probability
 #' \eqn{p(y|do(x),z)}. For formatting options, see [cfid::format.probability()].
 #'
-#'
 #' @param val An `integer` value of either 0 or 1 for almost sure events.
 #' @param var A `list` of objects of class `counterfactual_variable`
 #' (without interventions and with value assignments).
@@ -16,10 +15,8 @@
 #' intervention set \eqn{x} in \eqn{p(y|do(x),z)}.
 #'
 #' @seealso [cfid::counterfactual_variable()], [cfid::functional()]
-#'
 #' @return An object of class `probability`, which is a `list` containing
 #' all of the arguments of the constructor.
-#'
 #' @export
 probability <- function(val = NULL, var = NULL, do = NULL, cond = NULL) {
   stopifnot_(
@@ -52,6 +49,11 @@ probability <- function(val = NULL, var = NULL, do = NULL, cond = NULL) {
   )
 }
 
+#' Is the argument a `probability` object?
+#'
+#' @param x An R object.
+#' @return A `logical` value that is `TRUE` if `x` is a `probability` object.
+#' @noRd
 is.probability <- function(x) {
   inherits(x, "probability")
 }

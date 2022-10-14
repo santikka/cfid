@@ -5,17 +5,18 @@ g2 <- dag("X -> W -> Y <- Z <- D X <-> Y X -> Y")
 g3 <- dag("X -> Y <-> A <-> B <-> Z <- X")
 g4 <- dag("C -> A -> Y; C -> Y")
 
-v1 <- cf("Y", 0, c(X = 0))
-v2 <- cf("X", 1)
-v3 <- cf("Z", 0, c(D = 0))
-v4 <- cf("D", 0)
-v5 <- cf("Y", 0, c(X = 0, Z = 0))
-v6 <- cf("Z", 1, c(X = 0))
-v7 <- cf("Y", 0, c(Y = 1))
-v8 <- cf("Y", 0, c(Y = 0))
-v9 <- cf("A", 0)
-v10 <- cf("B", 0)
-v11 <- cf("Z", 0, c(X = 1))
+v1 <- cf("Y", 0L, c(X = 0L))
+v2 <- cf("X", 1L)
+v3 <- cf("Z", 0L, c(D = 0L))
+v4 <- cf("D", 0L)
+v5 <- cf("Y", 0L, c(X = 0L, Z = 0L))
+v6 <- cf("Z", 1L, c(X = 0L))
+v7 <- cf("Y", 0L, c(Y = 1L))
+v8 <- cf("Y", 0L, c(Y = 0L))
+v9 <- cf("A", 0L)
+v10 <- cf("B", 0L)
+v11 <- cf("Z", 0L, c(X = 1L))
+v12 <- cf("Y", 1L, c(X = 1L))
 c1 <- conj(v1, v2, v3, v4)
 
 test_that("identifiable conjunction", {
@@ -35,6 +36,8 @@ test_that("identifiable conditional conjunction", {
 
 test_that("non-identifiable conditional conjunction", {
   out <- identifiable(g2, conj(v1), conj(v2, v3, v4))
+  expect_false(out$id)
+  out <- identifiable(dag("X -> Y"), conj(v1, v12))
   expect_false(out$id)
 })
 
@@ -79,7 +82,7 @@ test_that("auto convert singletons", {
   expect_identical(out3, out4)
 })
 
-test_that("no bidirected allowed", {
+test_that("graphs without bidirected edges are supported", {
   expect_error(identifiable(g4, cf("Y", 0, c(A = 1)), cf("A", 0)), NA)
 })
 
@@ -123,7 +126,21 @@ test_that("inconsistent interventions", {
   expect_false(identifiable(h, d1)$id)
 })
 
+test_that("inconsistent within c-component", {
+  h <- dag("Z -> X -> Y")
+  d1 <- conj(v1, v12, cf("Z", 0L))
+  out <- identifiable(h, d1)
+  expect_true(out$id)
+  expect_identical(out$formula$terms[[1L]]$val, 0L)
+})
+
 # ID and IDC --------------------------------------------------------------
+
+test_that("bow-arc", {
+  g <- dag("X -> Y <-> X")
+  out <- causal_effect(g, "Y", "X")
+  expect_false(out$id)
+})
 
 test_that("backdoor", {
   g <- dag("X -> Y <- Z -> X")
@@ -158,6 +175,35 @@ test_that("napkin", {
   )
 })
 
+test_that("nonidentifiable napkin variant", {
+  g <- dag("W -> Z -> X -> Y; Z -> Y <-> X <-> W")
+  out <- causal_effect(g, "Y", "X")
+  expect_false(out$id)
+})
+
+test_that("identifiable conditional causal effects", {
+  g <- dag("A -> {X, Z, B}; X -> Z -> Y; B -> Y; X <-> A <-> Y <-> X <-> B")
+  expect_true(causal_effect(g, "Y", "X", "A")$id)
+  expect_true(causal_effect(g, "Y", "X", c("A", "B"))$id)
+  expect_true(causal_effect(g, "Y", "X", c("A", "B", "Z"))$id)
+})
+
+test_that("non-identifiable conditional causal effect", {
+  g <- dag("X -> Z -> Y <-> Z <-> X")
+  expect_false(causal_effect(g, "Y", "X", "Z")$id)
+})
+
+test_that("conditional simplification is carried out", {
+  g <- dag("Z <-> X -> Z -> Y")
+  out <- causal_effect(g, "Y", "X", "Z")
+  expect_true(out$id)
+  expect_identical(format(out$formula), "p(y|x,z)")
+  g <- dag("X -> Z -> Y")
+  out <- causal_effect(g, "Y", "X", "Z")
+  expect_true(out$id)
+  expect_identical(format(out$formula), "p(y|x,z)")
+})
+
 # Identification pipeline -------------------------------------------------
 
 test_that("simple pipeline", {
@@ -184,6 +230,34 @@ test_that("simple pipeline", {
   )
 })
 
+test_that("nonidentifiable from observations alone", {
+  g <- dag("X -> Z -> Y <-> Z <-> X")
+  out1 <- identifiable(
+    g,
+    cf("Y", 0, c("X" = 0)), cf("Z", 0, c("X" = 0)),
+    data = "both"
+  )
+  out2 <- identifiable(
+    g,
+    cf("Y", 0, c("X" = 0)), cf("Z", 0, c("X" = 0)),
+    data = "observations"
+  )
+  expect_true(out1$id)
+  expect_false(out2$id)
+  expect_identical(
+    format(out1$formula),
+    "p_{x}(y|z)"
+  )
+  idfun <- functional(
+    numerator = out1$formula,
+    denominator = out1$formula
+  )
+  out3 <- identify_terms(x = idfun, data = "observations", g = g)
+  out4 <- identify_terms(x = idfun, data = "both", g = g)
+  expect_false(out3$id)
+  expect_true(out4$id)
+})
+
 test_that("quotient", {
   out <- identifiable(g1, conj(v1), conj(v2, v3, v4), data = "observations")
   expect_true(out$id)
@@ -193,16 +267,3 @@ test_that("quotient", {
   )
 })
 
-# Interface ---------------------------------------------------------------
-
-test_that("valid input", {
-  expect_error(identifiable())
-  expect_error(identifiable(c1))
-  expect_error(identifiable(g1))
-  expect_error(identifiable(g1, g1))
-  expect_error(identifiable(g1, c1, g1))
-  expect_error(identifiable(g1, cf("Y")))
-  expect_error(identifiable(g1, conj(cf("Y"))))
-  expect_error(identifiable(g1, cf("Y", 0), cf("X")))
-  expect_error(identifiable(g1, cf("Y", 0), conj(cf("X"))))
-})

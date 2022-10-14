@@ -65,7 +65,7 @@ counterfactual_variable <- function(var, obs = integer(0L), sub = integer(0L)) {
   if (length(sub) > 0L) {
     stopifnot_(
       !is.null(names(sub)),
-      "Argument `sub` must be named."
+      "Argument `sub` must be a named integer vector."
     )
     sub <- try_type(sub = sub, type = "integer")
     names(sub) <- toupper(names(sub))
@@ -76,6 +76,12 @@ counterfactual_variable <- function(var, obs = integer(0L), sub = integer(0L)) {
   )
 }
 
+#' Is the argument a `counterfactual_variable` object?
+#'
+#* @param x An R object.
+#* @return A `logical` value that is `TRUE` if `x` is a
+#* `counterfactual_variable` object.
+#* @noRd
 is.counterfactual_variable <- function(x) {
   inherits(x, "counterfactual_variable")
 }
@@ -101,8 +107,8 @@ format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
       }
     } else if (x$obs < 0L) {
       more <- x$obs < -1L
-      lhs <- ifelse(more, "{", "")
-      rhs <- ifelse(more, "}", "")
+      lhs <- ifelse_(more, "{", "")
+      rhs <- ifelse_(more, "}", "")
       super_var <- paste0("^", lhs, "*", rhs)
     }
     form$var <- collapse(tolower(x$var), super_var)
@@ -132,34 +138,9 @@ format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
 #' @export
 print.counterfactual_variable <- function(x, ...) {
   cat(format(x, ...), "\n")
+  invisible(x)
 }
 
 #' @rdname counterfactuals
 #' @export
 cf <- counterfactual_variable
-
-# Check if x is a tautological statement
-is_tautology <- function(x) {
-  if (length(x$sub) > 0L) {
-    if (x$var %in% names(x$sub)) {
-      y <- which(names(x$sub) %in% x$var)
-      if (x$obs == x$sub[y]) {
-        return(TRUE)
-      }
-    }
-  }
-  FALSE
-}
-
-# Check if x is an inconsistent statement
-is_inconsistent <- function(x) {
-  if (length(x$sub) > 0L) {
-    if (x$var %in% names(x$sub)) {
-      y <- which(names(x$sub) %in% x$var)
-      if (x$obs != x$sub[y]) {
-        return(TRUE)
-      }
-    }
-  }
-  FALSE
-}

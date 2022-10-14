@@ -10,17 +10,32 @@
 #' @param v An optional named `integer` vector giving the value assignments
 #' for observed variables in the model, i.e. \eqn{V = v} or
 #' for a subset of \eqn{V}.
-#' @return A `list` with two components:
+#' @return An object of class `query` which is a `list` with the following
+#' components:
 #'
 #' * `id`\cr A `logical` value that is `TRUE` if the query is identifiable and
-#' `FALSE` otherwise.
-#' * `formula`\cr A  `functional` object expressing the causal effect in terms of
-#'  the joint probability distribution \eqn{p(v)} for identifiable queries or
-#'  `NULL` if the queri is not identifiable.
+#'   `FALSE` otherwise.
+#' * `formula`\cr A  `functional` object expressing the causal effect in terms
+#'   of the joint probability distribution \eqn{p(v)} for identifiable queries
+#'   or `NULL` if the query is not identifiable.
+#' * `data`\cr The available data, for `causal_effect` this is always
+#'   `"observations"`
+#' * `causaleffect`\cr The original query \eqn{p(y|do(x),z)} as a `probability`
+#'   object.
+#' * `undefined`\cr A `logical` value, this is always `FALSE` for
+#'   `causaleffect`
 #'
 #' @export
 causal_effect <- function(g, y, x = character(0),
                           z = character(0), v = integer(0)) {
+  stopifnot_(
+    !missing(g),
+    "Argument `g` is missing."
+  )
+  stopifnot_(
+    is.dag(g),
+    "Argument `g` must be a `dag` object."
+  )
   stopifnot_(
     !missing(y),
     "Argument `y` is missing."
@@ -28,10 +43,6 @@ causal_effect <- function(g, y, x = character(0),
   stopifnot_(
     is.character(y) && is.character(x) && is.character(z),
     "Arguments `x`, `y` and `z` must be character vectors."
-  )
-  stopifnot_(
-    is.dag(g),
-    "Argument `g` must be a `dag` object."
   )
   n_v <- length(v)
   v_names <- names(v)

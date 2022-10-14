@@ -15,6 +15,24 @@ reg_match <- function(x, pattern, perl = TRUE) {
   regmatches(x, m)[[1L]]
 }
 
+ifelse_ <- function(test, yes, no) {
+  if (test) {
+    yes
+  } else {
+    no
+  }
+}
+
+seq_int <- seq.int
+
+seq_asc <- function(from, to) {
+  if (from > to) {
+    integer(0L)
+  } else {
+    seq_int(from, to)
+  }
+}
+
 #' Set the names of an object
 #'
 #' @param object an R object

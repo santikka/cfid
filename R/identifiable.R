@@ -26,12 +26,14 @@
 #' attempted in terms of the joint probability distribution by using the
 #' ID and IDC algorithms (see [cfid::causal_effect]).
 #'
-#' @param g A `DAG` object describing the causal graph
-#'     (to obtain a `DAG` from another format, see [cfid::import_graph()].
-#' @param gamma A `counterfactual_conjunction` object
-#'     representing the counterfactual causal query.
-#' @param delta A `counterfactual_conjunction` object
-#'     representing the conditioning conjunction (optional).
+#' @param g A `dag` object describing the causal graph
+#' (to obtain a `dag` from another format, see [cfid::import_graph()].
+#' @param gamma An R object that can be coerced into a
+#' `counterfactual_conjunction` object that represents the
+#' counterfactual causal query.
+#' @param delta An R object that can be coerced into a
+#' `counterfactual_conjunction` object that represents the conditioning
+#' conjunction (optional).
 #' @param data A `character` string that accepts one of the following:
 #' `"interventions"` (the default), `"observations"`or `"both"`. This argument
 #' defines the target level of identification. If `"interventions"` is used,
@@ -41,7 +43,7 @@
 #' for each term to the lowest level where the term is still identifiable.
 #'
 #' @seealso [cfid::dag()], [cfid::counterfactual_variable()],
-#' [cfid::probability()]
+#' [cfid::probability()], [cfid::functional()]
 #'
 #' @return An object of class `query` which is a `list` containing
 #' one or more of the following:
@@ -60,6 +62,9 @@
 #' * `undefined`\cr A logical value that is `TRUE` if
 #' a conditional conjunction \eqn{p(\gamma|\delta)} is undefined,
 #' for example when \eqn{p(\delta) = 0}, and `FALSE` otherwise.
+#' * `gamma`\cr The original counterfactual conjunction..
+#' * `delta`\cr The original conditioning counterfactual conjunction.
+#' * `data`\cr The original data.
 #'
 #' @examples
 #' # Examples that appears in Shpitser and Pearl (2008)
@@ -83,67 +88,61 @@
 #' identifiable(g2, c3)
 #'
 #' @export
-identifiable <- function(g, gamma, delta = NULL, data = "interventions") {
-  if (missing(g)) {
-    stop_("Argument `g` is missing.")
-  } else if (!is.dag(g)) {
-    stop_("Argument `g` must be a `dag` object.")
-  }
-  if (missing(gamma)) {
-    stop_("Argument `gamma` is missing.")
-  } else if (!is.counterfactual_conjunction(gamma)) {
-    if (is.counterfactual_variable(gamma)) {
-      if (length(gamma$obs) == 0L) {
-        stop_(
-          "Argument `gamma` contains counterfactual variables ",
-          "without a value assignment"
-        )
-      }
-      gamma <- counterfactual_conjunction(gamma)
-    } else {
-      stop_("Argument `gamma` must be a `counterfactual_conjunction` object.")
-    }
-  }
-  if (any(!assigned(gamma))) {
-    stop_(
+identifiable <- function(g, gamma, delta = NULL,
+                         data = c("interventions", "observations", "both")) {
+  stopifnot_(
+    !missing(g),
+    "Argument `g` is missing."
+  )
+  stopifnot_(
+    is.dag(g),
+    "Argument `g` must be a `dag` object."
+  )
+  stopifnot_(
+    !missing(gamma),
+    "Argument `gamma` is missing."
+  )
+  gamma <- try(as.counterfactual_conjunction(gamma), silent = TRUE)
+  stopifnot_(
+    !inherits(gamma, "try-error"),
+    "Unable to coerce `gamma` into a `counterfactual_conjunction` object."
+  )
+  stopifnot_(
+    all(assigned(gamma)),
+    paste0(
       "Argument `gamma` contains counterfactual variables ",
       "without a value assignment."
     )
-  }
-  if (is.null(delta)) {
-    out <- id_star(g, gamma)
-  } else {
-    if (!is.counterfactual_conjunction(delta)) {
-      if (is.counterfactual_variable(delta)) {
-        if (length(delta$obs) == 0L) {
-          stop_(
-            "Argument `delta` contains counterfactual variables ",
-            "without a value assignment."
-          )
-        }
-        delta <- counterfactual_conjunction(delta)
-      } else {
-        stop_("Argument `delta` must be a `counterfactual_conjunction` object.")
-      }
-    }
-    if (any(!assigned(delta))) {
-      stop_(
+  )
+  if (!is.null(delta)) {
+    delta <- try(as.counterfactual_conjunction(delta), silent = TRUE)
+    stopifnot_(
+      !inherits(delta, "try-error"),
+      "Unable to coerce `delta` into a `counterfactual_conjunction` object."
+    )
+    stopifnot_(
+      all(assigned(delta)),
+      paste0(
         "Argument `delta` contains counterfactual variables ",
-        "without a value assignment"
+        "without a value assignment."
       )
-    }
-    out <- idc_star(g, gamma, delta)
+    )
   }
-  if (is.null(out$undefined)) {
-    out$undefined <- FALSE
-  }
-  if (is.probability(out$formula)) {
-    out$formula <- functional(terms = list(out$formula))
-  }
+  data <- try(match.arg(data, c("interventions", "observations", "both")))
+  stopifnot_(
+    !inherits(data, "try-error"),
+    'Argument `data` must be either "interventions", "observations" or "both".'
+  )
+  out <- idc_star(g, gamma, delta)
+  out$formula <- ifelse_(
+    is.probability(out$formula),
+    functional(terms = list(out$formula)),
+    out$formula
+  )
   if (out$id && data != "interventions") {
     out <- identify_terms(out$formula, data, g)
-    out$undefined <- FALSE
   }
+  out$undefined <- ifelse_(is.null(out$undefined), FALSE, out$undefined)
   out$counterfactual <- TRUE
   out$gamma <- gamma
   out$delta <- delta
@@ -160,7 +159,7 @@ identifiable <- function(g, gamma, delta = NULL, data = "interventions") {
 #' @export
 print.query <- function(x, ...) {
   if (x$counterfactual) {
-    delta_str <- ifelse(
+    delta_str <- ifelse_(
       is.null(x$delta),
       "",
       paste0("|", format(x$delta))
@@ -170,7 +169,7 @@ print.query <- function(x, ...) {
   } else {
     cat("The query", format(x$causaleffect))
   }
-  id_str <- ifelse(x$id, "identifiable", "not identifiable")
+  id_str <- ifelse_(x$id, "identifiable", "not identifiable")
   data_str <- switch(
     x$data,
     both = "(P_*, p(v)).",
@@ -203,7 +202,10 @@ identify_terms <- function(x, data, g) {
         if (data == "observations") {
           return(list(id = FALSE, formula = NULL))
         }
-        terms[[i]] <- x$terms[[i]]
+        terms[[i]] <- list(
+          id = TRUE,
+          formula = x$terms[[i]]
+        )
       }
     }
     formulas <- lapply(terms, "[[", "formula")
@@ -217,15 +219,9 @@ identify_terms <- function(x, data, g) {
       if (data == "observations") {
         return(list(id = FALSE, formula = NULL))
       }
-      n <- x$numerator
     }
+    # Denominator must be identifiable if the numerator is
     d <- identify_terms(x$denominator, data, g)
-    if (!d$id) {
-      if (data == "observations") {
-        return(list(id = FALSE, formula = NULL))
-      }
-      d <- x$numerator
-    }
     out <- list(
       id = TRUE,
       formula = functional(

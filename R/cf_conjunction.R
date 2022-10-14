@@ -61,11 +61,15 @@ as.counterfactual_conjunction.list <- function(x) {
   do.call(counterfactual_conjunction, x)
 }
 
+as.counterfactual_conjunction.counterfactual_variable <- function(x) {
+  counterfactual_conjunction(x)
+}
+
 as.counterfactual_conjunction.default <- function(x) {
   if (is.counterfactual_conjunction(x)) {
     x
   } else {
-    stop_("Cannot object to class `counterfactual_conjunction`", x)
+    stop_("Cannot coerce object to class `counterfactual_conjunction`: ", x)
   }
 }
 
@@ -89,6 +93,7 @@ format.counterfactual_conjunction <- function(x, varsep = " \u2227 ", ...) {
 #' @export
 print.counterfactual_conjunction <- function(x, ...) {
   cat(format(x, ...), "\n")
+  invisible(x)
 }
 
 #' @method + counterfactual_conjunction
@@ -115,8 +120,8 @@ print.counterfactual_conjunction <- function(x, ...) {
       out <- structure(y, class = "counterfactual_conjunction")
     } else {
       stop_(
-        "Unable to add object of class `", class(e2), "` ",
-        "to a counterfactual conjunction"
+        "Cannot add an object of class `", class(e2), "` ",
+        "to a counterfactual conjunction."
       )
     }
   } else if (is.counterfactual_variable(e1)) {
@@ -133,12 +138,12 @@ print.counterfactual_conjunction <- function(x, ...) {
       out <- counterfactual_conjunction(e1, e2)
     } else {
       stop_(
-        "Unable to add object of class `", class(e2), "` ",
-        "to a counterfactual variable"
+        "Cannot add an object of class `", class(e2), "` ",
+        "to a counterfactual variable."
       )
     }
   } else {
-    stop_("Unsupported input for method `+.counterfactual_conjunction`")
+    stop_("Unsupported input for method `+.counterfactual_conjunction`.")
   }
   out
 }
@@ -172,4 +177,45 @@ check_conflicts <- function(x, y) {
     conf_form <- comma_sep(vapply(conf, format, character(1L)))
     stop_("Inconsistent definitions given for variables: ", conf_form)
   }
+}
+
+#' Remove tautological statements from a counterfactual conjunction
+#'
+#' @param x A `counterfactual_conjunction` object.
+#' @return A `logical` value that is `TRUE` if `x` is a tautology.
+#' @noRd
+remove_tautologies <- function(x) {
+  x_len <- length(x)
+  taut <- logical(x_len)
+  for (i in seq_len(x_len)) {
+    y <- x[[i]]
+    if (length(y$sub) > 0L) {
+      if (y$var %in% names(y$sub)) {
+        z <- which(names(y$sub) %in% y$var)
+        if (y$obs == y$sub[z]) {
+          taut[i] <- TRUE
+        }
+      }
+    }
+  }
+  x[!taut]
+}
+
+#' Check if a counterfactual statement is inconsistent
+#'
+#' @param x A `counterfactual_conjunction` object
+#' @return A `logical` value that is `TRUE` if `x` is inconsistent.
+#' @noRd
+is_inconsistent <- function(x) {
+  for (y in x) {
+    if (length(y$sub) > 0L) {
+      if (y$var %in% names(y$sub)) {
+        z <- which(names(y$sub) %in% y$var)
+        if (y$obs != y$sub[z]) {
+          return(TRUE)
+        }
+      }
+    }
+  }
+  FALSE
 }
