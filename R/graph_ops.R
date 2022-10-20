@@ -25,9 +25,6 @@ subgraph <- function(x, g) {
 detect_cycles <- function(A) {
   X <- A
   n <- ncol(X)
-  if (any(diag(X) > 0L)) {
-    return(TRUE)
-  }
   for (i in seq_len(n - 1L)) {
     X <- X %*% A
     if (any(diag(X) > 0L)) {

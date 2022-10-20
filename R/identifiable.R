@@ -153,6 +153,17 @@ identifiable <- function(g, gamma, delta = NULL,
   )
 }
 
+#' Query Objects
+#'
+#' Objects of class `query` describe the output of `identifiable` and
+#' `causal_effect`. They are `list` objects with a custom `print` method and
+#' contain data related to the identifiability results. See
+#' [cfid::identifiable] and [cfid::causal_effect] for details.
+#'
+#' @name query
+NULL
+
+#' @rdname query
 #' @method print query
 #' @param x A `query` object
 #' @param ... Not used.

@@ -36,5 +36,5 @@ is \code{"dosearch"}, returns a character vector of length one that describes
 \code{g} in the \code{dosearch} package syntax.
 }
 \description{
-Convert a valid graph object to a supported external format.
+Convert a valid graph object into a supported external format.
 }

@@ -78,10 +78,10 @@ counterfactual_variable <- function(var, obs = integer(0L), sub = integer(0L)) {
 
 #' Is the argument a `counterfactual_variable` object?
 #'
-#* @param x An R object.
-#* @return A `logical` value that is `TRUE` if `x` is a
-#* `counterfactual_variable` object.
-#* @noRd
+#' @param x An R object.
+#' @return A `logical` value that is `TRUE` if `x` is a
+#' `counterfactual_variable` object.
+#' @noRd
 is.counterfactual_variable <- function(x) {
   inherits(x, "counterfactual_variable")
 }

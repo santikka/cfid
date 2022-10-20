@@ -14,23 +14,32 @@
 #' `X <-> Y` which means that there is an additional variable `U[X,Y]` in
 #' the graph, and the edges `X <- U[X,Y] -> Y`, respectively.
 #'
-#' Groups of vertices can be defined by enclosing the vertices within
-#' curly braces. For example `X -> {Y Z}` defines that the graph has an edge
-#' from `X` to both `Y` and `Z`.
-#
-#' Different statements in `x` are automatically distinguished from one
-#' another without any additional delimiters, but semicolons, commas
-#' and line breaks can be used if desired.
+#' Different statements in `x` can be distinguished from one
+#' another using either semicolons, line breaks or spaces.
+#'
+#' Subgraphs can be defined by enclosing the definition within
+#' curly braces. For example `X -> {Y Z}` defines an edge
+#' from `X` to both `Y` and `Z`. Individual statements within a subgraph can be
+#' separated by a comma or semicolon, but this is optional.
+#' Edges can also be defined within subgraphs, and subgraphs can be nested.
+#' For example, `X -> {Z -> Y}` is the same definition as
+#' `X -> Z; X -> Y; Z -> Y`. Similarly `X <-> {Z -> {A B}} -> Y` is the same as
+#' `X <-> {Z A B} -> Y; Z -> {A B}`.
 #'
 #' Note that in the context of this package, vertex labels will always be
-#' converted into upper case, meaning that typing `Z` or `z` within `x` will
+#' converted into upper case, meaning that typing `Z` or `z` will
 #' always represent the same variable. This is done to enforce the notation
-#' of counterfactual variables, where capital letter denote variables,
+#' of counterfactual variables, where capital letters denote variables
 #' and small letters denote their value assignments.
 #'
 #' @param x A `character` string containing a sequence of paths consisting of
-#' of edges in the form `X -> Y`, `X <- Y` or `X <-> Y`.
-#' See details for more advanced constructs.
+#' nodes or subgraphs `X` or edges in the form `X -> Y`, `X <- Y` or `X <-> Y`
+#' where `X` and `Y` are subgraphs or nodes See details for more advanced
+#' constructs.
+#' @param u A `character` vector of variable names which should be considered
+#' unobserved (besides those defined by bidirected edges). These variables
+#' are subsequently removed via latent projection. Variable names not found
+#' in the graph are ignored.
 #' @return An object of class `dag`, which is a square adjacency matrix
 #' with the following attributes:
 #'
@@ -40,100 +49,94 @@
 #' * `text`\cr A `character` string giving representing the DAG.
 #' .
 #' @examples
-#' dag("x -> {y z} <- w <-> g")
+#' dag("X -> {Y Z} <- W <-> G")
 #'
-#' # Groups can appear on both sides of an edge
-#' dag("{x z} -> {y w}")
+#' # Subgraphs can appear on both sides of an edge
+#' dag("{X Z} -> {Y W}")
 #'
 #' # Semicolons can be used to distinguish individual statements
-#' dag("x -> z -> y; x <-> y")
+#' dag("X -> Z -> Y; X <-> Y")
 #'
-#' # Commas can be used to distinguish variables
+#' # Commas can be used to distinguish variables within groups if there
+#' # are no edges within the group
 #' dag("{x, y, z} -> w")
 #'
-#' # Line breaks are also allowed
-#' dag("z -> w
-#'      x -> y")
+#' # Edges within subgraphs is supported
+#' dag("{X -> Z} -> {Y <-> W}")
+#'
+#' # Nested subgraphs are supported
+#' dag("{X -> {Z -> {Y <-> W}}}")
+#'
+#' # Line breaks are also supported for statement separation
+#' dag("
+#'   Z -> W
+#'   X -> Y
+#' ")
 #'
 #' @export
-dag <- function(x) {
+dag <- function(x, u = character(0L)) {
   stopifnot_(
     length(x) == 1L,
     "Argument `x` must be a single character string."
   )
   x <- try_type(x = x, type = "character")
   x <- toupper(x)
-  x <- gsub("[;\\,\r\n\t]", " ", x)
+  # Normalize whitespace to a single space globally
+  x <- gsub(",|;", " ", x)
+  x <- gsub("<->", " -- ", x)
+  x <- gsub("->", " -> ", x)
+  x <- gsub("<-", " <- ", x)
+  x <- trimws(gsub("\\s+", " ", x))
   stopifnot_(
-    nzchar(trimws(x)),
+    nzchar(x),
     "Argument `x` contains only whitespace or special characters."
   )
-  e_within <- grepl("\\{[^\\}]+[<>\\-]+[^\\{]+\\}", x)
   stopifnot_(
-    !e_within,
-    "Edges are not allowed within groups defined by {...}."
+    validate_dag(strsplit(x, "", fixed = TRUE)[[1L]]),
+    "Argument `x` contains invalid syntax."
   )
-  g_str <- reg_match(x, "\\{([^<>\\-]+)\\}|([^<> \\-]+)|(<->|<-|->)")
-  g_str[2L, ] <- trimws(g_str[2L, ])
-  g_type <- apply(g_str[-1L, , drop = FALSE], 2L, nzchar)
-  g_str <- g_str[rbind(FALSE, g_type)]
-  g_lst <- strsplit(g_str, "[ ]+", perl = TRUE)
-  e_lst <- which(
-    vapply(g_lst, function(e) e[1L] %in% c("<-", "->", "<->"), logical(1L))
-  )
-  v_lst <- Filter(function(v) all(!v %in% c("<->", "<-", "->")), g_lst)
-  v_names <- unique(unlist(v_lst))
+  u <- try_type(u = u, type = "character")
+  u <- toupper(u)
+  x <- parse_dag(x)
+  v_names <- unique(x$vars)
+  u <- intersect(u, v_names)
   n_v <- length(v_names)
-  n_e <- length(e_lst)
-  n_g <- length(g_lst)
-  A_obs <- matrix(0L, n_v, n_v)
-  A_bi <- matrix(0L, n_v, n_v)
-  rownames(A_obs) <- colnames(A_obs) <- v_names
+  A_di <- matrix(FALSE, n_v, n_v)
+  A_bi <- matrix(FALSE, n_v, n_v)
+  rownames(A_di) <- colnames(A_di) <- v_names
   rownames(A_bi) <- colnames(A_bi) <- v_names
-  for (i in e_lst) {
+  edgemat <- unique(x$edgemat)
+  n_e <- nrow(edgemat)
+  for (i in seq_len(n_e)) {
+    lhs <- edgemat[i, 1L]
+    rhs <- edgemat[i, 2L]
+    arrow <- edgemat[i, 3L]
+    edge_str <- paste0(lhs, " ", arrow, " ", rhs)
+    # eliminate self-loops
     stopifnot_(
-      i > 1L && i < n_g,
-      "Invalid edge construct in argument `x`."
+      lhs != rhs,
+      paste0("Invalid edge construct in argument `x`: ", edge_str)
     )
-    pairs <- expand.grid(
-      g_lst[[i - 1L]],
-      g_lst[[i + 1L]],
-      stringsAsFactors = FALSE
-    )
-    p <- seq_len(nrow(pairs))
-    if (g_lst[[i]] %in% c("<-", "->")) {
-      right <- identical(g_lst[[i]], "->")
-      lhs <- ifelse_(right, 1L, 2L)
-      rhs <- ifelse_(right, 2L, 1L)
-      ix <- cbind(pairs[p, lhs], pairs[p, rhs])
-      A_obs[ix] <- 1L
-    } else {
-      ix <- rbind(
-        cbind(pairs[p, 1L], pairs[p, 2L]),
-        cbind(pairs[p, 2L], pairs[p, 1L])
-      )
-      invalid <- which(ix[, 1L] == ix[, 2L])
-      stopifnot_(
-        length(invalid) == 0L,
-        paste0(
-          "Invalid bidirected edge in `g`: ",
-          pairs[invalid[1], 1L], " <-> ", pairs[invalid[1], 1L], "."
-        )
-      )
-      A_bi[ix] <- 1L
-    }
+    A_di[lhs, rhs] <- A_di[lhs, rhs] || arrow == "->"
+    A_di[rhs, lhs] <- A_di[rhs, lhs] || arrow == "<-"
+    A_bi[lhs, rhs] <- A_bi[lhs, rhs] || arrow == "--"
+    A_bi[rhs, lhs] <- A_bi[rhs, lhs] || arrow == "--"
   }
   stopifnot_(
-    !detect_cycles(A_obs),
+    !detect_cycles(A_di),
     "The graph specified by argument `x` is not acyclic."
   )
-  A_bi[lower.tri(A_bi)] <- 0L
+  lp <- latent_projection(A_di, A_bi, u)
+  A_di <- 1L * lp$A_di
+  A_bi <- 1L * lp$A_bi
+  v_names <- colnames(A_di)
+  n_v <- length(v_names)
   n_u <- sum(A_bi)
   n_vu <- n_v + n_u
   A <- matrix(0L, n_vu, n_vu)
   labels <- character(n_vu)
   latent <- logical(n_vu)
-  A[seq_len(n_v), seq_len(n_v)] <- A_obs
+  A[seq_len(n_v), seq_len(n_v)] <- A_di
   labels[seq_len(n_v)] <- v_names
   u_ix <- seq_asc(n_v + 1L, n_vu)
   lhs_ix <- rep(u_ix, 2L)
@@ -155,32 +158,233 @@ dag <- function(x) {
   )
 }
 
-#' Convert a DAG into a character string
+validate_dag <- function(x) {
+  edge_tokens <- c("<", ">", "-")
+  x_len <- length(x)
+  open <- 0L
+  prev <- 1L
+  sub_start <- 0L
+  sub_end <- 0L
+  sub <- FALSE
+  prev_edge <- TRUE
+  edge_rhs <- TRUE
+  lhs <- FALSE
+  i <- 0L
+  while (i < x_len) {
+    i <- i + 1L
+    open <- open + (x[i] == "{") - (x[i] == "}")
+    sub_start <- sub_start + i * (open == 1L && !sub)
+    sub_end <- sub_end + i * (open == 0L && sub)
+    sub <- (open > 0L)
+    if (open < 0L) {
+      return(FALSE)
+    }
+    if (open == 0L && (x[i] == " " || i == x_len)) {
+      if (sub_start > 0L) {
+        tmp <- validate_dag(x[seq_int(sub_start + 1L, sub_end - 1L)])
+        if (!tmp) {
+          return(FALSE)
+        }
+        sub <- FALSE
+        sub_start <- 0L
+        sub_end <- 0L
+      } else {
+        if (any(x[seq.int(prev, i - 1L)] %in% edge_tokens)) {
+          return(FALSE)
+        }
+      }
+      edge_rhs <- prev_edge
+      edge <- isTRUE(
+        (x[i + 1L] == "<" && x[i + 2L] == "-" ) ||
+        (x[i + 1L] == "-" && x[i + 2L] == ">" ) ||
+        (x[i + 1L] == "-" && x[i + 2L] == "-" )
+      )
+      if (edge) {
+        edge_rhs <- !edge
+        prev_edge <- edge
+      }
+      i <- i + 3L * edge
+      prev <- i + 1L
+      edge <- FALSE
+    }
+  }
+  open == 0L && edge_rhs
+}
+
+
+#' Parse a DAG statement
 #'
-#' @param A An adjacency matrix.
-#' @param lab A `character` vector of vertex labels.
-#' @param lat A `logical` vector indicating latent variables by `TRUE`.
-#' @param ord An `integer` vector giving a topological order of `A`.
-#' @return A `character` representation of the DAG.
+#' @param x A `character` vector of length 1 corresponding to a single
+#' statement in the input to `dag`.
+#' @return A `list` with two components: `vars` containing unique variable
+#' names as a `character` vector and `edgemat` which is a matrix of edge
+#' definitions.
 #' @noRd
-dag_string <- function(A, lab, lat, ord) {
-  ord <- ord[!lat[ord]]
-  e <- character(ncol(A))
-  for (i in ord) {
-    ch <- lab[children(i, A)]
-    n_ch <- length(ch)
-    if (n_ch > 0L) {
-      lhs <- ifelse_(n_ch > 1L, "{", "")
-      rhs <- ifelse_(n_ch > 1L, "}", "")
-      e[i] <- paste0(
-        format(lab[i]), " -> ", lhs, paste0(ch, collapse = ", "), rhs
+parse_dag <- function(x) {
+  out <- list()
+  x <- trimws(x)
+  vars <- character(0L)
+  edgemat <- matrix(0L, 0L, 3L)
+  edges <- find_edges(x)
+  no_edges <- length(edges$arrows) == 0L || !any(nzchar(edges$arrows))
+  if (no_edges) {
+    for (i in seq_along(edges$endpoints)) {
+      if (grepl("-|\\{|\\}", edges$endpoints[i])) {
+        endpoint_parsed <- parse_dag(edges$endpoints[i])
+        vars <- c(vars, endpoint_parsed$vars)
+        edgemat <- rbind(edgemat, endpoint_parsed$edgemat)
+      } else {
+        vars <- c(vars, strsplit(edges$endpoints[i], "\\s")[[1L]])
+      }
+    }
+  }
+  for (i in seq_along(edges$arrows)) {
+    lhs_parsed <- parse_dag(edges$endpoints[i])
+    rhs_parsed <- parse_dag(edges$endpoints[i + 1L])
+    vars <- c(
+      vars,
+      lhs_parsed$vars,
+      rhs_parsed$vars
+    )
+    if (nzchar(edges$arrows[i])) {
+      pairs <- expand.grid(
+        lhs_parsed$vars,
+        rhs_parsed$vars,
+        stringsAsFactors = FALSE,
+        KEEP.OUT.ATTRS = FALSE
+      )
+      new_edges <- cbind(pairs, edges$arrows[i])
+      edgemat <- rbind(
+        edgemat,
+        lhs_parsed$edgemat,
+        rhs_parsed$edgemat,
+        new_edges
       )
     }
   }
-  for (i in which(lat)) {
-    e[i] <- paste0(format(lab[children(i, A)]), collapse = " <-> ")
+  list(vars = vars, edgemat = edgemat)
+}
+
+#' Find edges and group definitions in a DAG statement
+#'
+#' @inheritParams parse_dag
+#' @return A `list` with two elements: `arrows` which is a `character` vector
+#' of the edges and `endpoints` which is a `character` vector of the edge
+#' endpoint variable names or group constructs.
+#' @noRd
+find_edges <- function(x) {
+  arrows <- character(0L)
+  endpoints <- character(0L)
+  open <- 0L
+  group <- FALSE
+  g_ix <- 1L
+  ix <- 0L
+  ix_offset <- 0L
+  x_len <- nchar(x)
+  # Elements are added for lookahead
+  x <- c(strsplit(x, "", fixed = TRUE)[[1L]], "", "")
+  while (ix <= x_len) {
+    ix <- ix + 1L
+    open <- open + (x[ix] == "{") - (x[ix] == "}")
+    next_edge <- x[ix + 1L] %in% c("-", "<")
+    group <- group || (open > 0L)
+    if (open == 0L && x[ix] == " ") {
+      if (next_edge) {
+        e <- collapse(x[seq.int(ix + 1L, ix + 2L)])
+        ix_offset <- 3L
+      } else {
+        e <- ""
+        ix_offset <- 0L
+      }
+      arrows <- c(arrows, e)
+      v <- ifelse_(
+        group,
+        collapse(x[seq_int(g_ix + 1L, ix - 2L)]),
+        collapse(x[seq_int(g_ix, ix - 1L)])
+      )
+      endpoints <- c(endpoints, v)
+      group <- FALSE
+      has_endpoint <- FALSE
+      ix <- ix + ix_offset
+      g_ix <- ix + 1L
+    }
   }
-  paste0(e[nzchar(e)], collapse = "; ")
+  v <- ifelse_(
+    group,
+    collapse(x[seq_int(g_ix + 1L, x_len - 1L)]),
+    collapse(x[seq_int(g_ix, x_len)])
+  )
+  endpoints <- c(endpoints, v)
+  list(arrows = arrows, endpoints = endpoints)
+}
+
+#' Latent projection of a latent variable DAG
+#'
+#' @param A_di An adjacency matrix of directed edges.
+#' @param A_bi An adjacency matrix of bidirected edges.
+#' @param u A `character` vector of variable names to be projected out.
+#' @return A `list` with modified versions of `A_di` and `A_bi` such that
+#' the model no longer contains `u` explicitly.
+#' @noRd
+latent_projection <- function(A_di, A_bi, u) {
+  v <- colnames(A_di)
+  ui <- match(u, v)
+  for (i in ui) {
+    ubi <- parents(i, A_bi)
+    upa <- parents(i, A_di)
+    uch <- children(i, A_di)
+    n_upa <- length(upa)
+    n_uch <- length(uch)
+    n_ubi <- length(ubi)
+    if (n_upa > 0L && n_uch > 0L) {
+      ix <- as.matrix(expand.grid(upa, uch))
+      A_di[ix] <- TRUE
+    }
+    if (n_ubi > 0L && n_uch > 0L) {
+      ix <- as.matrix(expand.grid(ubi, uch))
+      A_bi[ix] <- TRUE
+      A_bi[ix[, 2L], ix[, 1L]] <- TRUE
+    }
+    if (n_uch > 1L) {
+      ix <- as.matrix(expand.grid(uch, uch))
+      A_bi[ix] <- TRUE
+    }
+  }
+  if (length(ui) > 0L) {
+    A_di <- A_di[-ui, -ui]
+    A_bi <- A_bi[-ui, -ui]
+  }
+  A_bi[lower.tri(A_bi)] <- FALSE
+  diag(A_bi) <- FALSE
+  list(A_di = A_di, A_bi = A_bi)
+}
+
+#' Convert a DAG into a character string
+#'
+#' @param A An adjacency matrix.
+#' @param labels A `character` vector of vertex labels.
+#' @param latent A `logical` vector indicating latent variables by `TRUE`.
+#' @param ord An `integer` vector giving a topological order of `A`.
+#' @return A `character` representation of the DAG.
+#' @noRd
+dag_string <- function(A, labels, latent, ord) {
+ ord <- ord[!latent[ord]]
+ e <- character(ncol(A))
+ for (i in ord) {
+   ch <- labels[children(i, A)]
+   n_ch <- length(ch)
+   if (n_ch > 0L) {
+     lhs <- ifelse_(n_ch > 1L, "{", "")
+     rhs <- ifelse_(n_ch > 1L, "}", "")
+     e[i] <- paste0(
+       format(labels[i]), " -> ", lhs, paste0(ch, collapse = ", "), rhs
+     )
+   }
+ }
+ for (i in which(latent)) {
+   e[i] <- paste0(format(labels[children(i, A)]), collapse = " <-> ")
+ }
+ paste0(c(labels[!latent], e[nzchar(e)]), collapse = "; ")
 }
 
 #' Is the argument a `dag` object?
@@ -484,12 +688,20 @@ import_graph <- function(x) {
     names(x) <- NULL
     class(x) <- NULL
     x <- trimws(gsub("[;\\,\r\n\t]", " ", x))
-    x_def <- reg_match(x, "dag \\{(.+)\\}")
     stopifnot_(
-      length(x_def) > 0L,
+      grepl("dag", x),
+      "Argument `x` is not a DAG."
+    )
+    x <- gsub("dag", "", x)
+    stopifnot_(
+      !grepl("[\\[\\]]", x),
+      "Attribute definitions via [...] are not supported in argument `x`."
+    )
+    out <- try(dag(x), silent = TRUE)
+    stopifnot_(
+      !inherits(out, "try-error"),
       "Unable to parse argument `x` into an object of class `dag`."
     )
-    out <- dag(x_def[2L, 1L])
   } else if (inherits(x, "igraph")) {
     stopifnot_(
       requireNamespace("igraph", quietly = TRUE),
@@ -504,16 +716,16 @@ import_graph <- function(x) {
     unobs_edges <- e[description == "U" & !is.na(description)]
     if (length(obs_edges) > 0L) {
       obs_ind <- igraph::get.edges(x, obs_edges)
-      g_obs <- paste(v[obs_ind[,1]], "->", v[obs_ind[, 2L]], collapse = " ")
+      g_obs <- paste(v[obs_ind[,1]], "->", v[obs_ind[, 2L]], collapse = "; ")
     }
     if (length(unobs_edges) > 0L) {
       unobs_ind <- igraph::get.edges(x, unobs_edges)
       unobs_ind <- unobs_ind[unobs_ind[,1] < unobs_ind[, 2L],,drop=FALSE]
       g_unobs <- paste(
-        v[unobs_ind[, 1L]], "<->", v[unobs_ind[, 2L]], collapse = " "
+        v[unobs_ind[, 1L]], "<->", v[unobs_ind[, 2L]], collapse = "; "
       )
     }
-    out <- dag(paste0(c(g_obs, g_unobs), collapse = " "))
+    out <- dag(paste0(c(g_obs, g_unobs), collapse = "; "))
   } else if (is.character(x)) {
     out <- dag(x)
   } else if (is.null(out)) {

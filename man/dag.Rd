@@ -5,12 +5,17 @@
 \alias{print.dag}
 \title{Directed Acyclic Graph}
 \usage{
-dag(x)
+dag(x, u = character(0L))
 
 \method{print}{dag}(x, ...)
 }
 \arguments{
 \item{x}{A \code{dag} object}
+
+\item{u}{A \code{character} vector of variable names which should be considered
+unobserved (besides those defined by bidirected edges). These variables
+are subsequently removed via latent projection. Variable names not found
+in the graph are ignored.}
 
 \item{...}{Not used}
 }
@@ -18,14 +23,15 @@ dag(x)
 An object of class \code{dag}, which is a square adjacency matrix
 with the following attributes:
 \itemize{
-\item \code{labels} A \code{character} vector (or a list) of vertex labels.
-\item \code{latent} A \code{logical} vector indicating latent variables.
-\item \code{order} An \code{integer} vector giving a topological order for the vertices.
+\item \code{labels}\cr A \code{character} vector (or a list) of vertex labels.
+\item \code{latent}\cr A \code{logical} vector indicating latent variables.
+\item \code{order}\cr An \code{integer} vector giving a topological order for the vertices.
+\item \code{text}\cr A \code{character} string giving representing the DAG.
 .
 }
 }
 \description{
-Define a directed acyclic graph (DAG).
+Define a directed acyclic graph (DAG) describing the causal model.
 }
 \details{
 The syntax for \code{x} follows the \code{dagitty} package closely for compatibility.
@@ -40,33 +46,47 @@ Unobserved latent confounders are defined using bidirected edges as
 \verb{X <-> Y} which means that there is an additional variable \code{U[X,Y]} in
 the graph, and the edges \code{X <- U[X,Y] -> Y}, respectively.
 
-Groups of vertices can be defined by enclosing the vertices within
-curly braces. For example \verb{X -> \{Y Z\}} defines that the graph has an edge
-from \code{X} to both \code{Y} and \code{Z}.
-Different statements in \code{x} are automatically distinguished from one
-another without any additional delimiters, but semicolons, commas
-and line breaks can be used if desired.
+Different statements in \code{x} can be distinguished from one
+another using either semicolons, line breaks or spaces.
+
+Subgraphs can be defined by enclosing the definition within
+curly braces. For example \verb{X -> \{Y Z\}} defines an edge
+from \code{X} to both \code{Y} and \code{Z}. Individual statements within a subgraph can be
+separated by a comma or semicolon, but this is optional.
+Edges can also be defined within subgraphs, and subgraphs can be nested.
+For example, \code{X -> {Z -> Y}} is the same definition as
+\verb{X -> Z; X -> Y; Z -> Y}. Similarly \verb{X <-> \{Z -> \{A B\}\} -> Y} is the same as
+\verb{X <-> \{Z A B\} -> Y; Z -> \{A B\}}.
 
 Note that in the context of this package, vertex labels will always be
-converted into upper case, meaning that typing \code{Z} or \code{z} within \code{x} will
+converted into upper case, meaning that typing \code{Z} or \code{z} will
 always represent the same variable. This is done to enforce the notation
-of counterfactual variables, where capital letter denote variables,
+of counterfactual variables, where capital letters denote variables
 and small letters denote their value assignments.
 }
 \examples{
-dag("x -> {y z} <- w <-> g")
+dag("X -> {Y Z} <- W <-> G")
 
-# Groups can appear on both sides of an edge
-dag("{x z} -> {y w}")
+# Subgraphs can appear on both sides of an edge
+dag("{X Z} -> {Y W}")
 
 # Semicolons can be used to distinguish individual statements
-dag("x -> z -> y; x <-> y")
+dag("X -> Z -> Y; X <-> Y")
 
-# Commas can be used to distinguish variables
+# Commas can be used to distinguish variables within groups if there
+# are no edges within the group
 dag("{x, y, z} -> w")
 
-# Line breaks are also allowed
-dag("z -> w
-     x -> y")
+# Edges within subgraphs is supported
+dag("{X -> Z} -> {Y <-> W}")
+
+# Nested subgraphs are supported
+dag("{X -> {Z -> {Y <-> W}}}")
+
+# Line breaks are also supported for statement separation
+dag("
+  Z -> W
+  X -> Y
+")
 
 }

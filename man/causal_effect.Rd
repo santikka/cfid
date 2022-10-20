@@ -20,13 +20,20 @@ for observed variables in the model, i.e. \eqn{V = v} or
 for a subset of \eqn{V}.}
 }
 \value{
-A \code{list} with two components:
+An object of class \code{query} which is a \code{list} with the following
+components:
 \itemize{
 \item \code{id}\cr A \code{logical} value that is \code{TRUE} if the query is identifiable and
 \code{FALSE} otherwise.
-\item \code{formula}\cr A  \code{functional} object expressing the causal effect in terms of
-the joint probability distribution \eqn{p(v)} for identifiable queries or
-\code{NULL} if the queri is not identifiable.
+\item \code{formula}\cr A  \code{functional} object expressing the causal effect in terms
+of the joint probability distribution \eqn{p(v)} for identifiable queries
+or \code{NULL} if the query is not identifiable.
+\item \code{data}\cr The available data, for \code{causal_effect} this is always
+\code{"observations"}
+\item \code{causaleffect}\cr The original query \eqn{p(y|do(x),z)} as a \code{probability}
+object.
+\item \code{undefined}\cr A \code{logical} value, this is always \code{FALSE} for
+\code{causaleffect}
 }
 }
 \description{

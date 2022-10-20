@@ -10,6 +10,8 @@ test_that("extra delimiter invariance", {
   expect_identical(dag("X -> Y -> Z"), dag("X -> Y; Y -> Z"))
   expect_identical(dag("X -> Y -> Z"), dag("X -> Y\n Y -> Z"))
   expect_identical(dag("{X, Y, Z}"), dag("X Y Z"))
+  expect_identical(dag("{{X, Y, Z}}"), dag("X Y Z"))
+  expect_identical(dag("{{X, Y} Z}"), dag("X Y Z"))
 })
 
 test_that("zero edges is allowed", {
@@ -26,24 +28,50 @@ test_that("singleton bidirected", {
   expect_error(dag("X <-> X"))
 })
 
-test_that("no edges within groups", {
-  expect_error(dag("{X -> Y}"))
-  expect_error(dag("{X <-> Y} -> {Z -> W}"))
-})
-
-test_that("missing endpoint", {
+test_that("syntax errors fail", {
+  expect_error(dag("->"))
+  expect_error(dag("<-"))
+  expect_error(dag("<->"))
   expect_error(dag("X ->"))
   expect_error(dag("<- X"))
+  expect_error(dag("<- <- X"))
+  expect_error(dag("X -> ->"))
+  expect_error(dag("X -> -> Y"))
+  expect_error(dag("X -> {}"))
+  expect_error(dag("{} -> X"))
+  expect_error(dag("{Y -> -> X} -> X"))
   expect_error(dag("<-> X"))
   expect_error(dag("X <->"))
+  expect_error(dag("X -> {"))
+  expect_error(dag("X -> }"))
+  expect_error(dag("{"))
+  expect_error(dag("}"))
 })
 
 test_that("allowed structures", {
-  expect_error(dag("x -> {y z} <- w <-> g"), NA)
-  expect_error(dag("{x z} -> {y w}"), NA)
-  expect_error(dag("x -> z -> y; x <-> y"), NA)
-  expect_error(dag("{x, y, z} -> w"), NA)
-  expect_error(dag("z -> w\nx -> y"), NA)
+  expect_error(dag("{X -> Y}"), NA)
+  expect_error(dag("{X <-> Y} -> {Z -> W}"), NA)
+  expect_error(dag("X -> {Y Z} <- W <-> G"), NA)
+  expect_error(dag("{X Z} -> {Y W}"), NA)
+  expect_error(dag("X -> Z -> Y; X <-> Y"), NA)
+  expect_error(dag("{X, Y, Z} -> W"), NA)
+  expect_error(dag("Z -> W\nX -> Y"), NA)
+  expect_error(dag("{X -> Z} -> {Y <-> W}"), NA)
+  expect_error(dag("{X -> {Z -> {Y <-> W}}}"), NA)
+})
+
+test_that("latent_projection", {
+  expect_identical(dag("X -> Z -> Y", u = "Z"), dag("X -> Y"))
+  expect_identical(dag("X <- Z -> Y", u = "Z"), dag("X <-> Y"))
+  expect_identical(dag("Z <-> X -> Z -> Y", u = "Z"), dag("X <-> Y; X -> Y"))
+  expect_identical(
+    dag(" X -> Z -> Y <- W -> X", u = c("Z", "W")),
+    dag("X <-> Y; X -> Y")
+  )
+  expect_identical(
+    dag("X -> {Z <-> {A B} -> H} -> Y", u = c("Z", "A", "B", "H")),
+    dag("X -> Y")
+  )
 })
 
 g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")

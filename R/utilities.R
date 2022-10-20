@@ -10,11 +10,6 @@ rep_char <- function(x, n) {
   paste0(rep(x, n), collapse = "")
 }
 
-reg_match <- function(x, pattern, perl = TRUE) {
-  m <- gregexec(pattern, x, perl)
-  regmatches(x, m)[[1L]]
-}
-
 ifelse_ <- function(test, yes, no) {
   if (test) {
     yes
