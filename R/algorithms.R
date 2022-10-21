@@ -93,6 +93,7 @@ id_star <- function(g, gamma) {
   gamma_sub <- subs(gamma)
   gamma_cfvar <- cfvars(gamma_prime)
   gamma_sub_var <- lapply(gamma_sub, names)
+  # Simplify subscripts to ancestors
   for (i in seq_along(gamma_prime)) {
     if (length(gamma_sub_var[[i]]) > 0L) {
       g_ix <- which(lab_prime %in% gamma_cfvar[i])

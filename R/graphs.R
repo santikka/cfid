@@ -521,6 +521,7 @@ cg <- function(p, gamma) {
         }
         for (b in seq_int(a + 1L, p$n_worlds)) {
           same_var <- FALSE
+          same_val <- FALSE
           val_pa_beta <- NULL
           val_beta <- NULL
           beta_offset <- (b - 1L) * p$n_obs_orig
@@ -535,32 +536,36 @@ cg <- function(p, gamma) {
           }
           if (n_pa_alpha == 0L || n_pa_beta == 0L) {
             if (identical(val_alpha, val_beta)) {
-              same_var <- TRUE
+              same_var <- (n_pa_alpha == 0L && n_pa_beta == 0L)
+              same_val <- TRUE
             }
           } else {
             obs_pa <- intersect(pa_alpha, obs) - alpha_offset
             if (length(obs_pa) > 0) {
-              same_var <- all_equivalent(eq_val, obs_pa, a, b)
+              same_val <- all_equivalent(eq_val, obs_pa, a, b)
             } else {
               # Latent variables are shared across worlds
-              same_var <- TRUE
+              same_val <- TRUE
             }
+            same_var <- same_val
           }
-          if (same_var) {
+          if (same_val) {
             if (!val_consistent(val_alpha, val_beta)) {
               return(list(consistent = FALSE))
             }
             eq_val[[v]] <- update_equivalence(eq_val[[v]], a, b)
-            ch_beta <- children(beta_ix, A)
-            A_cg[pa_beta, alpha_ix] <- 1L
-            A_cg[alpha_ix, ch_beta] <- 1L
-            keep[beta_ix] <- FALSE
-            merged <- c(
-              merged,
-              list(
-                list(original = beta, replacement = alpha)
+            if (same_var) {
+              ch_beta <- children(beta_ix, A)
+              A_cg[pa_beta, alpha_ix] <- 1L
+              A_cg[alpha_ix, ch_beta] <- 1L
+              keep[beta_ix] <- FALSE
+              merged <- c(
+                merged,
+                list(
+                  list(original = beta, replacement = alpha)
+                )
               )
-            )
+            }
           }
         }
       }
