@@ -148,7 +148,7 @@ test_that("backdoor", {
   expect_true(out$id)
   expect_identical(
     format(out$formula),
-    "\\sum_{z} p(y|z,x)p(z)"
+    "\\sum_{z} P(y|z,x)P(z)"
   )
 })
 
@@ -158,7 +158,7 @@ test_that("frontdoor", {
   expect_true(out$id)
   expect_identical(
     format(out$formula),
-    "\\sum_{z} p(z|x)\\left(\\sum_{x^*} p(y|x^*,z)p(x^*)\\right)"
+    "\\sum_{z} P(z|x)\\left(\\sum_{x^*} P(y|x^*,z)P(x^*)\\right)"
   )
 })
 
@@ -169,8 +169,8 @@ test_that("napkin", {
   expect_identical(
     format(out$formula),
     paste0(
-      "\\frac{\\sum_{w} p(y|w,z,x)p(x|w,z)p(w)}",
-      "{\\sum_{w,y^*} p(y^*|w,z,x)p(x|w,z)p(w)}"
+      "\\frac{\\sum_{w} P(y|w,z,x)P(x|w,z)P(w)}",
+      "{\\sum_{w,y^*} P(y^*|w,z,x)P(x|w,z)P(w)}"
     )
   )
 })
@@ -197,11 +197,11 @@ test_that("conditional simplification is carried out", {
   g <- dag("Z <-> X -> Z -> Y")
   out <- causal_effect(g, "Y", "X", "Z")
   expect_true(out$id)
-  expect_identical(format(out$formula), "p(y|x,z)")
+  expect_identical(format(out$formula), "P(y|x,z)")
   g <- dag("X -> Z -> Y")
   out <- causal_effect(g, "Y", "X", "Z")
   expect_true(out$id)
-  expect_identical(format(out$formula), "p(y|x,z)")
+  expect_identical(format(out$formula), "P(y|x,z)")
 })
 
 # Identification pipeline -------------------------------------------------
@@ -222,11 +222,11 @@ test_that("simple pipeline", {
   expect_true(out2$id)
   expect_identical(
     format(out1$formula),
-    "p_{x}(y|z)"
+    "P_{x}(y|z)"
   )
   expect_identical(
     format(out2$formula),
-    "\\frac{p(y|x,z)p(z|x)}{\\sum_{y^*} p(y^*|x,z)p(z|x)}"
+    "\\frac{P(y|x,z)P(z|x)}{\\sum_{y^*} P(y^*|x,z)P(z|x)}"
   )
 })
 
@@ -246,7 +246,7 @@ test_that("nonidentifiable from observations alone", {
   expect_false(out2$id)
   expect_identical(
     format(out1$formula),
-    "p_{x}(y|z)"
+    "P_{x}(y|z)"
   )
   idfun <- functional(
     numerator = out1$formula,
@@ -263,7 +263,7 @@ test_that("quotient", {
   expect_true(out$id)
   expect_identical(
     format(out$formula),
-    "\\frac{\\sum_{w} p(w|x)p(y|x',d,w,z)p(x')}{p(x')}",
+    "\\frac{\\sum_{w} P(w|x)P(y|x',d,w,z)P(x')}{P(x')}",
   )
 })
 

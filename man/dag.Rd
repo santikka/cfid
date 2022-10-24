@@ -47,7 +47,7 @@ Unobserved latent confounders are defined using bidirected edges as
 the graph, and the edges \code{X <- U[X,Y] -> Y}, respectively.
 
 Different statements in \code{x} can be distinguished from one
-another using either semicolons, line breaks or spaces.
+another using either semicolons, line breaks, or spaces.
 
 Subgraphs can be defined by enclosing the definition within
 curly braces. For example \verb{X -> \{Y Z\}} defines an edge

@@ -16,7 +16,7 @@
 #' is meant to represent a product of terms.
 #' @param numerator A `functional` or a `probability` object.
 #' If the functional represents a conditional probability that
-#' cannot be expressed simply in terms of the set of inputs \eqn{P*},
+#' cannot be expressed simply in terms of the set of inputs,
 #' this is the numerator of the quotient representation.
 #' @param denominator A `functional` or a `probability` object.
 #' The denominator of the quotient representation.
@@ -87,9 +87,9 @@ is.functional <- function(x) {
 #' to simply denote the `obs` value via superscript directly as
 #' `"y^{(obs)}"`, where obs is evaluated.
 #' @param use_do A `logical` value. If `TRUE`, the explicit do-operation is
-#' used to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+#' used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
 #' If `FALSE` (the default), the subscript notation is used instead
-#' (e.g., \eqn{p_x(y)}).
+#' (e.g., \eqn{P_x(y)}).
 #' @param ... Additional arguments passed to `format`.
 #' @return A `character` representation of the `functional` object
 #' in LaTeX syntax.

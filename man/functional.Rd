@@ -23,7 +23,7 @@ is meant to represent a product of terms.}
 
 \item{numerator}{A \code{functional} or a \code{probability} object.
 If the functional represents a conditional probability that
-cannot be expressed simply in terms of the set of inputs \eqn{P*},
+cannot be expressed simply in terms of the set of inputs,
 this is the numerator of the quotient representation.}
 
 \item{denominator}{A \code{functional} or a \code{probability} object.
@@ -40,9 +40,9 @@ to simply denote the \code{obs} value via superscript directly as
 \code{"y^{(obs)}"}, where obs is evaluated.}
 
 \item{use_do}{A \code{logical} value. If \code{TRUE}, the explicit do-operation is
-used to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
 If \code{FALSE} (the default), the subscript notation is used instead
-(e.g., \eqn{p_x(y)}).}
+(e.g., \eqn{P_x(y)}).}
 
 \item{...}{Additional arguments passed to \code{format}.}
 }

@@ -58,10 +58,10 @@ for example when \eqn{p(\delta) = 0}, and \code{FALSE} otherwise.
 Determine the identifiability of a (conditional) counterfactual conjunction.
 }
 \details{
-To identify a non-conditional conjunction \eqn{p(\gamma)}, the argument
+To identify a non-conditional conjunction \eqn{P(\gamma)}, the argument
 \code{delta} should be \code{NULL}.
 
-To identify a conditional conjunction \eqn{p(\gamma|\delta)}, both \code{gamma}
+To identify a conditional conjunction \eqn{P(\gamma|\delta)}, both \code{gamma}
 and \code{delta} should be specified.
 
 First, a parallel worlds graph is constructed based on the query. In a

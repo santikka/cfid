@@ -2,10 +2,10 @@
 #'
 #' Determine the identifiability of a (conditional) counterfactual conjunction.
 #'
-#' To identify a non-conditional conjunction \eqn{p(\gamma)}, the argument
+#' To identify a non-conditional conjunction \eqn{P(\gamma)}, the argument
 #' `delta` should be `NULL`.
 #'
-#' To identify a conditional conjunction \eqn{p(\gamma|\delta)}, both `gamma`
+#' To identify a conditional conjunction \eqn{P(\gamma|\delta)}, both `gamma`
 #' and `delta` should be specified.
 #'
 #' First, a parallel worlds graph is constructed based on the query. In a
@@ -175,7 +175,7 @@ print.query <- function(x, ...) {
       "",
       paste0("|", format(x$delta))
     )
-    query_str <- paste0("p(", format(x$gamma), delta_str, ")")
+    query_str <- paste0("P(", format(x$gamma), delta_str, ")")
     cat("The query", query_str)
   } else {
     cat("The query", format(x$causaleffect))
@@ -183,8 +183,8 @@ print.query <- function(x, ...) {
   id_str <- ifelse_(x$id, "identifiable", "not identifiable")
   data_str <- switch(
     x$data,
-    both = "(P_*, p(v)).",
-    observations = "p(v).",
+    both = "{P_*, P(v)}.",
+    observations = "P(v).",
     interventions = "P_*."
   )
   cat(" is", id_str, "from", data_str)

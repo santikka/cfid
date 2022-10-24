@@ -1,6 +1,6 @@
 #' Causal Effect Identification
 #'
-#' Identify a causal effect of the form \eqn{p(y|do(x),z)} from \eqn{p(v)} in
+#' Identify a causal effect of the form \eqn{P(y|do(x),z)} from \eqn{P(v)} in
 #' \eqn{G}.
 #'
 #' @param g A `dag` object depicting the causal diagram \eqn{G}.
@@ -16,11 +16,11 @@
 #' * `id`\cr A `logical` value that is `TRUE` if the query is identifiable and
 #'   `FALSE` otherwise.
 #' * `formula`\cr A  `functional` object expressing the causal effect in terms
-#'   of the joint probability distribution \eqn{p(v)} for identifiable queries
+#'   of the joint probability distribution \eqn{P(v)} for identifiable queries
 #'   or `NULL` if the query is not identifiable.
 #' * `data`\cr The available data, for `causal_effect` this is always
 #'   `"observations"`
-#' * `causaleffect`\cr The original query \eqn{p(y|do(x),z)} as a `probability`
+#' * `causaleffect`\cr The original query \eqn{P(y|do(x),z)} as a `probability`
 #'   object.
 #' * `undefined`\cr A `logical` value, this is always `FALSE` for
 #'   `causaleffect`

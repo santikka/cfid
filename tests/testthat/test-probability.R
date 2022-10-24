@@ -25,23 +25,23 @@ prob3$denominator <- probability(val = 1L)
 test_that("probability format works", {
   expect_identical(
     format(id1$formula),
-    "\\sum_{w} p_{x}(w)p_{w,z}(y,x')p_{d}(z)p(d)"
+    "\\sum_{w} P_{x}(w)P_{w,z}(y,x')P_{d}(z)P(d)"
   )
   expect_identical(
     format(id1$formula, use_primes = FALSE),
-    "\\sum_{w} p_{x}(w)p_{w,z}(y,x^{(1)})p_{d}(z)p(d)"
+    "\\sum_{w} P_{x}(w)P_{w,z}(y,x^{(1)})P_{d}(z)P(d)"
   )
   expect_identical(
     format(id2$formula),
-    "\\frac{\\sum_{w} p_{x}(w)p_{w,z}(y,x')}{p(x')}"
+    "\\frac{\\sum_{w} P_{x}(w)P_{w,z}(y,x')}{P(x')}"
   )
   expect_identical(
     format(id2$formula, use_do = TRUE),
-    "\\frac{\\sum_{w} p(w|do(x))p(y,x'|do(w,z))}{p(x')}"
+    "\\frac{\\sum_{w} P(w|do(x))P(y,x'|do(w,z))}{P(x')}"
   )
   expect_identical(
     format(prob3),
-    "\\sum_{w} p_{x}(w)p_{w,z}(y,x')"
+    "\\sum_{w} P_{x}(w)P_{w,z}(y,x')"
   )
   expect_identical(
     format(probability(val = 1L)),
@@ -53,10 +53,10 @@ test_that("probability printing works", {
   expect_output(
     print(id1$formula),
     paste0(
-      "\\\\sum_\\{w\\} p_\\{x\\}\\(w\\)p_\\{w,z\\}",
-      "\\(y,x'\\)p_\\{d\\}\\(z\\)p\\(d\\)"
+      "\\\\sum_\\{w\\} P_\\{x\\}\\(w\\)P_\\{w,z\\}",
+      "\\(y,x'\\)P_\\{d\\}\\(z\\)P\\(d\\)"
     )
   )
   prob <- probability(var = list(cf("X", 0)), cond = list(cf("Z", 0)))
-  expect_output(print(prob), "p\\(x|z\\)")
+  expect_output(print(prob), "P\\(x|z\\)")
 })

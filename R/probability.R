@@ -1,18 +1,18 @@
 #' Symbolic Probability Distributions
 #'
 #' Defines an interventional or observational (conditional) probability
-#' \eqn{p(y|do(x),z)}. For formatting options, see [cfid::format.probability()].
+#' \eqn{P(y|do(x),z)}. For formatting options, see [cfid::format.probability()].
 #'
 #' @param val An `integer` value of either 0 or 1 for almost sure events.
 #' @param var A `list` of objects of class `counterfactual_variable`
 #' (without interventions and with value assignments).
-#' `var` defines the observations \eqn{y} in \eqn{p(y|do(x),z)}.
+#' `var` defines the observations \eqn{y} in \eqn{P(y|do(x),z)}.
 #' @param cond A `list` of `counterfactual_variable` variable objects
 #' (without interventions and with value assignments).Defines the
-#' conditioning set \eqn{z} in \eqn{p(y|do(x),z)}.
+#' conditioning set \eqn{z} in \eqn{P(y|do(x),z)}.
 #' @param do A `list` of `counterfactual_variable` variable objects
 #' (without interventions and with value assignments). Defines the
-#' intervention set \eqn{x} in \eqn{p(y|do(x),z)}.
+#' intervention set \eqn{x} in \eqn{P(y|do(x),z)}.
 #'
 #' @seealso [cfid::counterfactual_variable()], [cfid::functional()]
 #' @return An object of class `probability`, which is a `list` containing
@@ -69,9 +69,9 @@ is.probability <- function(x) {
 #' to simply denote the `obs` value via superscript directly as
 #' `"y^{(obs)}"`, where obs is evaluated.
 #' @param use_do A `logical` value. If `TRUE`, the explicit do-operation is
-#' used to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+#' used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
 #' If `FALSE` (the default), the subscript notation is used instead
-#' (e.g., \eqn{p_x(y)}).
+#' (e.g., \eqn{P_x(y)}).
 #' @param ... Additional arguments passed to `format`.
 #' @return A `character` representation of the `probability` object
 #' in LaTeX syntax.
@@ -125,7 +125,7 @@ format.probability <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
     rhs <- paste0("|", do, cond)
   }
   var <- paste0(comma_sep(vapply(x$var, format, character(1L), use_primes)))
-  paste0("p", sub, "(", var, rhs, ")")
+  paste0("P", sub, "(", var, rhs, ")")
 }
 
 #' @method print probability

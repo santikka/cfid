@@ -17,15 +17,15 @@ probability(val = NULL, var = NULL, do = NULL, cond = NULL)
 
 \item{var}{A \code{list} of objects of class \code{counterfactual_variable}
 (without interventions and with value assignments).
-\code{var} defines the observations \eqn{y} in \eqn{p(y|do(x),z)}.}
+\code{var} defines the observations \eqn{y} in \eqn{P(y|do(x),z)}.}
 
 \item{do}{A \code{list} of \code{counterfactual_variable} variable objects
 (without interventions and with value assignments). Defines the
-intervention set \eqn{x} in \eqn{p(y|do(x),z)}.}
+intervention set \eqn{x} in \eqn{P(y|do(x),z)}.}
 
 \item{cond}{A \code{list} of \code{counterfactual_variable} variable objects
 (without interventions and with value assignments).Defines the
-conditioning set \eqn{z} in \eqn{p(y|do(x),z)}.}
+conditioning set \eqn{z} in \eqn{P(y|do(x),z)}.}
 
 \item{x}{A \code{probability} object.}
 
@@ -38,9 +38,9 @@ to simply denote the \code{obs} value via superscript directly as
 \code{"y^{(obs)}"}, where obs is evaluated.}
 
 \item{use_do}{A \code{logical} value. If \code{TRUE}, the explicit do-operation is
-used to denote interventional probabilities (e.g., \eqn{p(y|do(x))}).
+used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
 If \code{FALSE} (the default), the subscript notation is used instead
-(e.g., \eqn{p_x(y)}).}
+(e.g., \eqn{P_x(y)}).}
 
 \item{...}{Additional arguments passed to \code{format}.}
 }
@@ -53,7 +53,7 @@ in LaTeX syntax.
 }
 \description{
 Defines an interventional or observational (conditional) probability
-\eqn{p(y|do(x),z)}. For formatting options, see \code{\link[=format.probability]{format.probability()}}.
+\eqn{P(y|do(x),z)}. For formatting options, see \code{\link[=format.probability]{format.probability()}}.
 }
 \examples{
 # Example from Makhlouf, Zhioua and Palamidessi (2021)
