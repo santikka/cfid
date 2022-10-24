@@ -17,7 +17,7 @@ Description: Facilitates the identification of counterfactual queries in
  conjunctions. Construction of parallel worlds graphs and counterfactual graphs 
  is carried out automatically based on the counterfactual query and the causal 
  diagram.
-License: GPL-3
+License: GPL (>= 3)
 Encoding: UTF-8
 URL: https://github.com/santikka/cfid
 Roxygen: list(markdown = TRUE)
