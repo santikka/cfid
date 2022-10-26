@@ -195,6 +195,7 @@ print.query <- function(x, ...) {
   if (x$id) {
     cat("\nFormula:", format(x$formula, ...))
   }
+  cat("\n")
 }
 
 #' Attempt to Identify Terms from the Output of IDC*
