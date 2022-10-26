@@ -91,47 +91,6 @@ obs <- function(gamma) {
   gamma[vapply(gamma, function(x) length(x$sub) == 0, logical(1L))]
 }
 
-#' Determines trivially conflicting variables in a counterfactual conjunction
-#'
-#' @param cf_list A list of `counterfactual_variable` objects.
-#' @return A `list` of conflicting variables
-#' @noRd
-trivial_conflicts <- function(cf_list) {
-  x <- cfvars(cf_list)
-  out <- list()
-  for (y in cf_list) {
-    y_cf <- list(cfvar(y))
-    z <- which(x %in% y_cf)
-    if (length(z) > 1L) {
-      x_vals <- sapply(cf_list[z], "[[", "obs")
-      if (length(unique(x_vals)) > 1L) {
-        out <- c(out, y_cf)
-      }
-    }
-  }
-  unique(out)
-}
-
-#' Determines whether a counterfactual variable conflicts with a
-#' counterfactual conjunction
-#'
-#' @param y A `counterfactual_variable` object.
-#' @param gamma A `Counterfactual_conjunction` object.
-#' @return A `list` of conflicting variables.
-#' @noRd
-trivial_conflict <- function(y, gamma) {
-  y_cf <- list(cfvar(y))
-  x <- cfvars(gamma)
-  z <- which(x %in% y_cf)
-  if (length(z) > 0L) {
-    xy_vals <- c(sapply(gamma[z], "[[", "obs"), y$obs)
-    if (length(unique(xy_vals)) > 1L) {
-      return(y_cf)
-    }
-  }
-  list()
-}
-
 #' Determines the value of a counterfactual variable within a conjunction.
 #'
 #' @param x A `counterfactual_variable` object.

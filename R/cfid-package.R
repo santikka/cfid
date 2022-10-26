@@ -5,16 +5,16 @@
 #' @details
 #' This package provides tools necessary for identifying counterfactual
 #' queries in causal models. Causal graphs, counterfactual variables,
-#' and counterfactual conjunctions are defined via a simple interface.
+#' and counterfactual conjunctions are defined via simple interfaces.
 #'
 #' # Counterfactuals
 #'
 #' In simple terms, counterfactual are statements involving multiple
-#' conceptual 'worlds' where the observed state of the worlds is different.
+#' conceptual "worlds" where the observed state of the worlds is different.
 #' As an example, consider two variables, Y = "headache", and X = "aspirin".
 #' A counterfactual statement could be "If I have a headache and did not take
 #' aspirin, would I not have a headache, had I taken aspirin instead".
-#' This statement involves two worlds: the real or actual world, where
+#' This statement involves two worlds: the real or "actual" world, where
 #' aspirin was not taken, and a hypothetical world, where it was taken.
 #' In more formal terms, this statement involves a counterfactual variable
 #' \eqn{Y_x} that attains two different values in two different worlds, forming
@@ -27,12 +27,12 @@
 #' Pearl's ladder of causation consists of the associational,
 #' interventional and counterfactual levels, with counterfactual being
 #' the highest level. The goal of identification is to find a transformation
-#' from a higher level query into a lower level one.
+#' of a higher level query into a lower level one.
 #' For the interventional case, this transformation is known as causal effect
 #' identifiability, where interventional distributions are expressed in terms
 #' of observational quantities. Tools for this type of identification are
 #' readily available,
-#' such as in `causaleffect`, `dagitty`, `pcalg`, and `dosearch`
+#' such as in the `causaleffect`, `dagitty`, `pcalg`, and `dosearch`
 #' packages. Transformation from the highest counterfactual level, is more
 #' difficult, both conceptually and computationally, since to reach the
 #' observational level, we must first find a transformation of our
@@ -41,7 +41,9 @@
 #' exist, for example in the presence of latent unobserved confounders, meaning
 #' that the queries are non-identifiable. This package deals with the first
 #' transformation, i.e., expressing the counterfactual queries in terms of
-#' interventional queries (and observational, when possible).
+#' interventional queries (and observational, when possible), as well as the
+#' second one, transforming interventional distributions to observational
+#' quantities.
 #'
 #' # Algorithms
 #'
@@ -49,11 +51,10 @@
 #' \eqn{G} is a directed acyclic graph (DAG) depicting the causal model
 #' in question (a causal graph for short), and
 #' \eqn{P_*} is the set of all interventional distributions
-#' in causal models inducing \eqn{G}.
-#' counterfactual probability into an expression which can be represented
-#' solely in terms of interventional distributions. Identification is carried
-#' out using the ID*
-#' and IDC* algorithms by Shpitser and Pearl (2008). These
+#' in causal models inducing \eqn{G}. Identification is carried
+#' out by the ID* and IDC* algorithms by Shpitser and Pearl (2008) which aim to
+#' convenrt the input counterfactual probability into an expression which can
+#' be represented solely in terms of interventional distributions. These
 #' algorithms are sound and complete, meaning that their output is always
 #' correct, and in the case of a non-identifiable counterfactual, one can
 #' always construct a counterexample, witnessing non-identifiability.
@@ -67,6 +68,7 @@
 #' construction, see [cfid::dag()].
 #'
 #' # Counterfactual variables and conjunctions
+#'
 #' Counterfactual variables are defined by their name, value and the conceptual
 #' world that they belong to. A world is defined by a unique set of actions
 #' (interventions) via the do-operator (Pearl, 2009). We can define the two

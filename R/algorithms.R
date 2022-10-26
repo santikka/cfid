@@ -7,6 +7,7 @@
 #' functional as a `functional` or a `probability` object, respectively.
 #' @noRd
 id_star <- function(g, gamma) {
+  # ID* algorithm line order changed here to avoid unnecesary recursion
   # Line 2
   if (is_inconsistent(gamma)) {
     return(list(id = TRUE, formula = probability(val = 0L)))

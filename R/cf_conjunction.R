@@ -53,18 +53,38 @@ counterfactual_conjunction <- function(...) {
   structure(unique(dots), class = "counterfactual_conjunction")
 }
 
+#' Convert an \R object into a `counterfactual_conjunction`
+#'
+#' @param x An \R object.
+#' @return A `counterfactual_conjunction` object, if a suitable method exists.
+#' @noRd
 as.counterfactual_conjunction <- function(x) {
   UseMethod("as.counterfactual_conjunction")
 }
 
+#' Convert a `list` into a counterfactual conjunction
+#'
+#' @param x A `list` object.
+#' @return A `counterfactual_conjunction` object.
+#' @noRd
 as.counterfactual_conjunction.list <- function(x) {
   do.call(counterfactual_conjunction, x)
 }
 
+#' Convert a `counterfactual_variable` into a `counterfactual_conjunction`
+#'
+#' @param x A `counterfactual_variable` object.
+#' @return A `counterfactual_conjunction` object.
+#' @noRd
 as.counterfactual_conjunction.counterfactual_variable <- function(x) {
   counterfactual_conjunction(x)
 }
 
+#' Convert an \R object into a `counterfactual_conjunction`
+#'
+#' @param x An \R object.
+#' @return A `counterfactual_conjunction` object, if `x` is a counterfactual
+#' @noRd
 as.counterfactual_conjunction.default <- function(x) {
   if (is.counterfactual_conjunction(x)) {
     x
@@ -73,6 +93,12 @@ as.counterfactual_conjunction.default <- function(x) {
   }
 }
 
+#' Is the argument a `counterfactual_conjunction` object?
+#'
+#' @param x An \R object.
+#' @return A `logical` value that is `TRUE` if `x` is a
+#' `counterfactual_conjunction` object.
+#' @noRd
 is.counterfactual_conjunction <- function(x) {
   inherits(x, "counterfactual_conjunction")
 }
@@ -166,7 +192,12 @@ print.counterfactual_conjunction <- function(x, ...) {
 #' @export
 conj <- counterfactual_conjunction
 
-
+#' Check for conflicting value assignments within one or between two
+#' counterfactual conjunctions
+#'
+#' @param x A `counterfactual_conjunction` object.
+#' @param y A `counterfactual_conjunction` object.
+#' @noRd
 check_conflicts <- function(x, y) {
   if (missing(y)) {
     conf <- trivial_conflicts(x)
@@ -177,6 +208,47 @@ check_conflicts <- function(x, y) {
     conf_form <- comma_sep(vapply(conf, format, character(1L)))
     stop_("Inconsistent definitions given for variables: ", conf_form)
   }
+}
+
+#' Determines trivially conflicting variables in a counterfactual conjunction
+#'
+#' @param cf_list A list of `counterfactual_variable` objects.
+#' @return A `list` of conflicting variables.
+#' @noRd
+trivial_conflicts <- function(cf_list) {
+  x <- cfvars(cf_list)
+  out <- list()
+  for (y in cf_list) {
+    y_cf <- list(cfvar(y))
+    z <- which(x %in% y_cf)
+    if (length(z) > 1L) {
+      x_vals <- sapply(cf_list[z], "[[", "obs")
+      if (length(unique(x_vals)) > 1L) {
+        out <- c(out, y_cf)
+      }
+    }
+  }
+  unique(out)
+}
+
+#' Determines whether a counterfactual variable conflicts with another
+#' counterfactual conjunction
+#'
+#' @param y A `counterfactual_variable` object.
+#' @param gamma A `Counterfactual_conjunction` object.
+#' @return A `list` of conflicting variables.
+#' @noRd
+trivial_conflict <- function(y, gamma) {
+  y_cf <- list(cfvar(y))
+  x <- cfvars(gamma)
+  z <- which(x %in% y_cf)
+  if (length(z) > 0L) {
+    xy_vals <- c(sapply(gamma[z], "[[", "obs"), y$obs)
+    if (length(unique(xy_vals)) > 1L) {
+      return(y_cf)
+    }
+  }
+  list()
 }
 
 #' Remove tautological statements from a counterfactual conjunction

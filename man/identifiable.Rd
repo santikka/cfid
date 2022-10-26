@@ -15,11 +15,11 @@ identifiable(
 \item{g}{A \code{dag} object describing the causal graph
 (to obtain a \code{dag} from another format, see \code{\link[=import_graph]{import_graph()}}.}
 
-\item{gamma}{An R object that can be coerced into a
+\item{gamma}{An \R object that can be coerced into a
 \code{counterfactual_conjunction} object that represents the
 counterfactual causal query.}
 
-\item{delta}{An R object that can be coerced into a
+\item{delta}{An \R object that can be coerced into a
 \code{counterfactual_conjunction} object that represents the conditioning
 conjunction (optional).}
 

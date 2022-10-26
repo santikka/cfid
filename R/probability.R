@@ -51,7 +51,7 @@ probability <- function(val = NULL, var = NULL, do = NULL, cond = NULL) {
 
 #' Is the argument a `probability` object?
 #'
-#' @param x An R object.
+#' @param x An \R object.
 #' @return A `logical` value that is `TRUE` if `x` is a `probability` object.
 #' @noRd
 is.probability <- function(x) {

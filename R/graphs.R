@@ -389,7 +389,7 @@ dag_string <- function(A, labels, latent, ord) {
 
 #' Is the argument a `dag` object?
 #'
-#' @param x An R object.
+#' @param x An \R object.
 #' @return A `logical` value that is `TRUE` if the object is a `dag`.
 #' @noRd
 is.dag <- function(x) {

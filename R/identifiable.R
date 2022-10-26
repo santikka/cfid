@@ -28,10 +28,10 @@
 #'
 #' @param g A `dag` object describing the causal graph
 #' (to obtain a `dag` from another format, see [cfid::import_graph()].
-#' @param gamma An R object that can be coerced into a
+#' @param gamma An \R object that can be coerced into a
 #' `counterfactual_conjunction` object that represents the
 #' counterfactual causal query.
-#' @param delta An R object that can be coerced into a
+#' @param delta An \R object that can be coerced into a
 #' `counterfactual_conjunction` object that represents the conditioning
 #' conjunction (optional).
 #' @param data A `character` string that accepts one of the following:
@@ -166,19 +166,20 @@ NULL
 #' @rdname query
 #' @method print query
 #' @param x A `query` object
-#' @param ... Not used.
+#' @param ... Arguments passed to [cfid::format.functional] and
+#'   [cfid::format.counterfactual_conjunction]
 #' @export
 print.query <- function(x, ...) {
   if (x$counterfactual) {
     delta_str <- ifelse_(
       is.null(x$delta),
       "",
-      paste0("|", format(x$delta))
+      paste0("|", format(x$delta, ...))
     )
-    query_str <- paste0("P(", format(x$gamma), delta_str, ")")
+    query_str <- paste0("P(", format(x$gamma, ...), delta_str, ")")
     cat("The query", query_str)
   } else {
-    cat("The query", format(x$causaleffect))
+    cat("The query", format(x$causaleffect, ...))
   }
   id_str <- ifelse_(x$id, "identifiable", "not identifiable")
   data_str <- switch(
@@ -192,7 +193,7 @@ print.query <- function(x, ...) {
     cat("\nThe query is undefined.")
   }
   if (x$id) {
-    cat("\nFormula:", format(x$formula))
+    cat("\nFormula:", format(x$formula, ...))
   }
 }
 

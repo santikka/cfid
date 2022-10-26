@@ -10,7 +10,8 @@
 \arguments{
 \item{x}{A \code{query} object}
 
-\item{...}{Not used.}
+\item{...}{Arguments passed to \link{format.functional} and
+\link{format.counterfactual_conjunction}}
 }
 \description{
 Objects of class \code{query} describe the output of \code{identifiable} and
