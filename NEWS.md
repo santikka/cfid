@@ -7,6 +7,7 @@
   * The syntax used by `dag` is now more flexible, allowing edges within subgraph definitions and nested subgraphs.
   * Dropped dependency on R version 4.1.
   * Improved the package documentation.
+  * Changed the default value of `var_sep` argument.
 
 # cfid 0.1.3
 

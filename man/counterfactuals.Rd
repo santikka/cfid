@@ -16,7 +16,7 @@
 \usage{
 counterfactual_conjunction(...)
 
-\method{format}{counterfactual_conjunction}(x, varsep = " ∧ ", ...)
+\method{format}{counterfactual_conjunction}(x, var_sep = " /\\\\ ", ...)
 
 \method{print}{counterfactual_conjunction}(x, ...)
 
@@ -43,7 +43,7 @@ cf(var, obs = integer(0L), sub = integer(0L))
 \item{x}{A \code{counterfactual_variable} or a \code{counterfactual_conjunction}
 object.}
 
-\item{varsep}{A \code{character} string to separate counterfactual variables.}
+\item{var_sep}{A \code{character} string to separate counterfactual variables.}
 
 \item{e1}{A \code{counterfactual_variable} or a \code{counterfactual_conjunction}
 object.}

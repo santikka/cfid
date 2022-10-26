@@ -105,13 +105,13 @@ is.counterfactual_conjunction <- function(x) {
 
 #' @method format counterfactual_conjunction
 #' @rdname counterfactuals
-#' @param varsep A `character` string to separate counterfactual variables.
+#' @param var_sep A `character` string to separate counterfactual variables.
 #' @param ... Additional arguments passed to
 #' [cfid::format.counterfactual_variable()].
 #' @export
-format.counterfactual_conjunction <- function(x, varsep = " \u2227 ", ...) {
+format.counterfactual_conjunction <- function(x, var_sep = " /\\ ", ...) {
   cf <- sapply(x, function(y) format.counterfactual_variable(y, ...))
-  paste0(cf, collapse = varsep)
+  paste0(cf, collapse = var_sep)
 }
 
 #' @method print counterfactual_conjunction

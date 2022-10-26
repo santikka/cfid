@@ -50,11 +50,11 @@ test_that("default coercion is supported for conjunctions", {
 })
 
 test_that("conjunction format is correct", {
-  expect_identical(format(c1), "y \u2227 x")
+  expect_identical(format(c1), "y /\\ x")
 })
 
 test_that("conjunction printing works", {
-  expect_output(print(c1), "y \u2227 x")
+  expect_output(print(c1), "y /\\\\ x")
 })
 
 test_that("counterfactual arithmetic is correct", {
