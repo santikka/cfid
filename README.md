@@ -48,7 +48,8 @@ These would define the following DAGs:
 ``` mermaid
 flowchart LR;
   X(X)-->Y(Y);
-  X<-.->Z(Z);
+  X(X)-->Z(Z);
+  X<-.->Z;
   W(W)-->Z;
   W<-.->G(G);
 ```
