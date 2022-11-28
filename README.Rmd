@@ -10,7 +10,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# cfid
+# cfid: An R Package for Identification of Counterfactual Queries in Causal Models
 
 <!-- Badges -->
 [![codecov](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg?token=13KFY7ULZ4)](https://codecov.io/gh/santikka/cfid)
@@ -58,9 +58,9 @@ These would define the following DAGs:
 ```mermaid
 flowchart LR;
   X(X)-->Y(Y);
-  X<-->Z(Z);
+  X<-.->Z(Z);
   W(W)-->Z;
-  W<->G(G);
+  W<-.->G(G);
 ```
 ```mermaid
 flowchart LR;
@@ -75,7 +75,7 @@ flowchart LR;
   X-->W(W);
   Z-->Y;
   Z-->W;
-  Y<-->W;
+  Y<-.->W;
 ```
 
 ## Counterfactual variables and conjunctions
@@ -129,7 +129,7 @@ flowchart TB;
   W-->Y(Y);
   D(D)-->Z(Z);
   Z-->Y;
-  X<-->Y;
+  X<-.->Y;
 ```
 ```{r}
 g1 <- dag("X -> W -> Y <- Z <- D X <-> Y")

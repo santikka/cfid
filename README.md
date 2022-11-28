@@ -1,5 +1,5 @@
 
-# cfid
+# cfid: An R Package for Identification of Counterfactual Queries in Causal Models
 
 <!-- Badges -->
 
@@ -48,9 +48,9 @@ These would define the following DAGs:
 ``` mermaid
 flowchart LR;
   X(X)-->Y(Y);
-  X<-->Z(Z);
+  X<-.->Z(Z);
   W(W)-->Z;
-  W<->G(G);
+  W<-.->G(G);
 ```
 
 ``` mermaid
@@ -67,7 +67,7 @@ flowchart LR;
   X-->W(W);
   Z-->Y;
   Z-->W;
-  Y<-->W;
+  Y<-.->W;
 ```
 
 ## Counterfactual variables and conjunctions
@@ -133,7 +133,7 @@ flowchart TB;
   W-->Y(Y);
   D(D)-->Z(Z);
   Z-->Y;
-  X<-->Y;
+  X<-.->Y;
 ```
 
 ``` r
