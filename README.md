@@ -32,9 +32,9 @@ a syntax similar to the
 [`dagitty`](https://cran.r-project.org/package=dagitty) package. This
 function accepts edges of the form `X -> Y`, `X <- Y`, and `X <-> Y`,
 where the last variant is a shorthand for a latent confounder affecting
-both `X` and `Y` (a so-called bidirected edge). Subgraphs can be define
+both `X` and `Y` (a so-called bidirected edge). Subgraphs can be defined
 using curly braces `{...}`. Edges to and from subgraphs connect to all
-vertices present in the subgraph. Sugraphs can also be nested. Some
+vertices present in the subgraph. Subgraphs can also be nested. Some
 examples of allowed constructs include:
 
 ``` r
@@ -74,10 +74,10 @@ flowchart LR;
 ## Counterfactual variables and conjunctions
 
 A counterfactual variable is defined by its name, value, and the
-submodel it originated from (a set of interventions). For example, $y_x$
-is a counterfactual variable named $Y$ with the value assignment $y$
-that originated from a submodel where the intervention $do(X = x)$ took
-place.
+submodel that it originated from (a set of interventions). For example,
+$y_x$ is a counterfactual variable named $Y$ with the value assignment
+$y$ that originated from a submodel where the intervention $do(X = x)$
+took place.
 
 The function `counterfactual_variable` and its shorthand alias `cf` can
 be used to construct counterfactual variables. This function takes three

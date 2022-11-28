@@ -46,8 +46,8 @@ similar to the [`dagitty`](https://cran.r-project.org/package=dagitty) package.
 This function accepts
 edges of the form `X -> Y`, `X <- Y`, and `X <-> Y`, where the last variant is 
 a shorthand for a latent confounder affecting both `X` and `Y` (a so-called
-bidirected edge). Subgraphs can be define using curly braces `{...}`. Edges
-to and from subgraphs connect to all vertices present in the subgraph. Sugraphs
+bidirected edge). Subgraphs can be defined using curly braces `{...}`. Edges
+to and from subgraphs connect to all vertices present in the subgraph. Subgraphs
 can also be nested. Some examples of allowed constructs include:
 ```{r, eval = FALSE}
 dag("X -> {Y Z} <- W <-> G")
@@ -83,7 +83,7 @@ flowchart LR;
 
 ## Counterfactual variables and conjunctions
 
-A counterfactual variable is defined by its name, value, and the submodel
+A counterfactual variable is defined by its name, value, and the submodel that
 it originated from (a set of interventions). For example, $y_x$ is a counterfactual
 variable named $Y$ with the value assignment $y$ that originated from a submodel
 where the intervention $do(X = x)$ took place.
