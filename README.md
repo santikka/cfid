@@ -49,8 +49,8 @@ These would define the following DAGs:
 flowchart LR;
   X((X))-->Y((Y));
   X((X))-->Z((Z));
-  X<-.->Z;
   W((W))-->Z;
+  W-->Y;
   W<-.->G((G));
 ```
 
@@ -65,8 +65,8 @@ flowchart LR;
 flowchart LR;
   X((X))--->Z((Z));
   X-->Y((Y));
-  Z-->Y;
   X-->W((W));
+  Z-->Y;
   Z-->W;
   Y<-.->W;
 ```
