@@ -47,26 +47,26 @@ These would define the following DAGs:
 
 ``` mermaid
 flowchart LR;
-  X(X)-->Y(Y);
-  X(X)-->Z(Z);
+  X((X))-->Y((Y));
+  X((X))-->Z((Z));
   X<-.->Z;
-  W(W)-->Z;
-  W<-.->G(G);
+  W((W))-->Z;
+  W<-.->G((G));
 ```
 
 ``` mermaid
 flowchart LR;
-  X(X)-->W(W);
-  Y(Y)-->W;
-  Z(Z)-->W;
+  X((X))-->W((W));
+  Y((Y))-->W;
+  Z((Z))-->W;
 ```
 
 ``` mermaid
 flowchart LR;
-  X(X)-->Z(Z);
-  X-->Y(Y);
-  X-->W(W);
+  X((X))--->Z((Z));
+  X-->Y((Y));
   Z-->Y;
+  X-->W((W));
   Z-->W;
   Y<-.->W;
 ```
