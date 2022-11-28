@@ -59,7 +59,7 @@
 #'
 #' # Commas can be used to distinguish variables within groups if there
 #' # are no edges within the group
-#' dag("{x, y, z} -> w")
+#' dag("{X, Y, Z} -> W")
 #'
 #' # Edges within subgraphs is supported
 #' dag("{X -> Z} -> {Y <-> W}")

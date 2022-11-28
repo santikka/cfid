@@ -1,0 +1,111 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "cfid",
+  "description": "Facilitates the identification of counterfactual queries in structural causal models via the ID* and IDC* algorithms by Shpitser, I. and Pearl, J. (2007, 2008) <arXiv:1206.5294>, <https://jmlr.org/papers/v9/shpitser08a.html>. Provides a simple interface for defining causal diagrams and counterfactual conjunctions. Construction of parallel worlds graphs and counterfactual graphs is carried out automatically based on the counterfactual query and the causal diagram.",
+  "name": "cfid: Identification of Counterfactual Queries in Causal Models",
+  "codeRepository": "https://github.com/santikka/cfid",
+  "license": "https://spdx.org/licenses/GPL-3.0",
+  "version": "0.1.4",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "R",
+    "url": "https://r-project.org"
+  },
+  "runtimePlatform": "R version 4.2.1 (2022-06-23 ucrt)",
+  "provider": {
+    "@id": "https://cran.r-project.org",
+    "@type": "Organization",
+    "name": "Comprehensive R Archive Network (CRAN)",
+    "url": "https://cran.r-project.org"
+  },
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Santtu",
+      "familyName": "Tikka",
+      "email": "santtuth@gmail.com",
+      "@id": "https://orcid.org/0000-0003-4039-4342"
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Santtu",
+      "familyName": "Tikka",
+      "email": "santtuth@gmail.com",
+      "@id": "https://orcid.org/0000-0003-4039-4342"
+    }
+  ],
+  "softwareSuggestions": [
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "covr",
+      "name": "covr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=covr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "dagitty",
+      "name": "dagitty",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=dagitty"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "igraph",
+      "name": "igraph",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=igraph"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "mockery",
+      "name": "mockery",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=mockery"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "testthat",
+      "name": "testthat",
+      "version": ">= 3.0.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=testthat"
+    }
+  ],
+  "softwareRequirements": {
+    "SystemRequirements": null
+  },
+  "fileSize": "149.405KB",
+  "releaseNotes": "https://github.com/santikka/cfid/blob/master/NEWS.md",
+  "readme": "https://github.com/santikka/cfid/blob/main/README.md",
+  "contIntegration": ["https://codecov.io/gh/santikka/cfid", "https://github.com/santikka/cfid/actions"],
+  "keywords": ["counterfactual", "counterfactuals", "identifiability", "causal-models", "causal-inference", "causality-algorithms", "directed-acyclic-graph"]
+}
