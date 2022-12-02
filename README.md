@@ -35,40 +35,40 @@ where the last variant is a shorthand for a latent confounder affecting
 both `X` and `Y` (a so-called bidirected edge). Subgraphs can be defined
 using curly braces `{...}`. Edges to and from subgraphs connect to all
 vertices present in the subgraph. Subgraphs can also be nested. Some
-examples of allowed constructs include:
+examples of valid constructs include:
 
 ``` r
-dag("X -> {Y Z} <- W <-> G")
-dag("{X, Y, Z} -> W")
-dag("{X -> {Z -> {Y <-> W}}}")
+dag("X -> Y <- Z <-> W")
+dag("{X Y Z} -> {A B}")
+dag("X -> {Z <-> {Y W}}")
 ```
 
-These would define the following DAGs:
+which define the following DAGs:
 
 ``` mermaid
 flowchart LR;
   X((X))-->Y((Y));
+  Z((Z))-->Y;
+  W((W))<-.->Z;
+```
+
+``` mermaid
+flowchart LR;
+  X((X))-->A((A));
+  Y((Y))-->A;
+  Z((Z))-->A;
+  X-->B((B));
+  Y-->B;
+  Z-->B;
+```
+
+``` mermaid
+flowchart LR;
   X((X))-->Z((Z));
-  W((W))-->Z;
-  W-->Y;
-  W<-.->G((G));
-```
-
-``` mermaid
-flowchart LR;
-  X((X))-->W((W));
-  Y((Y))-->W;
-  Z((Z))-->W;
-```
-
-``` mermaid
-flowchart LR;
-  X((X))--->Z((Z));
   X-->Y((Y));
   X-->W((W));
-  Z-->Y;
-  Z-->W;
-  Y<-.->W;
+  Z<-.->Y;
+  Z<-.->W;
 ```
 
 ## Counterfactual variables and conjunctions
@@ -130,9 +130,9 @@ $P(y_x|x' \wedge z_d \wedge d)$ in the DAG shown below as follows:
 
 ``` mermaid
 flowchart TB;
-  X(X)-->W(W);
-  W-->Y(Y);
-  D(D)-->Z(Z);
+  X((X))-->W((W));
+  W-->Y((Y));
+  D((D))-->Z((Z));
   Z-->Y;
   X<-.->Y;
 ```
@@ -162,6 +162,10 @@ For more information and examples, please see the package documentation.
     package provides a heuristic search algorithm that uses do-calculus
     to identify causal effects from an arbitrary combination of input
     distributions.
--   The [`dagitty`](https://cran.r-project.org/package=dagitty) provides
-    various tools for causal modeling, such as finding adjustment sets
-    and instrumental variables.
+-   The [`dagitty`](https://cran.r-project.org/package=dagitty) package
+    provides various tools for causal modeling, such as finding
+    adjustment sets and instrumental variables.
+-   The [`R6causal`](https://cran.r-project.org/package=R6causal)
+    package implements an R6 class for structural causal models, and
+    provides tools to simulate counterfactual scenarios for discrete
+    variables.

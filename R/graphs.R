@@ -158,6 +158,11 @@ dag <- function(x, u = character(0L)) {
   )
 }
 
+#' Check that the argument follows valid DAG syntax
+#'
+#' @param x A `character` string
+#' @return A `logical` value: `TRUE` if `x` is valid and `FALSE` otherwise
+#' @noRd
 validate_dag <- function(x) {
   edge_tokens <- c("<", ">", "-")
   x_len <- length(x)
@@ -210,7 +215,6 @@ validate_dag <- function(x) {
   }
   open == 0L && edge_rhs
 }
-
 
 #' Parse a DAG statement
 #'
@@ -368,23 +372,23 @@ latent_projection <- function(A_di, A_bi, u) {
 #' @return A `character` representation of the DAG.
 #' @noRd
 dag_string <- function(A, labels, latent, ord) {
- ord <- ord[!latent[ord]]
- e <- character(ncol(A))
- for (i in ord) {
-   ch <- labels[children(i, A)]
-   n_ch <- length(ch)
-   if (n_ch > 0L) {
-     lhs <- ifelse_(n_ch > 1L, "{", "")
-     rhs <- ifelse_(n_ch > 1L, "}", "")
-     e[i] <- paste0(
-       format(labels[i]), " -> ", lhs, paste0(ch, collapse = ", "), rhs
-     )
-   }
- }
- for (i in which(latent)) {
-   e[i] <- paste0(format(labels[children(i, A)]), collapse = " <-> ")
- }
- paste0(c(labels[!latent], e[nzchar(e)]), collapse = "; ")
+  ord <- ord[!latent[ord]]
+  e <- character(ncol(A))
+  for (i in ord) {
+    ch <- labels[children(i, A)]
+    n_ch <- length(ch)
+    if (n_ch > 0L) {
+      lhs <- ifelse_(n_ch > 1L, "{", "")
+      rhs <- ifelse_(n_ch > 1L, "}", "")
+      e[i] <- paste0(
+        format(labels[i]), " -> ", lhs, paste0(ch, collapse = ", "), rhs
+      )
+    }
+  }
+  for (i in which(latent)) {
+    e[i] <- paste0(format(labels[children(i, A)]), collapse = " <-> ")
+  }
+  paste0(c(labels[!latent], e[nzchar(e)]), collapse = "; ")
 }
 
 #' Is the argument a `dag` object?
@@ -421,7 +425,6 @@ pwg <- function(g, gamma) {
   lat <- attr(g, "latent")
   ord <- attr(g, "order")
   sub_lst <- unique(subs(gamma))
-  #sub_lst <- sub_lst[order(lengths(sub_lst))]
   sub_var <- lapply(sub_lst, function(i) which(lab %in% names(i)))
   n_worlds <- length(sub_lst)
   n <- length(lab)
@@ -628,7 +631,6 @@ cg <- function(p, gamma) {
       }
     }
   }
-  #gamma <- as.counterfactual_conjunction(unique(gamma))
   an <- sort(union(query_vars, ancestors(query_vars, cg_dag)))
   cg_dag <- subgraph(an, cg_dag)
   latent_cg <- attr(cg_dag, "latent")
@@ -649,6 +651,13 @@ cg <- function(p, gamma) {
   )
 }
 
+#' Update equivalence classes of counterfactual variables
+#'
+#' @param eq A `list` of current equivalence classes
+#' @param a An `integer` index of a parallel world
+#' @param b An `integer` index of a parallel world
+#' @return A `list` of updated equivalence classes
+#' @noRd
 update_equivalence <- function(eq, a, b) {
   if (length(eq) == 1L) {
     return(eq)
@@ -659,6 +668,13 @@ update_equivalence <- function(eq, a, b) {
   c(eq[-c(a_cl, b_cl)], merged)
 }
 
+#' Checks whether all parents of counterfactual variables are equivalent
+#'
+#' @inheritParams update_equivalence
+#' @param vars An `integer` vector of parents of a counterfactual variable
+#' @return A `logical` value: `TRUE` if all parents are equivalent and FALSE
+#' otherwise.
+#' @noRd
 all_equivalent <- function(eq, vars, a, b) {
   for (v in vars) {
     eq_v <- eq[[v]]
