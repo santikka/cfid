@@ -34,6 +34,22 @@ cflist <- function(x) {
   lapply(x, cf)
 }
 
+#' Create a list of counterfactual variables from a character vector
+#' with value assignments
+#'
+#' @param x A `character` vector of variable names.
+#' @param v A `integer` vector of values.
+#' @return A list of corresponding `counterfactual_variable` objects.
+#' @noRd
+cflistv <- function(x, v) {
+  n <- length(x)
+  out <- vector(mode = "list", length = n)
+  for (i in seq_len(n)) {
+    out[[i]] <- cf(x[i], obs = v[i])
+  }
+  out
+}
+
 #' Determines the values present in a counterfactual conjunction.
 #'
 #' @param gamma A `counterfactual_conjunction` object.

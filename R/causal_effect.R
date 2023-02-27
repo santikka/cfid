@@ -70,9 +70,9 @@ causal_effect <- function(g, y, x = character(0),
   }
   out$counterfactual <- FALSE
   out$causaleffect <- probability(
-    var = cflist(y),
-    do = cflist(x),
-    cond = cflist(z)
+    var = cflistv(y, v = v[y]),
+    do = cflistv(x, v = v[x]),
+    cond = cflistv(z, v = v[z])
   )
   out$data <- "observations"
   out$undefined <- FALSE
