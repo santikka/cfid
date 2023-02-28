@@ -1,10 +1,17 @@
 
 # cfid: An R Package for Identification of Counterfactual Queries in Causal Models
 
-<!-- Badges -->
+<!-- badges: start -->
 
-[![codecov](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg?token=13KFY7ULZ4)](https://codecov.io/gh/santikka/cfid)
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/santikka/cfid/workflows/R-CMD-check/badge.svg)](https://github.com/santikka/cfid/actions)
+[![Codecov test
+coverage](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg)](https://app.codecov.io/gh/santikka/cfid?branch=main)
+[![CRAN
+version](http://www.r-pkg.org/badges/version/cfid)](https://CRAN.R-project.org/package=cfid)
+<!-- badges::end -->
 
 ## Overview
 
@@ -15,6 +22,9 @@ Pearl, J. (2007, 2008) <https://arxiv.org/abs/1206.5294>,
 interface for defining causal graphs and counterfactual conjunctions.
 Construction of parallel worlds graphs and counterfactual graphs is done
 automatically based on the counterfactual query and the causal graph.
+
+See also the tutorial paper on this package:
+<https://arxiv.org/abs/2210.14745>
 
 ## Installation
 
@@ -154,18 +164,16 @@ For more information and examples, please see the package documentation.
 
 ## Related packages
 
--   The
-    [`causaleffect`](https://cran.r-project.org/package=causaleffect)
-    package provides the ID and IDC algorithms for the identification of
-    causal effects (among other algorithms).
--   The [`dosearch`](https://cran.r-project.org/package=dosearch)
-    package provides a heuristic search algorithm that uses do-calculus
-    to identify causal effects from an arbitrary combination of input
-    distributions.
--   The [`dagitty`](https://cran.r-project.org/package=dagitty) package
-    provides various tools for causal modeling, such as finding
-    adjustment sets and instrumental variables.
--   The [`R6causal`](https://cran.r-project.org/package=R6causal)
-    package implements an R6 class for structural causal models, and
-    provides tools to simulate counterfactual scenarios for discrete
-    variables.
+- The [`causaleffect`](https://cran.r-project.org/package=causaleffect)
+  package provides the ID and IDC algorithms for the identification of
+  causal effects (among other algorithms).
+- The [`dosearch`](https://cran.r-project.org/package=dosearch) package
+  provides a heuristic search algorithm that uses do-calculus to
+  identify causal effects from an arbitrary combination of input
+  distributions.
+- The [`dagitty`](https://cran.r-project.org/package=dagitty) package
+  provides various tools for causal modeling, such as finding adjustment
+  sets and instrumental variables.
+- The [`R6causal`](https://cran.r-project.org/package=R6causal) package
+  implements an R6 class for structural causal models, and provides
+  tools to simulate counterfactual scenarios for discrete variables.
