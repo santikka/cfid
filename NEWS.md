@@ -1,3 +1,7 @@
+# cfid 0.1.5
+
+  * Added missing value assignments to the query for `causal_effect`.
+
 # cfid 0.1.4
 
   * Fixed an issue related to fixed variables in the counterfactual graph.
@@ -5,7 +9,7 @@
   * Now uses lower case and snake case for classes.
   * Added `id` and `idc` algorithms for full identification pipeline. These algorithms can also be used directly via `causal_effect`.
   * The syntax used by `dag` is now more flexible, allowing edges within subgraph definitions and nested subgraphs.
-  * Dropped dependency on R version 4.1.
+  * Dropped dependency on R version 4.1.0.
   * Improved the package documentation.
   * Changed the default value of `var_sep` argument.
 
