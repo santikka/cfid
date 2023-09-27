@@ -115,11 +115,19 @@ format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
   } else {
     form$var <- x$var
   }
-  if (length(x$sub)) {
+  if (length(x$sub) > 0L) {
     if (use_primes) {
-      super_sub <- sapply(x$sub, function(y) rep_char("'", y))
+      super_sub <- vapply(
+        x$sub,
+        function(y) rep_char("'", y),
+        character(1L)
+      )
     } else {
-      super_sub <- sapply(x$sub, function(y) paste0("^{(", y, ")}"))
+      super_sub <- vapply(
+        x$sub,
+        function(y) paste0("^{(", y, ")}"),
+        character(1L)
+      )
       super_sub[x$sub == 0L] <- ""
     }
     form$sub <- paste0(

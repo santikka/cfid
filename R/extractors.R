@@ -7,6 +7,21 @@ vars <- function(gamma) {
   vapply(gamma, function(x) x$var, character(1L))
 }
 
+#' Determines both variables and interventional variables in a
+#' counterfactual conjunction
+#'
+#' @param gamma A `counterfactual_conjunction` object..
+#' @return A `character` vector of variable names.
+#' @noRd
+all_vars <- function(gamma) {
+  unique(
+    c(
+      vars(gamma),
+      unlist(lapply(subs(gamma), names))
+    )
+  )
+}
+
 #' Get the counterfactual variables present in a counterfactual conjunction.
 #'
 #' @param gamma A `counterfactual_conjunction` object.
@@ -111,7 +126,7 @@ obs <- function(gamma) {
 #'
 #' @param x A `counterfactual_variable` object.
 #' @param gamma A `counterfactual_conjunction` object.
-#' @return An `integer` correspodning to the value assignment if present
+#' @return An `integer` corresponding to the value assignment if present.
 #' or `NULL`.
 #' @noRd
 val <- function(x, gamma) {

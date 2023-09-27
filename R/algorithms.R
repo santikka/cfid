@@ -7,7 +7,7 @@
 #' functional as a `functional` or a `probability` object, respectively.
 #' @noRd
 id_star <- function(g, gamma) {
-  # ID* algorithm line order changed here to avoid unnecesary recursion
+  # ID* algorithm line order changed here to avoid unnecessary recursion
   # Line 2
   if (is_inconsistent(gamma)) {
     return(list(id = TRUE, formula = probability(val = 0L)))
@@ -30,6 +30,7 @@ id_star <- function(g, gamma) {
     vars(lab_prime[!attr(g_prime, "latent") & !assigned(lab_prime)])
   )
   gamma_prime <- tmp$conjunction
+  gamma_prime[duplicated(gamma_prime)] <- NULL
   gamma_var <- vars(gamma)
   gamma_obs <- obs(gamma)
   gamma_obs_var <- vars(gamma_obs)
@@ -54,13 +55,11 @@ id_star <- function(g, gamma) {
           obs_ix <- which(gamma_obs_var %in% s_sub_j)
           if (length(obs_ix) > 0) {
             s_val <- unlist(evs(gamma_obs)[obs_ix])
-            s_ix <- which(s_sub_j %in% gamma_obs_var)
-            sub_new[s_ix] <- s_val
+            sub_new[names(s_val)] <- s_val
           }
           comp[[i]][[j]]$sub <- c(comp[[i]][[j]]$sub, sub_new)
         }
       }
-      #s_conj <- do.call(counterfactual_conjunction, comp[[i]])
       s_conj <- try(
         do.call(counterfactual_conjunction, comp[[i]]), silent = TRUE
       )
@@ -68,14 +67,15 @@ id_star <- function(g, gamma) {
         return(list(id = TRUE, formula = probability(val = 0L)))
       }
       c_factors[[i]] <- id_star(g, s_conj)
-      if (!c_factors[[i]]$id) {
-        return(list(id = FALSE, formula = NULL))
-      }
       if (is.probability(c_factors[[i]]$formula) &&
           length(c_factors[[i]]$formula$val) > 0L &&
           c_factors[[i]]$formula$val == 0L) {
         return(list(id = TRUE, formula = probability(val = 0L)))
       }
+    }
+    nonid_factors <- !vapply(c_factors, "[[", logical(1L), "id")
+    if (any(nonid_factors)) {
+      return(list(id = FALSE, formula = NULL))
     }
     sumset <- setdiff(v_g, gamma_var)
     form_terms <- lapply(c_factors, "[[", "formula")

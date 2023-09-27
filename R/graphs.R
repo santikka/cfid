@@ -425,7 +425,8 @@ pwg <- function(g, gamma) {
   lat <- attr(g, "latent")
   ord <- attr(g, "order")
   sub_lst <- unique(subs(gamma))
-  sub_var <- lapply(sub_lst, function(i) which(lab %in% names(i)))
+  # sub_var <- lapply(sub_lst, function(i) which(lab %in% names(i)))
+  sub_var <- lapply(sub_lst, function(i) match(names(i), lab))
   n_worlds <- length(sub_lst)
   n <- length(lab)
   n_unobs <- sum(lat)
@@ -790,7 +791,7 @@ export_graph <- function(g, type = c("dagitty", "causaleffect", "dosearch"),
   out <- NULL
   type <- match.arg(type)
   lab <- attr(g, "labels")
-  lab_form <- sapply(lab, format)
+  lab_form <- vapply(lab, format, character(1L))
   lat <- attr(g, "latent")
   lat_ix <- which(lat)
   e_ix <-  which(g > 0L, arr.ind = TRUE)

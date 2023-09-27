@@ -110,7 +110,11 @@ is.counterfactual_conjunction <- function(x) {
 #' [cfid::format.counterfactual_variable()].
 #' @export
 format.counterfactual_conjunction <- function(x, var_sep = " /\\ ", ...) {
-  cf <- sapply(x, function(y) format.counterfactual_variable(y, ...))
+  cf <- vapply(
+    x,
+    function(y) format.counterfactual_variable(y, ...),
+    character(1L)
+  )
   paste0(cf, collapse = var_sep)
 }
 
@@ -222,7 +226,7 @@ trivial_conflicts <- function(cf_list) {
     y_cf <- list(cfvar(y))
     z <- which(x %in% y_cf)
     if (length(z) > 1L) {
-      x_vals <- sapply(cf_list[z], "[[", "obs")
+      x_vals <- vapply(cf_list[z], "[[", integer(1L), "obs")
       if (length(unique(x_vals)) > 1L) {
         out <- c(out, y_cf)
       }
@@ -243,7 +247,7 @@ trivial_conflict <- function(y, gamma) {
   x <- cfvars(gamma)
   z <- which(x %in% y_cf)
   if (length(z) > 0L) {
-    xy_vals <- c(sapply(gamma[z], "[[", "obs"), y$obs)
+    xy_vals <- c(vapply(gamma[z], "[[", integer(1L), "obs"), y$obs)
     if (length(unique(xy_vals)) > 1L) {
       return(y_cf)
     }

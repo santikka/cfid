@@ -56,6 +56,7 @@ in LaTeX syntax.
 \description{
 Identifying functionals are more complicated probabilistic expressions
 that cannot be expressed as simple observational or interventional
+probabilities using \code{\link[=probability]{probability()}}.
 }
 \details{
 When formatted via \code{print} or \code{format}, the arguments are

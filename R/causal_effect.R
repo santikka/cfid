@@ -53,10 +53,39 @@ causal_effect <- function(g, y, x = character(0),
       "Argument `v` must have names."
     )
   }
+  v_g <- attr(g, "labels")[!attr(g, "latent")]
+  stopifnot_(
+    all(y %in% v_g),
+    paste0(
+      "Argument `y` contains variables that are not present in `g`: ",
+      comma_sep(setdiff(y, v_g))
+    )
+  )
+  stopifnot_(
+    all(x %in% v_g),
+    paste0(
+      "Argument `x` contains variables that are not present in `g`: ",
+      comma_sep(setdiff(x, v_g))
+    )
+  )
+  stopifnot_(
+    length(z) == 0L || all(z %in% v_g),
+    paste0(
+      "Argument `z` contains variables that are not present in `g`: ",
+      comma_sep(setdiff(z, v_g))
+    )
+  )
+  stopifnot_(
+    n_v == 0 || all(v_names %in% v_g),
+    paste0(
+      "Argument `v` has names that are not present in `g`: ",
+      comma_sep(setdiff(v_names, v_g))
+    )
+  )
   n_obs <- sum(!attr(g, "latent"))
   if (n_v != n_obs) {
     v_temp <- v
-    v <- set_names(integer(n_obs), attr(g, "labels")[!attr(g, "latent")])
+    v <- set_names(integer(n_obs), v_g)
     v[v_names] <- v_temp
     v_names <- names(v)
   }
@@ -66,7 +95,7 @@ causal_effect <- function(g, y, x = character(0),
     names(bound) <- v_names
     xyz <- c(x, y, z)
     bound[xyz] <- bound[xyz] + 1L
-    out$formula <- assign_values(out$formula, v, v_names, bound)
+    out$formula <- assign_values(out$formula, bound, v)
   }
   out$counterfactual <- FALSE
   out$causaleffect <- probability(
@@ -80,39 +109,4 @@ causal_effect <- function(g, y, x = character(0),
     out,
     class = "query"
   )
-}
-
-#' Set Value Assignment Levels for a Probability Distribution
-#'
-#' @param x A `functional` object.
-#' @param v A named `integer` vector of values to assign
-#' @param v_names A `character` vector of the names of `v`
-#' @param bound An `integer` vector counting the number of times specific
-#' variables have been bound by summation.
-#' @noRd
-assign_values <- function(x, v, v_names, bound) {
-  sumset_vars <- vars(x$sumset)
-  now_bound <- v_names %in% sumset_vars
-  sumset_bound <- match(sumset_vars, v_names)
-  bound[now_bound] <- bound[now_bound] + 1L
-  for (i in seq_along(x$sumset)) {
-    x$sumset[[i]]$obs <- -bound[sumset_bound[i]]
-  }
-  if (length(x$terms) > 0) {
-    for (i in seq_along(x$terms)) {
-      x$terms[[i]] <- assign_values(x$terms[[i]], v, v_names, bound)
-    }
-  } else if (length(x$numerator) > 0) {
-    x$numerator <- assign_values(x$numerator, v, v_names, bound)
-    x$denominator <- assign_values(x$denominator, v, v_names, bound)
-  } else {
-    v[bound > 0] <- -bound[bound > 0]
-    var <- vars(x$var)
-    cond <- vars(x$cond)
-    x <- probability(
-      var = .mapply(function(a, b) cf(a, b), list(var, v[var]), list()),
-      cond = .mapply(function(a, b) cf(a, b), list(cond, v[cond]), list())
-    )
-  }
-  x
 }

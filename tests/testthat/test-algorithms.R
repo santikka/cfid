@@ -17,6 +17,7 @@ v9 <- cf("A", 0L)
 v10 <- cf("B", 0L)
 v11 <- cf("Z", 0L, c(X = 1L))
 v12 <- cf("Y", 1L, c(X = 1L))
+v13 <- cf("W", 0L)
 c1 <- conj(v1, v2, v3, v4)
 
 test_that("identifiable conjunction", {
@@ -24,8 +25,10 @@ test_that("identifiable conjunction", {
   expect_true(out$id)
 })
 
-test_that("non-identifiable conjunction", {
+test_that("non-identifiable conjunctions", {
   out <- identifiable(g2, c1)
+  expect_false(out$id)
+  out <- identifiable(g1, c1 + v13)
   expect_false(out$id)
 })
 
@@ -47,6 +50,8 @@ test_that("undefined conditional conjunction", {
 })
 
 test_that("joint gamma/delta inconsistent", {
+  out <- identifiable(g1, conj(v1, v2, v3, v4, v5, v6))
+  expect_equal(out$formula$terms[[1L]]$val, 0L)
   out <- identifiable(g1, conj(v1, v2, v3), conj(v4, v5, v6))
   expect_equal(out$formula$terms[[1L]]$val, 0L)
 })
@@ -126,12 +131,17 @@ test_that("inconsistent interventions", {
   expect_false(identifiable(h, d1)$id)
 })
 
-test_that("inconsistent within c-component", {
+test_that("inconsitent within c-component", {
+  out <- identifiable(g1, conj(v1, v2, v3, v6))
+  expect_true(out$id)
+  expect_identical(out$formula$terms[[1]], probability(val = 0L))
+})
+
+test_that("nonidentifiable c-component", {
   h <- dag("Z -> X -> Y")
   d1 <- conj(v1, v12, cf("Z", 0L))
   out <- identifiable(h, d1)
-  expect_true(out$id)
-  expect_identical(out$formula$terms[[1L]]$val, 0L)
+  expect_false(out$id)
 })
 
 # ID and IDC --------------------------------------------------------------

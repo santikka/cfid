@@ -63,6 +63,37 @@ test_that("invalid identifiable function inputs fail", {
   )
 })
 
+test_that("invalid causal effect function inputs fail", {
+  expect_error(
+    causal_effect(),
+    "Argument `g` is missing"
+  )
+  expect_error(
+    causal_effect("Y"),
+    "Argument `g` must be a `dag` object"
+  )
+  expect_error(
+    causal_effect(g1, integer(0)),
+    "Arguments `x`, `y` and `z` must be character vectors."
+  )
+  expect_error(
+    causal_effect(g1, "B"),
+    "Argument `y` contains variables that are not present in `g`: B"
+  )
+  expect_error(
+    causal_effect(g1, "Y", "B"),
+    "Argument `x` contains variables that are not present in `g`: B"
+  )
+  expect_error(
+    causal_effect(g1, "Y", "X", "B"),
+    "Argument `z` contains variables that are not present in `g`: B"
+  )
+  expect_error(
+    causal_effect(g1, "Y", "X", "Z", c(B = 0)),
+    "Argument `v` has names that are not present in `g`: B"
+  )
+})
+
 test_that("query printing works", {
   out <- identifiable(g1, c1)
   expect_output(print(out), "The query .+ is identifiable")

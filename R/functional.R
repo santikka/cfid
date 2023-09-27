@@ -2,7 +2,7 @@
 #'
 #' Identifying functionals are more complicated probabilistic expressions
 #' that cannot be expressed as simple observational or interventional
-#* probability using [cfid::probability()].
+#' probabilities using [cfid::probability()].
 #'
 #' When formatted via `print` or `format`, the arguments are
 #' prioritized in the following order if conflicting definitions are given:
@@ -139,4 +139,48 @@ format.functional <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
 #' @export
 print.functional <- function(x, ...) {
   cat(format(x, ...), "\n")
+}
+
+#' Set Value Assignment Levels for a Functional
+#'
+#' @param x A `functional` or a `probability` object.
+#' @param v A named `integer` vector of values to assign.
+#' @param bound An `integer` vector counting the number of times specific
+#' variables have been bound by summation.
+#' @noRd
+assign_values <- function(x, bound, v, termwise = FALSE) {
+  sumset_vars <- vars(x$sumset)
+  v_names <- names(bound)
+  now_bound <- v_names %in% sumset_vars
+  sumset_bound <- match(sumset_vars, v_names)
+  bound[now_bound] <- bound[now_bound] + 1L
+  for (i in seq_along(x$sumset)) {
+    x$sumset[[i]]$obs <- -bound[sumset_bound[i]]
+  }
+  if (length(x$terms) > 0) {
+    for (i in seq_along(x$terms)) {
+      x$terms[[i]] <- assign_values(x$terms[[i]], bound, v, termwise)
+    }
+  } else if (length(x$numerator) > 0) {
+    x$numerator <- assign_values(x$numerator, bound, v, termwise)
+    x$denominator <- assign_values(x$denominator, bound, v, termwise)
+  } else {
+    if (!is.null(x$val)) {
+      return(x)
+    }
+    if (termwise) {
+      v_term <- unlist(c(evs(x$var), evs(x$cond), evs(x$do)))
+      v[names(v_term)] <- v_term
+    }
+    v[bound > 0] <- -bound[bound > 0]
+    var <- vars(x$var)
+    cond <- vars(x$cond)
+    do <- vars(x$do)
+    x <- probability(
+      var = .mapply(function(a, b) cf(a, b), list(var, v[var]), list()),
+      cond = .mapply(function(a, b) cf(a, b), list(cond, v[cond]), list()),
+      do = .mapply(function(a, b) cf(a, b), list(do, v[do]), list())
+    )
+  }
+  x
 }

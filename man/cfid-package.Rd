@@ -57,7 +57,7 @@ in question (a causal graph for short), and
 \eqn{P_*} is the set of all interventional distributions
 in causal models inducing \eqn{G}. Identification is carried
 out by the ID* and IDC* algorithms by Shpitser and Pearl (2008) which aim to
-convenrt the input counterfactual probability into an expression which can
+convert the input counterfactual probability into an expression which can
 be represented solely in terms of interventional distributions. These
 algorithms are sound and complete, meaning that their output is always
 correct, and in the case of a non-identifiable counterfactual, one can
@@ -112,4 +112,8 @@ methods for the causal hierarchy. \emph{Journal of Machine Learning Research},
 Makhlouf, K., Zhioua, S. and Palamidessi, C. (2021).
 Survey on causal-based machine learning fairness notions.
 \emph{arXiv:2010.09553}
+
+Tikka, S. (2022).
+Identifying counterfactual queries with the R package cfid.
+\emph{arXiv:2210.14745}
 }

@@ -142,6 +142,16 @@ identifiable <- function(g, gamma, delta = NULL,
   if (out$id && data != "interventions") {
     out <- identify_terms(out$formula, data, g)
   }
+  if (out$id) {
+    n_obs <- sum(!attr(g, "latent"))
+    v <- set_names(integer(n_obs), attr(g, "labels")[!attr(g, "latent")])
+    v_names <- names(v)
+    bound <- integer(n_obs) - 1L
+    names(bound) <- v_names
+    query_vars <- unique(c(all_vars(gamma), all_vars(delta)))
+    bound[query_vars] <- bound[query_vars] + 1L
+    out$formula <- assign_values(out$formula, bound, v, termwise = TRUE)
+  }
   out$undefined <- ifelse_(is.null(out$undefined), FALSE, out$undefined)
   out$counterfactual <- TRUE
   out$gamma <- gamma
