@@ -1,5 +1,5 @@
 
-# cfid: An R Package for Identification of Counterfactual Queries in Causal Models
+# cfid: R Package for Identification of Counterfactual Queries in Causal Models
 
 <!-- badges: start -->
 
