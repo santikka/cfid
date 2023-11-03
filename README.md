@@ -1,5 +1,5 @@
 
-# cfid: R Package for Identification of Counterfactual Queries in Causal Models
+# cfid: An R Package for Identification of Counterfactual Queries in Causal Models
 
 <!-- badges: start -->
 
@@ -15,9 +15,9 @@ version](http://www.r-pkg.org/badges/version/cfid)](https://CRAN.R-project.org/p
 
 ## Overview
 
-This package facilitates the identification of counterfactual queries in structural
-causal models via the ID\* and IDC\* algorithms by Shpitser, I. and
-Pearl, J. (2007, 2008) <https://arxiv.org/abs/1206.5294>,
+This package facilitates the identification of counterfactual queries in
+structural causal models via the ID\* and IDC\* algorithms by Shpitser,
+I. and Pearl, J. (2007, 2008) <https://arxiv.org/abs/1206.5294>,
 <https://jmlr.org/papers/v9/shpitser08a.html>. Provides a simple
 interface for defining causal graphs and counterfactual conjunctions.
 Construction of parallel worlds graphs and counterfactual graphs is done
