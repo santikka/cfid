@@ -95,6 +95,10 @@ For complete examples of identifiable counterfactual queries, see
 }
 
 \references{
+Tikka, S. (2023).
+Identifying counterfactual queries with the R package \code{cfid}.
+\emph{The R Journal}, \strong{15(2)}:330--343.
+
 Pearl, J. (1995) Causal diagrams for empirical research. \emph{Biometrika},
 \strong{82(4)}:669--688.
 
@@ -112,8 +116,4 @@ methods for the causal hierarchy. \emph{Journal of Machine Learning Research},
 Makhlouf, K., Zhioua, S. and Palamidessi, C. (2021).
 Survey on causal-based machine learning fairness notions.
 \emph{arXiv:2010.09553}
-
-Tikka, S. (2022).
-Identifying counterfactual queries with the R package cfid.
-\emph{arXiv:2210.14745}
 }

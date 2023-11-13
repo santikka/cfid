@@ -11,12 +11,13 @@ Authors@R: c(
 Maintainer: Santtu Tikka <santtuth@gmail.com>
 Description: Facilitates the identification of counterfactual queries in
  structural causal models via the ID* and IDC* algorithms
- by Shpitser, I. and Pearl, J. (2007, 2008) 
- <arXiv:1206.5294>, <https://jmlr.org/papers/v9/shpitser08a.html>. 
+ by Shpitser, I. and Pearl, J. (2007, 2008) <arXiv:1206.5294>, 
+ <https://jmlr.org/papers/v9/shpitser08a.html>. 
  Provides a simple interface for defining causal diagrams and counterfactual 
  conjunctions. Construction of parallel worlds graphs and counterfactual graphs 
  is carried out automatically based on the counterfactual query and the causal 
- diagram. See Tikka, S. (2022) for a tutorial of the package <arXiv:2210.14745>.
+ diagram. See Tikka, S. (2023) <doi:10.32614/RJ-2023-053> for a tutorial of 
+ the package.
 License: GPL (>= 3)
 Encoding: UTF-8
 URL: https://github.com/santikka/cfid

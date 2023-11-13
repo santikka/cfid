@@ -18,17 +18,18 @@ version](http://www.r-pkg.org/badges/version/cfid)](https://CRAN.R-project.org/p
 This package facilitates the identification of counterfactual queries in
 structural causal models via the ID\* and IDC\* algorithms by Shpitser,
 I. and Pearl, J. (2007, 2008) <https://arxiv.org/abs/1206.5294>,
-<https://jmlr.org/papers/v9/shpitser08a.html>. Provides a simple
-interface for defining causal graphs and counterfactual conjunctions.
+<https://jmlr.org/papers/v9/shpitser08a.html>. A simple interface is
+provided for defining causal graphs and counterfactual conjunctions.
 Construction of parallel worlds graphs and counterfactual graphs is done
 automatically based on the counterfactual query and the causal graph.
 
-See also the tutorial paper on this package:
-<https://arxiv.org/abs/2210.14745>
+For further information, see the tutorial paper on this package
+published in *The R Journal*: <https://doi.org/10.32614/RJ-2023-053>
 
 ## Installation
 
-Install the latest development version by using the devtools package:
+You can install the latest development version by using the devtools
+package:
 
 ``` r
 # install.packages("devtools")

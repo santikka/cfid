@@ -91,6 +91,11 @@
 #' @docType package
 #' @name cfid-package
 #' @references
+#'
+#' Tikka, S. (2023).
+#' Identifying counterfactual queries with the R package `cfid`.
+#' *The R Journal*, **15(2)**:330--343.
+#'
 #' Pearl, J. (1995) Causal diagrams for empirical research. *Biometrika*,
 #' **82(4)**:669--688.
 #'
@@ -109,7 +114,5 @@
 #' Survey on causal-based machine learning fairness notions.
 #' *arXiv:2010.09553*
 #'
-#' Tikka, S. (2022).
-#' Identifying counterfactual queries with the R package cfid.
-#' *arXiv:2210.14745*
+
 NULL
