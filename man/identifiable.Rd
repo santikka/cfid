@@ -42,7 +42,8 @@ inconsistent, the query will be identifiable, but with probability 0.
 \item \code{formula}\cr An object of class \code{functional} giving the identifying
 functional of the query in LaTeX syntax via \code{format} or \code{print},
 if identifiable. This expression is given in terms of the
-available \code{data}. For tautological statements, the resulting
+available \code{data}. Variables bound by summation are distinguished by a
+superscript asterisk. For tautological statements, the resulting
 probability is 1, and for inconsistent statements, the resulting
 probability is 0. For formatting options, see
 \code{\link[=format.functional]{format.functional()}} and \code{\link[=format.probability]{format.probability()}}.

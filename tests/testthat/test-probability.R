@@ -30,6 +30,12 @@ id5 <- identifiable(g2, v5, v7)
 id6 <- identifiable(g2, v5, v7, data = "obs")
 id7 <- identifiable(g1, conj(v1, v2, v3))
 
+g3 <- dag("X -> Z -> Y")
+v8 <- cf("Z", 0, c("X" = 0))
+v9 <- cf("Y", 1)
+id8 <- identifiable(g3, v8, v9)
+id9 <- identifiable(g3, v8, v9, data = "obs")
+
 # Format ------------------------------------------------------------------
 
 test_that("probability format works", {
@@ -67,15 +73,23 @@ test_that("probability format works", {
   )
   expect_identical(
     format(id5$formula),
-    "\\frac{\\sum_{x^*} P_{x^*}(y)P(x^*)P_{x^*,y}(z)}{\\sum_{x^*,y^*} P(x^*)P_{x^*,y^*}(z)P_{x^*}(y^*)}"
+    "\\frac{\\sum_{x^*} P_{x}(y)P(x^*)P_{x^*,y}(z)}{\\sum_{x^*,y^*} P(x^*)P_{x^*,y^*}(z)P_{x^*}(y^*)}"
   )
   expect_identical(
     format(id6$formula),
-    "\\frac{\\sum_{x^*} P(y|x^*)P(x^*)P(z|x^*,y)}{\\sum_{x^*,y^*} P(x^*)P(z|x^*,y^*)P(y^*|x^*)}"
+    "\\frac{\\sum_{x^*} P(y|x)P(x^*)P(z|x^*,y)}{\\sum_{x^*,y^*} P(x^*)P(z|x^*,y^*)P(y^*|x^*)}"
   )
   expect_identical(
     format(id7$formula),
-    "\\sum_{w,d^*} P_{x}(w)P_{w,z}(y,x')P_{d^*}(z)P(d^*)"
+    "\\sum_{w,d^*} P_{x}(w)P_{w,z}(y,x')P_{d}(z)P(d^*)"
+  )
+  expect_identical(
+    format(id8$formula),
+    "\\frac{\\sum_{x^*} P_{x}(z)P(x^*)P_{z}(y')}{\\sum_{x^*,z^*} P(x^*)P_{x^*}(z^*)P_{z^*}(y')}"
+  )
+  expect_identical(
+    format(id9$formula),
+    "\\frac{\\sum_{x^*} P(z|x)P(x^*)P(y'|x,z)}{\\sum_{x^*,z^*} P(x^*)P(z^*|x^*)P(y'|x,z^*)}"
   )
 })
 

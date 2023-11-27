@@ -79,23 +79,12 @@ is.functional <- function(x) {
 
 #' @rdname functional
 #' @param x A `functional` object.
-#' @param use_primes A `logical` value. If `TRUE` (the default), any value
-#' assignment of a counterfactual variable with `obs` will be formatted with
-#' as many primes in the superscript as the value of `obs`, e.g.,
-#' `obs = 0` outputs `"y"`, `obs = 1` outputs `"y'"`,
-#' `obs = 2` outputs `"y''"` and so forth. The alternative when `FALSE` is
-#' to simply denote the `obs` value via superscript directly as
-#' `"y^{(obs)}"`, where obs is evaluated.
-#' @param use_do A `logical` value. If `TRUE`, the explicit do-operation is
-#' used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
-#' If `FALSE` (the default), the subscript notation is used instead
-#' (e.g., \eqn{P_x(y)}).
 #' @param ... Additional arguments passed to `format`.
 #' @return A `character` representation of the `functional` object
 #' in LaTeX syntax.
 #'
 #' @export
-format.functional <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
+format.functional <- function(x, ...) {
   terms <- ""
   sumset <- ""
   fraction <- ""
@@ -104,12 +93,12 @@ format.functional <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
   if (length(x$sumset) > 0) {
     sumset <- paste0(
       "\\sum_{",
-      comma_sep(vapply(x$sumset, format, character(1L), use_primes)),
+      comma_sep(vapply(x$sumset, format, character(1L), ...)),
       "} "
     )
   }
   if (!is.null(x$terms)) {
-    terms <- vapply(x$terms, format, character(1L), use_primes, use_do)
+    terms <- vapply(x$terms, format, character(1L), ...)
     sums <- vapply(
       x$terms,
       function(y) { is.functional(y) && length(y$sumset) > 0 },
@@ -121,13 +110,13 @@ format.functional <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
     terms <- collapse(terms)
   } else if (!is.null(x$numerator)) {
     if (length(x$denominator$val) > 0L && x$denominator$val == 1L) {
-      fraction <- format(x$numerator, use_primes, use_do)
+      fraction <- format(x$numerator, ...)
     } else {
       fraction <- paste0(
         "\\frac{",
-        format(x$numerator, use_primes, use_do),
+        format(x$numerator, ...),
         "}{",
-        format(x$denominator, use_primes, use_do),
+        format(x$denominator, ...),
         "}"
       )
     }
@@ -171,8 +160,12 @@ assign_values <- function(x, bound, v, termwise = FALSE) {
     if (termwise) {
       v_term <- unlist(c(evs(x$var), evs(x$cond), evs(x$do)))
       v[names(v_term)] <- v_term
+      bind <- bound > 0 & v_names %in% attr(x, "free_vars")
+      attr(x, "free_vars") <- NULL
+    } else {
+      bind <- bound > 0
     }
-    v[bound > 0] <- -bound[bound > 0]
+    v[bind] <- -bound[bind]
     var <- vars(x$var)
     cond <- vars(x$cond)
     do <- vars(x$do)

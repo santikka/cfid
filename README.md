@@ -13,6 +13,8 @@ coverage](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg)](http
 version](http://www.r-pkg.org/badges/version/cfid)](https://CRAN.R-project.org/package=cfid)
 <!-- badges::end -->
 
+    #> Warning: package 'cfid' was built under R version 4.3.2
+
 ## Overview
 
 This package facilitates the identification of counterfactual queries in

@@ -40,26 +40,36 @@ id_star <- function(g, gamma) {
   if (n_comp > 1L) {
     # Line 6
     c_factors <- vector(mode = "list", length = n_comp)
+    free_vars <- vector(mode = "list", length = n_comp)
+    form_terms <- vector(mode = "list", length = n_comp)
+    nonid_factors <- rep(TRUE, n_comp)
     prob_zero <- FALSE
     for (i in seq_len(n_comp)) {
       s_var <- vars(comp[[i]])
       s_sub <- setdiff(v_g, s_var)
-      for (j in seq_along(comp[[i]])) {
+      n_terms <- length(comp[[i]])
+      sub_new <- vector(mode = "list", length = n_terms)
+      for (j in seq_len(n_terms)) {
         gamma_val <- val(comp[[i]][[j]], gamma_prime)
         comp[[i]][[j]]$obs <- ifelse_(is.null(gamma_val), 0L, gamma_val)
         sub_var <- names(comp[[i]][[j]]$sub)
         s_sub_j <- setdiff(s_sub, sub_var)
         s_len <- length(s_sub_j)
         if (s_len > 0) {
-          sub_new <- set_names(integer(s_len), s_sub_j)
+          sub_new[[j]] <- set_names(integer(s_len), s_sub_j)
           obs_ix <- which(gamma_obs_var %in% s_sub_j)
           if (length(obs_ix) > 0) {
             s_val <- unlist(evs(gamma_obs)[obs_ix])
-            sub_new[names(s_val)] <- s_val
+            sub_new[[j]][names(s_val)] <- s_val
           }
-          comp[[i]][[j]]$sub <- c(comp[[i]][[j]]$sub, sub_new)
+          comp[[i]][[j]]$sub <- c(comp[[i]][[j]]$sub, sub_new[[j]])
         }
       }
+      sumset <- setdiff(v_g, gamma_var)
+      sub_new_reduce <- names(
+        Reduce(function(x, y) intersect(names(x), names(y)), sub_new)
+      )
+      free_vars[[i]] <- intersect(sumset, union(sub_new_reduce, s_var))
       s_conj <- try(
         do.call(counterfactual_conjunction, comp[[i]]), silent = TRUE
       )
@@ -72,13 +82,15 @@ id_star <- function(g, gamma) {
           c_factors[[i]]$formula$val == 0L) {
         return(list(id = TRUE, formula = probability(val = 0L)))
       }
+      if (c_factors[[i]]$id) {
+        form_terms[[i]] <- c_factors[[i]]$formula
+        attr(form_terms[[i]], "free_vars") <- free_vars[[i]]
+        nonid_factors[i] <- FALSE
+      }
     }
-    nonid_factors <- !vapply(c_factors, "[[", logical(1L), "id")
     if (any(nonid_factors)) {
       return(list(id = FALSE, formula = NULL))
     }
-    sumset <- setdiff(v_g, gamma_var)
-    form_terms <- lapply(c_factors, "[[", "formula")
     if (length(sumset) > 0L) {
       form_out <- functional(
         sumset = lapply(sumset, function(x) cf(var = x, obs = 0L)),

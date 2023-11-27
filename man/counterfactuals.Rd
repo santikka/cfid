@@ -63,8 +63,13 @@ the observed value of \code{var} (i.e., \eqn{Y = y})}
 variables intervened on (via \eqn{do(X = x)}) and values to the
 value assignments (their levels, e.g., \eqn{x}).}
 
-\item{use_primes}{A \code{logical} value indicating whether primes should be
-used to differentiate between value assignments}
+\item{use_primes}{A \code{logical} value. If \code{TRUE} (the default), any value
+assignment of a counterfactual variable with \code{obs} will be formatted with
+as many primes in the superscript as the value of \code{obs}, e.g.,
+\code{obs = 0} outputs \code{"y"}, \code{obs = 1} outputs \code{"y'"},
+\code{obs = 2} outputs \code{"y''"} and so forth. The alternative when \code{FALSE} is
+to simply denote the \code{obs} value via superscript directly as
+\code{"y^{(obs)}"}, where obs is evaluated.}
 }
 \value{
 \code{conj} returns an object of class \code{counterfactual_conjunction}.

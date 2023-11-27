@@ -90,8 +90,13 @@ is.counterfactual_variable <- function(x) {
 #' @rdname counterfactuals
 #' @param x A `counterfactual_variable` or a `counterfactual_conjunction`
 #' object.
-#' @param use_primes A `logical` value indicating whether primes should be
-#' used to differentiate between value assignments
+#' @param use_primes A `logical` value. If `TRUE` (the default), any value
+#' assignment of a counterfactual variable with `obs` will be formatted with
+#' as many primes in the superscript as the value of `obs`, e.g.,
+#' `obs = 0` outputs `"y"`, `obs = 1` outputs `"y'"`,
+#' `obs = 2` outputs `"y''"` and so forth. The alternative when `FALSE` is
+#' to simply denote the `obs` value via superscript directly as
+#' `"y^{(obs)}"`, where obs is evaluated.
 #' @export
 format.counterfactual_variable <- function(x, use_primes = TRUE, ...) {
   super_var <- character(0L)

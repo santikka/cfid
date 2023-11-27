@@ -61,13 +61,6 @@ is.probability <- function(x) {
 #' @method format probability
 #' @rdname probability
 #' @param x A `probability` object.
-#' @param use_primes A `logical` value. If `TRUE` (the default), any value
-#' assignment of a counterfactual variable with `obs` will be formatted with
-#' as many primes in the superscript as the value of `obs`, e.g.,
-#' `obs = 0` outputs `"y"`, `obs = 1` outputs `"y'"`,
-#' `obs = 2` outputs `"y''"` and so forth. The alternative when `FALSE` is
-#' to simply denote the `obs` value via superscript directly as
-#' `"y^{(obs)}"`, where obs is evaluated.
 #' @param use_do A `logical` value. If `TRUE`, the explicit do-operation is
 #' used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
 #' If `FALSE` (the default), the subscript notation is used instead
@@ -98,7 +91,7 @@ is.probability <- function(x) {
 #' format(f, use_primes = FALSE, use_do = TRUE)
 #'
 #' @export
-format.probability <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
+format.probability <- function(x, use_do = FALSE, ...) {
   if (length(x$val) > 0L) {
     return(as.character(x$val))
   }
@@ -109,7 +102,7 @@ format.probability <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
   any_do <- length(x$do) > 0L
   any_cond <- length(x$cond) > 0L
   if (any_do) {
-    form_do <- comma_sep(vapply(x$do, format, character(1L), use_primes))
+    form_do <- comma_sep(vapply(x$do, format, character(1L), ...))
     if (!use_do) {
       sub <- paste0("_{", form_do, "}")
     } else {
@@ -118,13 +111,13 @@ format.probability <- function(x, use_primes = TRUE, use_do = FALSE, ...) {
   }
   if (any_cond) {
     cond <- paste0(
-      comma_sep(vapply(x$cond, format, character(1L), use_primes))
+      comma_sep(vapply(x$cond, format, character(1L), ...))
     )
   }
   if ((any_do && use_do) || any_cond) {
     rhs <- paste0("|", do, cond)
   }
-  var <- paste0(comma_sep(vapply(x$var, format, character(1L), use_primes)))
+  var <- paste0(comma_sep(vapply(x$var, format, character(1L), ...)))
   paste0("P", sub, "(", var, rhs, ")")
 }
 

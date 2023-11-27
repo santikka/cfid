@@ -8,7 +8,7 @@
 \usage{
 functional(sumset = NULL, terms = NULL, numerator = NULL, denominator = NULL)
 
-\method{format}{functional}(x, use_primes = TRUE, use_do = FALSE, ...)
+\method{format}{functional}(x, ...)
 
 \method{print}{functional}(x, ...)
 }
@@ -30,19 +30,6 @@ this is the numerator of the quotient representation.}
 The denominator of the quotient representation.}
 
 \item{x}{A \code{functional} object.}
-
-\item{use_primes}{A \code{logical} value. If \code{TRUE} (the default), any value
-assignment of a counterfactual variable with \code{obs} will be formatted with
-as many primes in the superscript as the value of \code{obs}, e.g.,
-\code{obs = 0} outputs \code{"y"}, \code{obs = 1} outputs \code{"y'"},
-\code{obs = 2} outputs \code{"y''"} and so forth. The alternative when \code{FALSE} is
-to simply denote the \code{obs} value via superscript directly as
-\code{"y^{(obs)}"}, where obs is evaluated.}
-
-\item{use_do}{A \code{logical} value. If \code{TRUE}, the explicit do-operation is
-used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
-If \code{FALSE} (the default), the subscript notation is used instead
-(e.g., \eqn{P_x(y)}).}
 
 \item{...}{Additional arguments passed to \code{format}.}
 }

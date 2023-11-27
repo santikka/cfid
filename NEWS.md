@@ -1,3 +1,7 @@
+# cfid 0.1.7
+
+  * Fixed some formulas having incorrect variables indicated as summation variables.
+
 # cfid 0.1.6
 
   * Summation variables are now properly distinguished from query variables in the output formulas of `identifiable()`.

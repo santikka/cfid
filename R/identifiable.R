@@ -55,7 +55,8 @@
 #' * `formula`\cr An object of class `functional` giving the identifying
 #' functional of the query in LaTeX syntax via `format` or `print`,
 #' if identifiable. This expression is given in terms of the
-#' available `data`. For tautological statements, the resulting
+#' available `data`. Variables bound by summation are distinguished by a
+#' superscript asterisk. For tautological statements, the resulting
 #' probability is 1, and for inconsistent statements, the resulting
 #' probability is 0. For formatting options, see
 #' [cfid::format.functional()] and [cfid::format.probability()].
@@ -139,9 +140,6 @@ identifiable <- function(g, gamma, delta = NULL,
     functional(terms = list(out$formula)),
     out$formula
   )
-  if (out$id && data != "interventions") {
-    out <- identify_terms(out$formula, data, g)
-  }
   if (out$id) {
     n_obs <- sum(!attr(g, "latent"))
     v <- set_names(integer(n_obs), attr(g, "labels")[!attr(g, "latent")])
@@ -151,6 +149,9 @@ identifiable <- function(g, gamma, delta = NULL,
     query_vars <- unique(c(all_vars(gamma), all_vars(delta)))
     bound[query_vars] <- bound[query_vars] + 1L
     out$formula <- assign_values(out$formula, bound, v, termwise = TRUE)
+  }
+  if (out$id && data != "interventions") {
+    out <- identify_terms(out$formula, data, g)
   }
   out$undefined <- ifelse_(is.null(out$undefined), FALSE, out$undefined)
   out$counterfactual <- TRUE

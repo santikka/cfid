@@ -8,7 +8,7 @@
 \usage{
 probability(val = NULL, var = NULL, do = NULL, cond = NULL)
 
-\method{format}{probability}(x, use_primes = TRUE, use_do = FALSE, ...)
+\method{format}{probability}(x, use_do = FALSE, ...)
 
 \method{print}{probability}(x, ...)
 }
@@ -28,14 +28,6 @@ intervention set \eqn{x} in \eqn{P(y|do(x),z)}.}
 conditioning set \eqn{z} in \eqn{P(y|do(x),z)}.}
 
 \item{x}{A \code{probability} object.}
-
-\item{use_primes}{A \code{logical} value. If \code{TRUE} (the default), any value
-assignment of a counterfactual variable with \code{obs} will be formatted with
-as many primes in the superscript as the value of \code{obs}, e.g.,
-\code{obs = 0} outputs \code{"y"}, \code{obs = 1} outputs \code{"y'"},
-\code{obs = 2} outputs \code{"y''"} and so forth. The alternative when \code{FALSE} is
-to simply denote the \code{obs} value via superscript directly as
-\code{"y^{(obs)}"}, where obs is evaluated.}
 
 \item{use_do}{A \code{logical} value. If \code{TRUE}, the explicit do-operation is
 used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
