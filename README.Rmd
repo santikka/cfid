@@ -19,8 +19,8 @@ knitr::opts_chunk$set(
 [![CRAN version](http://www.r-pkg.org/badges/version/cfid)]( https://CRAN.R-project.org/package=cfid)
 <!-- badges::end -->
 
-```{r, echo = FALSE}
-library(cfid)
+```{r, echo = FALSE, warning=FALSE}
+library("cfid")
 ```
 
 ## Overview
