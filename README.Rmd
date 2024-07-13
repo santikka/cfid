@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/santikka/cfid/workflows/R-CMD-check/badge.svg)](https://github.com/santikka/cfid/actions)
 [![Codecov test coverage](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg)](https://app.codecov.io/gh/santikka/cfid?branch=main)
-[![CRAN version](http://www.r-pkg.org/badges/version/cfid)]( https://CRAN.R-project.org/package=cfid)
+[![CRAN version](https://www.r-pkg.org/badges/version/cfid)](https://CRAN.R-project.org/package=cfid)
 <!-- badges::end -->
 
 ```{r, echo = FALSE, warning=FALSE}

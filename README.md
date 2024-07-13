@@ -10,7 +10,7 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 [![Codecov test
 coverage](https://codecov.io/gh/santikka/cfid/branch/main/graph/badge.svg)](https://app.codecov.io/gh/santikka/cfid?branch=main)
 [![CRAN
-version](http://www.r-pkg.org/badges/version/cfid)](https://CRAN.R-project.org/package=cfid)
+version](https://www.r-pkg.org/badges/version/cfid)](https://CRAN.R-project.org/package=cfid)
 <!-- badges::end -->
 
 ## Overview
