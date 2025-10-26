@@ -104,7 +104,7 @@ cf(var = "Y", obs = 0, sub = c(X = 0))
 by default, the value 0 is the “default” or baseline level, and integer
 values different from 0 are denoted by primes. For example $y'_x$ is a
 similar counterfactual variable to $y_x$, except that it was observed to
-take the value $y'$ instead of $y$ This can be accomplished by changing
+take the value $y'$ instead of $y$. This can be accomplished by changing
 the `obs` argument:
 
 ``` r

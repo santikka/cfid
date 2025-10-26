@@ -1,3 +1,8 @@
+# cfid 0.1.8
+
+  * Fixed an issue where some identifiable queries were incorrectly deemed nonidentifiable when multiple counterfactual variables shared a compatible subscript.
+  * Updated `igraph` related functionality to use non-deprecated functions.
+
 # cfid 0.1.7
 
   * Fixed some formulas having incorrect variables indicated as summation variables.

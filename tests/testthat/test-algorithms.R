@@ -144,6 +144,15 @@ test_that("nonidentifiable c-component", {
   expect_false(out$id)
 })
 
+test_that("duplicate but compatible intervention is ok", {
+  h <- dag("E -> S -> T -> D; E -> D; E <-> T; S <-> D")
+  d1 <- cf("D", 0, sub = c(E = 0, T = 0))
+  d2 <- cf("T", 0)
+  q1 <- conj(d1, d2)
+  out <- identifiable(h, q1)
+  expect_true(out$id)
+})
+
 # ID and IDC --------------------------------------------------------------
 
 test_that("bow-arc", {

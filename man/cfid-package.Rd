@@ -2,6 +2,7 @@
 % Please edit documentation in R/cfid-package.R
 \docType{package}
 \name{cfid-package}
+\alias{cfid}
 \alias{cfid-package}
 \title{The \code{cfid} package}
 \description{
@@ -116,4 +117,15 @@ methods for the causal hierarchy. \emph{Journal of Machine Learning Research},
 Makhlouf, K., Zhioua, S. and Palamidessi, C. (2021).
 Survey on causal-based machine learning fairness notions.
 \emph{arXiv:2010.09553}
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/santikka/cfid}
+}
+
+}
+\author{
+\strong{Maintainer}: Santtu Tikka \email{santtuth@gmail.com} (\href{https://orcid.org/0000-0003-4039-4342}{ORCID})
+
 }

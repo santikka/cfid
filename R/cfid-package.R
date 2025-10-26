@@ -88,7 +88,6 @@
 #' For complete examples of identifiable counterfactual queries, see
 #' [cfid::identifiable()], which is the main function of the package.
 #'
-#' @docType package
 #' @name cfid-package
 #' @references
 #'
@@ -114,5 +113,4 @@
 #' Survey on causal-based machine learning fairness notions.
 #' *arXiv:2010.09553*
 #'
-
-NULL
+"_PACKAGE"

@@ -161,20 +161,20 @@ test_that("dagitty mag not supported", {
 })
 
 test_that("causaleffect syntax with igraph supported", {
-  ig <- igraph::graph.formula(X -+ Z -+ Y, Y -+ X, X -+ Y)
-  ig <- igraph::set.edge.attribute(ig, "description", c(2, 4), "U")
+  ig <- igraph::graph_from_literal(X -+ Z -+ Y, Y -+ X, X -+ Y)
+  ig <- igraph::set_edge_attr(ig, "description", c(2, 4), "U")
   expect_identical(import_graph(ig), dag("X -> Z -> Y X <-> Y"))
 })
 
 test_that("generic igraph not supported", {
-  ig <- igraph::graph.formula(X -- Y)
-  expect_error(import_graph(ig))
+  ig <- igraph::graph_from_literal(X -- Y)
+  expect_error(import_graph(ig), "Argument `x` must be a directed graph\\.")
 })
 
 test_that("fail when no igraph", {
-  ig <- igraph::graph.formula(X -+ Y)
+  ig <- igraph::graph_from_literal(X -+ Y)
   mockery::stub(import_graph, "requireNamespace", FALSE)
-  expect_error(import_graph(ig))
+  expect_error(import_graph(ig), "Attempting to use `igraph` input")
 })
 
 test_that("dosearch syntax", {

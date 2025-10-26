@@ -118,8 +118,15 @@ id_star <- function(g, gamma) {
   }
   s_sub <- unlist(unique(subs(gamma_prime)))
   s_sub <- split(s_sub, names(s_sub))
-  if (any(lengths(s_sub) > 1L)) {
-    return(list(id = FALSE, formula = NULL))
+  s_sub_lens <- lengths(s_sub)
+  if (any(s_sub_lens > 1L)) {
+    for (i in seq_along(s_sub_lens)) {
+      if (length(unique(s_sub[[i]])) > 1) {
+        return(list(id = FALSE, formula = NULL))
+      } else {
+        s_sub[[i]] <- s_sub[[i]][1L]
+      }
+    }
   }
   s_val <- unlist(evs(gamma_prime))
   s_val <- split(s_val, names(s_val))

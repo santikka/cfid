@@ -729,19 +729,28 @@ import_graph <- function(x) {
       requireNamespace("igraph", quietly = TRUE),
       "Attempting to use `igraph` input, but the package is not available."
     )
+    stopifnot_(
+      igraph::is_directed(x),
+      "Argument `x` must be a directed graph."
+    )
     e <- igraph::E(x)
     v <- igraph::vertex_attr(x, "name")
     g_obs <- ""
     g_unobs <- ""
     description <- NULL
-    obs_edges <- e[(is.na(description) | description != "U")]
-    unobs_edges <- e[description == "U" & !is.na(description)]
+    e_attr <- igraph::edge_attr(x, "description", index = e)
+    obs_edges <- e
+    unobs_edges <- NULL
+    if (!is.null(e_attr)) {
+      obs_edges <- e[is.na(e_attr) | e_attr != "U"]
+      unobs_edges <- e[!is.na(e_attr) & e_attr == "U"]
+    }
     if (length(obs_edges) > 0L) {
-      obs_ind <- igraph::get.edges(x, obs_edges)
+      obs_ind <- igraph::ends(x, obs_edges, names = FALSE)
       g_obs <- paste(v[obs_ind[,1]], "->", v[obs_ind[, 2L]], collapse = "; ")
     }
     if (length(unobs_edges) > 0L) {
-      unobs_ind <- igraph::get.edges(x, unobs_edges)
+      unobs_ind <- igraph::ends(x, unobs_edges, names = FALSE)
       unobs_ind <- unobs_ind[unobs_ind[,1] < unobs_ind[, 2L],,drop=FALSE]
       g_unobs <- paste(
         v[unobs_ind[, 1L]], "<->", v[unobs_ind[, 2L]], collapse = "; "
