@@ -145,8 +145,8 @@ test_that("nonidentifiable c-component", {
 })
 
 test_that("duplicate but compatible intervention is ok", {
-  h <- dag("E -> S -> T -> D; E -> D; E <-> T; S <-> D")
-  d1 <- cf("D", 0, sub = c(E = 0, T = 0))
+  h <- dag("E -> S -> T -> W; E -> W; E <-> T; S <-> W")
+  d1 <- cf("W", 0, sub = c(E = 0, T = 0))
   d2 <- cf("T", 0)
   q1 <- conj(d1, d2)
   out <- identifiable(h, q1)

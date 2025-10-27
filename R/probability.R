@@ -3,6 +3,8 @@
 #' Defines an interventional or observational (conditional) probability
 #' \eqn{P(y|do(x),z)}. For formatting options, see [cfid::format.probability()].
 #'
+#' @export
+#' @rdname probability
 #' @param val An `integer` value of either 0 or 1 for almost sure events.
 #' @param var A `list` of objects of class `counterfactual_variable`
 #' (without interventions and with value assignments).
@@ -17,7 +19,7 @@
 #' @seealso [cfid::counterfactual_variable()], [cfid::functional()]
 #' @return An object of class `probability`, which is a `list` containing
 #' all of the arguments of the constructor.
-#' @export
+#'
 probability <- function(val = NULL, var = NULL, do = NULL, cond = NULL) {
   stopifnot_(
     !is.null(val) || !is.null(var),
@@ -60,6 +62,7 @@ is.probability <- function(x) {
 
 #' @method format probability
 #' @rdname probability
+#' @export
 #' @param x A `probability` object.
 #' @param use_do A `logical` value. If `TRUE`, the explicit do-operation is
 #' used to denote interventional probabilities (e.g., \eqn{P(y|do(x))}).
@@ -68,7 +71,6 @@ is.probability <- function(x) {
 #' @param ... Additional arguments passed to `format`.
 #' @return A `character` representation of the `probability` object
 #' in LaTeX syntax.
-
 #' @examples
 #' # Example from Makhlouf, Zhioua and Palamidessi (2021)
 #' g2 <- dag("C -> A -> Y; C -> Y")
@@ -90,7 +92,6 @@ is.probability <- function(x) {
 #' # Without primes, with do-operator
 #' format(f, use_primes = FALSE, use_do = TRUE)
 #'
-#' @export
 format.probability <- function(x, use_do = FALSE, ...) {
   if (length(x$val) > 0L) {
     return(as.character(x$val))
