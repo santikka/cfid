@@ -74,7 +74,7 @@ test_that("inconsistent", {
 })
 
 test_that("remove tautology", {
-  out <- identifiable(g1, conj(v1, v2, v3, v3, v8))
+  out <- identifiable(g1, conj(v1, v2, v3, v4, v8))
   expect_true(out$id)
 })
 
@@ -119,7 +119,7 @@ test_that("length zero delta via recursion", {
 
 test_that("inconsistent in counterfactual graph", {
   h <- dag("X -> Z -> Y")
-  d1 <- conj(cf("Z", 0), cf("Z", 1, c("X" = 0)))
+  d1 <- conj(cf("Z", 0), cf("Z", 1, c("X" = 0)), cf("X", 0))
   out <- identifiable(h, d1)
   expect_true(out$id)
   expect_identical(out$formula$terms[[1]], probability(val = 0L))
@@ -131,11 +131,30 @@ test_that("inconsistent interventions", {
   expect_false(identifiable(h, d1)$id)
 })
 
-test_that("inconsitent within c-component", {
-  out <- identifiable(g1, conj(v1, v2, v3, v6))
-  expect_true(out$id)
-  expect_identical(out$formula$terms[[1]], probability(val = 0L))
+test_that("single c-component not identifiable", {
+  h <- dag("X -> Y; X <-> Y")
+  d1 <- conj(cf("Y", 0, c("X" = 0)), cf("Y", 0))
+  expect_false(identifiable(h, d1)$id)
 })
+
+test_that("single c-component marginalization", {
+  h <- dag("X -> Y; X <-> Y <-> Z; Z -> Y")
+  d1 <- conj(cf("Y", 0, c("X" = 0)))
+  out <- identifiable(h, d1)
+  expect_true(out$id)
+  expect_identical(
+    format(out$formula),
+    "P_{x}(y)"
+  )
+})
+
+# test_that("inconsistent within c-component", {
+#   h <- dag("X -> Y; X <-> Y")
+#   d1 <- conj(cf("Y", 0, c("X" = 0)), cf("Y", 0))
+#   out <- identifiable(h, d1)
+#   expect_true(out$id)
+#   expect_identical(out$formula$terms[[1]], probability(val = 0L))
+# })
 
 test_that("nonidentifiable c-component", {
   h <- dag("Z -> X -> Y")
@@ -144,13 +163,13 @@ test_that("nonidentifiable c-component", {
   expect_false(out$id)
 })
 
-test_that("duplicate but compatible intervention is ok", {
+test_that("not identifiable via incompatible sum", {
   h <- dag("E -> S -> T -> W; E -> W; E <-> T; S <-> W")
   d1 <- cf("W", 0, sub = c(E = 0, T = 0))
   d2 <- cf("T", 0)
   q1 <- conj(d1, d2)
   out <- identifiable(h, q1)
-  expect_true(out$id)
+  expect_false(out$id)
 })
 
 # ID and IDC --------------------------------------------------------------

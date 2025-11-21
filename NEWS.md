@@ -1,3 +1,7 @@
+# cfid 0.1.9
+
+  * Fixed two issues related to rare scenarios that resulted in the query being incorrectly identified.
+
 # cfid 0.1.8
 
   * Fixed an issue where some identifiable queries were incorrectly deemed nonidentifiable when multiple counterfactual variables shared a compatible subscript.

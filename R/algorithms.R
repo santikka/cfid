@@ -34,6 +34,8 @@ id_star <- function(g, gamma) {
   gamma_var <- vars(gamma)
   gamma_obs <- obs(gamma)
   gamma_obs_var <- vars(gamma_obs)
+  evs_u <- unlist(evs(gamma_prime))
+  evs_df <- data.frame(var = names(evs_u), val = evs_u)
   merged <- tmp$merged
   comp <- c_components(g_prime)
   n_comp <- length(comp)
@@ -44,6 +46,7 @@ id_star <- function(g, gamma) {
     form_terms <- vector(mode = "list", length = n_comp)
     nonid_factors <- rep(TRUE, n_comp)
     prob_zero <- FALSE
+    sumset <- setdiff(v_g, gamma_var)
     for (i in seq_len(n_comp)) {
       s_var <- vars(comp[[i]])
       s_sub <- setdiff(v_g, s_var)
@@ -62,10 +65,21 @@ id_star <- function(g, gamma) {
             s_val <- unlist(evs(gamma_obs)[obs_ix])
             sub_new[[j]][names(s_val)] <- s_val
           }
+          sum_ix <- which(sumset %in% s_sub_j)
+          if (length(sum_ix) > 0) {
+            for (k in sum_ix) {
+              max_ev <- 0L
+              if (sumset[k] %in% evs_df$var) {
+                max_ev <- 1L + max(
+                  evs_df[evs_df$var == sumset[k], , drop = FALSE]$val
+                )
+              }
+              sub_new[[j]][sumset[k]] <- max_ev # represent summation
+            }
+          }
           comp[[i]][[j]]$sub <- c(comp[[i]][[j]]$sub, sub_new[[j]])
         }
       }
-      sumset <- setdiff(v_g, gamma_var)
       sub_new_reduce <- names(
         Reduce(function(x, y) intersect(names(x), names(y)), sub_new)
       )
@@ -100,10 +114,26 @@ id_star <- function(g, gamma) {
       form_out <- functional(terms = form_terms)
     }
     return(list(id = TRUE, formula = form_out))
-
+  }
+  # Consider the case where the variables in gamma is a subset of S
+  # (single c-component)
+  gamma_vars <- unique(vars(gamma_prime))
+  s_vars <- unique(vars(comp[[1L]]))
+  sumset <- character(0L)
+  if (!setequal(gamma_vars, s_vars)) {
+    sumset <- setdiff(s_vars, gamma_vars)
+    for (i in seq_along(sumset)) {
+      max_ev <- 0L
+      if (sumset[i] %in% evs_df$var) {
+        max_ev <- 1L + max(
+          evs_df[evs_df$var == sumset[i], , drop = FALSE]$val
+        )
+      }
+      gamma_prime <- gamma_prime + cf(sumset[i], max_ev)
+    }
   }
   # Line 7
-  gamma_sub <- subs(gamma)
+  gamma_sub <- subs(gamma_prime)
   gamma_cfvar <- cfvars(gamma_prime)
   gamma_sub_var <- lapply(gamma_sub, names)
   # Simplify subscripts to ancestors
@@ -146,8 +176,12 @@ id_star <- function(g, gamma) {
       }
     }
   }
+  if (length(sumset) > 0) {
+    free_vars <- which(!vars(gamma_prime) %in% sumset)
+    gamma_prime <- gamma_prime[free_vars]
+  }
   lab <- attr(g, "labels")
-  obs <- vals(gamma_prime)
+  obs <- unique(vals(gamma_prime))
   obs_var <- vars(obs)
   obs_ix <- which(lab %in% obs_var)
   obs_an <- ancestors(obs_ix, g)

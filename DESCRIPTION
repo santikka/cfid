@@ -1,7 +1,7 @@
 Package: cfid
 Type: Package
 Title: Identification of Counterfactual Queries in Causal Models
-Version: 0.1.8
+Version: 0.1.9
 Authors@R: c(
     person(given = "Santtu",
            family = "Tikka",
@@ -11,7 +11,7 @@ Authors@R: c(
 Maintainer: Santtu Tikka <santtuth@gmail.com>
 Description: Facilitates the identification of counterfactual queries in
  structural causal models via the ID* and IDC* algorithms
- by Shpitser, I. and Pearl, J. (2007, 2008) <arXiv:1206.5294>, 
+ by Shpitser, I. and Pearl, J. (2007, 2008) <doi:10.48550/arXiv.1206.5294>, 
  <https://jmlr.org/papers/v9/shpitser08a.html>. 
  Provides a simple interface for defining causal diagrams and counterfactual 
  conjunctions. Construction of parallel worlds graphs and counterfactual graphs 
